@@ -8,6 +8,9 @@ export function Header(){
         <div className="col-span-1 col-start-2 text-2xl font-black text-purple-200 ">
           <div className="cursor-pointer border-purple-200 border p-1 text-center rounded-3xl">
             <div className="cursor-pointer bg-white text-purple-700 border-purple-200 border p-1 text-center rounded-3xl">
+              <div className="xm:text-blue-500 xs:text-red-500">
+                test
+              </div>
               Auction ✴︎
             </div>
           </div>
