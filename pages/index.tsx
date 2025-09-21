@@ -1,56 +1,40 @@
-// app/page.tsx (Home)
-"use client";
-import { useState } from "react";
-import { AuctionCard } from "../components/AuctionCard";
-import {BottomNav} from "@/components/BottomNav";
-import Link from "next/link";
+// app/visual/page.tsx
+import { AuctionCard } from "@/components/AuctionCard";
 
-const samples = [
-  { id: 1, title: "ノートパソコン", price: 29800, remain: "終了まで 2日", img: "/laptop.png", note: "現在価格より安い" },
-  { id: 2, title: "スマートフォン", price: 25000, remain: "終了まで 5日", img: "/phone.png", note: "現在価格と同じ" },
-  { id: 3, title: "モニター", price: 10000, remain: "終了まで 3日", img: "/monitor.png" },
-  { id: 4, title: "タブレット", price: 18000, remain: "終了まで 1日", img: "/tablet.png" },
-];
+const hero = { title: "iPhone 15 Pro 特集", subtitle: "ついに登場", img: "/phone.png" };
 
-export default function Home() {
-  const [openFilters, setOpenFilters] = useState(false);
-
+export default function Visual() {
   return (
     <div className="px-4 pt-4">
-      {/* ヒーロー */}
-      <Link href={"/auth/login"}>
-        <section className="mb-4">
-          <div className="rounded-xl overflow-hidden bg-slate-100 p-5">
-            <h2 className="text-xl font-semibold">注目のオークション</h2>
-            <p className="text-sm text-gray-600 mt-1">いま注目のアイテムをピックアップ</p>
-          </div>
-        </section>
-      </Link>
-
-      {/* カテゴリ横スライド */}
       <section className="mb-4">
+        <div className="rounded-xl overflow-hidden bg-gradient-to-r from-slate-800 to-slate-700 text-white p-6">
+          <h2 className="text-2xl font-bold">{hero.title}</h2>
+          <p className="mt-2 opacity-90">{hero.subtitle}</p>
+          <div className="mt-4 w-full h-40 flex items-center justify-center">
+            {/* <img src={hero.img} alt="" className="h-28 object-contain" /> */}
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-6">
+        <h3 className="text-lg font-semibold mb-2">ピックアップ</h3>
         <div className="flex gap-3 overflow-x-auto pb-2">
-          {["PC", "スマホ", "タブレット", "周辺機器"].map((c) => (
-            <button key={c} className="min-w-[86px] px-3 py-2 rounded-xl bg-white shadow-sm text-sm">
-              {c}
-            </button>
+          {[1,2,3,4].map((i)=> (
+            <div key={i} className="min-w-[220px]">
+              <AuctionCard title={`アイテム ${i}`} price={15000 + i*1000} remain="残り2日" img="/laptop.png" />
+            </div>
           ))}
         </div>
       </section>
 
-      {/* フィルタボタン */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-sm text-gray-600">おすすめ</div>
-        <button onClick={() => setOpenFilters(true)} className="text-sm px-3 py-1 rounded-lg bg-sky-600 text-white">
-          フィルター
-        </button>
-      </div>
-
-      {/* カードグリッド */}
       <section>
+        <h3 className="text-lg font-semibold mb-2">カテゴリ別</h3>
         <div className="grid grid-cols-2 gap-3">
-          {samples.map((it) => (
-            <AuctionCard key={it.id} title={it.title} price={it.price} remain={it.remain} img={it.img} note={it.note} />
+          {[1,2,3,4].map((i)=> (
+            <div key={i} className="bg-white rounded-xl p-4 shadow-sm">
+              <div className="h-28 bg-gray-100 flex items-center justify-center">カテゴリ画像</div>
+              <div className="mt-2 font-semibold">カテゴリ名{i}</div>
+            </div>
           ))}
         </div>
       </section>

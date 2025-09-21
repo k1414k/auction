@@ -1,5 +1,6 @@
 // app/login/page.tsx
 import AuthLayout from "@/components/AuthLayout";
+import Link from "next/link";
 
 export default function LoginPage() {
   return (
@@ -31,15 +32,15 @@ export default function LoginPage() {
       </form>
       <div className="text-sm text-center text-gray-600 mt-4 space-y-1">
         <p>
-          <a href="/forgot-password" className="text-blue-600 hover:underline">
+          <Link href="/login/forgot-password" className="text-blue-600 hover:underline">
             パスワードをお忘れですか？
-          </a>
+          </Link>
         </p>
         <p>
           アカウントがない？{" "}
-          <a href="/register" className="text-blue-600 hover:underline">
+          {/* <a href="/register" className="text-blue-600 hover:underline">
             新規登録
-          </a>
+          </a> */}
         </p>
       </div>
     </AuthLayout>
