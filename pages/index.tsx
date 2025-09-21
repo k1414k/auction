@@ -2,7 +2,7 @@
 "use client";
 import { useState } from "react";
 import { AuctionCard } from "../components/AuctionCard";
-// import BottomNav from "@/components/BottomNav";
+import {BottomNav} from "@/components/BottomNav";
 
 const samples = [
   { id: 1, title: "ノートパソコン", price: 29800, remain: "終了まで 2日", img: "/laptop.png", note: "現在価格より安い" },
@@ -51,15 +51,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      {/* <BottomNav open={openFilters} onClose={() => setOpenFilters(false)}>
-        <h3 className="text-lg font-semibold mb-2">フィルター</h3>
-        <div className="space-y-2">
-          <label className="flex items-center gap-2"><input type="checkbox" /> 中古</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> 新品同様</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> ¥20,000以下</label>
-        </div>
-      </BottomNav> */}
     </div>
   );
 }
