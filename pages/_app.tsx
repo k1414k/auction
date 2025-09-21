@@ -10,8 +10,7 @@ export const metadata = {
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <html lang="ja">
-      <body className="bg-gray-50 min-h-screen text-gray-800">
+      <div className="bg-gray-50 min-h-screen text-gray-800">
         <div className="max-w-screen-sm mx-auto">
           <Header />
           <main className="pb-24"> {/* 下部ナビ分の余白 */}
@@ -19,8 +18,7 @@ export default function App({ Component, pageProps }: AppProps) {
           </main>
           <BottomNav />
         </div>
-      </body>
-    </html>
+      </div>
   );
 }
 

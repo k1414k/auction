@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AuctionCard } from "../components/AuctionCard";
 import {BottomNav} from "@/components/BottomNav";
+import Link from "next/link";
 
 const samples = [
   { id: 1, title: "ノートパソコン", price: 29800, remain: "終了まで 2日", img: "/laptop.png", note: "現在価格より安い" },
@@ -17,12 +18,14 @@ export default function Home() {
   return (
     <div className="px-4 pt-4">
       {/* ヒーロー */}
-      <section className="mb-4">
-        <div className="rounded-xl overflow-hidden bg-slate-100 p-5">
-          <h2 className="text-xl font-semibold">注目のオークション</h2>
-          <p className="text-sm text-gray-600 mt-1">いま注目のアイテムをピックアップ</p>
-        </div>
-      </section>
+      <Link href={"/auth/login"}>
+        <section className="mb-4">
+          <div className="rounded-xl overflow-hidden bg-slate-100 p-5">
+            <h2 className="text-xl font-semibold">注目のオークション</h2>
+            <p className="text-sm text-gray-600 mt-1">いま注目のアイテムをピックアップ</p>
+          </div>
+        </section>
+      </Link>
 
       {/* カテゴリ横スライド */}
       <section className="mb-4">
