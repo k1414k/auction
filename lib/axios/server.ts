@@ -1,11 +1,10 @@
 import axios from "axios";
 
-const apiBrowser = axios.create({
+const apiServer = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true // ブラウザだけ必要オプション
 })
 
-export default apiBrowser
+export default apiServer

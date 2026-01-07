@@ -1,44 +1,48 @@
 // app/register/page.tsx
 import AuthLayout from "@/components/AuthLayout";
 import {useState} from "react";
-import api from "@/lib/axios";
+import apiServer from "@/lib/axios/server";
+import {useRouter} from "next/navigation";
 
 export default function RegisterPage() {
-
-  const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [password_confirmation, setPassword_confirmation] = useState('')
+  const router = useRouter();
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    password_confirmation: "",
+  })
   const [errors, setErrors] = useState<string[]>([])
-  const formData = {
-    username: username,
-    email: email,
-    password: password,
-    password_confirmation: password_confirmation
-  }
-  const checkData = () => {
-    if (validateData()){
-      api.post("/auth", formData).then((res)=>{console.log(res)}).catch(e=>{console.log(e)})
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (validateForm()){
+      apiServer.post("/auth", form).then((res)=>{
+        router.replace("/auth/login")
+      }).catch(e=>{
+        console.log(e)
+        setErrors(["既に加入しているメールアドレスです"]) //<-----------------------------1
+      })
     }
     else {
-      console.log("ERR")
+      console.log("フロントバリデーションエラー")
     }
   }
 
 
-  const validateData = () => { //異常ない場合true
+  const validateForm = () => { //異常ない場合true
     const newErrors:string[] = []
 
-    if (username.trim().length < 4){
+    if (form.username.trim().length < 4){
       newErrors.push("ユーザー名は４文字以上必要です")
     }
-    if (email.trim().length < 4){
+    if (form.email.trim().length < 4){
       newErrors.push("正しいメールアドレスを入力してください")
     }
-    if (password.trim().length < 6){
+    if (form.password.trim().length < 6){
       newErrors.push("パスワードは６文字以上必要です")
     }
-    if (password != password_confirmation){
+    if (form.password != form.password_confirmation){
       newErrors.push("パスワード確認が一致しません")
     }
 
@@ -63,14 +67,14 @@ export default function RegisterPage() {
           </ul>
         </div>
       }
-      <form className="space-y-4">
+      <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
           <label className="block text-sm mb-1">ユーザー名</label>
           <input
             type="text"
             className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
             placeholder="Your name"
-            onChange={e=>setUsername(e.target.value)}
+            onChange={e=>setForm({...form, username: e.target.value})}
           />
         </div>
         <div>
@@ -79,7 +83,7 @@ export default function RegisterPage() {
             type="email"
             className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
             placeholder="you@example.com"
-            onChange={e=>setEmail(e.target.value)}
+            onChange={e=>setForm({...form, email: e.target.value})}
           />
         </div>
         <div>
@@ -88,7 +92,7 @@ export default function RegisterPage() {
             type="password"
             className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
             placeholder="••••••••"
-            onChange={e=>setPassword(e.target.value)}
+            onChange={e=>setForm({...form, password: e.target.value})}
           />
         </div>
         <div>
@@ -97,13 +101,12 @@ export default function RegisterPage() {
               type="password"
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
               placeholder="••••••••"
-              onChange={e=>setPassword_confirmation(e.target.value)}
+              onChange={e=>setForm({...form, password_confirmation: e.target.value})}
           />
         </div>
         <button
-          type="button"
+          type="submit"
           className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
-          onClick={checkData}
         >
           登録する
         </button>

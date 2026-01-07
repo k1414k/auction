@@ -1,10 +1,11 @@
 import AuthLayout from "@/components/AuthLayout";
 import Link from "next/link";
-import api from "@/lib/axios";
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import {useRouter} from "next/navigation"
 
 
 export default function LoginPage() {
+  const router = useRouter();
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -13,8 +14,18 @@ export default function LoginPage() {
     email: email,
     password: password,
   }
-  const checkData = async () => {
-    // if (!validateData()) return
+  // useEffect(() => {
+  //   const check = async () => {
+  //     const res = await fetch("/api/auth/validate")
+  //
+  //     if (res.ok) router.replace("/")
+  //   }
+  //
+  //   check()
+  // }, [])
+
+  const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
 
     try {
       setErrors("")
@@ -23,35 +34,25 @@ export default function LoginPage() {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
+        credentials: "include", // ← これ
+
       })
 
       if (!res.ok) {
         throw new Error()
       }
 
-      window.location.href = "/"
+      router.replace('/')
     } catch {
       setErrors("メールアドレスとパスワードが違います")
     }
   }
-  // const validateData = () => { //異常ない場合true
-  //   const newErrors:string[] = []
-  //
-  //   if (email.trim().length < 4){
-  //     newErrors.push("正しいメールアドレスを入力してください")
-  //   }
-  //   if (password.trim().length < 6){
-  //     newErrors.push("パスワードは６文字以上必要です")
-  //   }
-  //
-  //   setErrors(newErrors)
-  //   return newErrors.length === 0
-  // }
+
 
   return (
     <AuthLayout>
       <h1 className="text-2xl font-bold text-center mb-6">ログイン</h1>
-      <form className="space-y-4">
+      <form className="space-y-4" onSubmit={handleSubmit} >
         <div>
           <label className="block text-sm mb-1">メールアドレス</label>
           <input
@@ -71,13 +72,18 @@ export default function LoginPage() {
           />
         </div>
         <button
-            type="button"
+            type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-          onClick={checkData}
         >
           ログイン
         </button>
       </form>
+      {
+        errors != '' &&
+        <div className={"text-red-500 mt-2 text-center"}>
+          {errors}
+        </div>
+      }
       <div className="text-sm text-center text-gray-600 mt-4 space-y-1">
         <p>
           <Link href="/auth/forgot-password" className="text-blue-600 hover:underline">
