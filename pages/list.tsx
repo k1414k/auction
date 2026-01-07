@@ -18,7 +18,7 @@ export default function Home() {
   return (
     <div className="px-4 pt-4">
       {/* ヒーロー */}
-      <Link href={"/auth/login"}>
+      <Link href={"/auth/auth"}>
         <section className="mb-4">
           <div className="rounded-xl overflow-hidden bg-slate-100 p-5">
             <h2 className="text-xl font-semibold">注目のオークション</h2>
