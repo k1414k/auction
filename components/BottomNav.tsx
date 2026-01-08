@@ -29,10 +29,10 @@ export function BottomNav() {
           <CirclePlus />
           <span>販売</span>
         </Link>
-        <Link href="/auth/login" className="flex flex-col items-center text-xs">
+        <Link href="/account" className="flex flex-col items-center text-xs">
           <CircleUser />
           <span>
-            ログイン
+            マイページ
           </span>
         </Link>
         <div className="flex flex-col items-center text-xs">

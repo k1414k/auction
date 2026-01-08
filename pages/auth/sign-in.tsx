@@ -14,15 +14,6 @@ export default function LoginPage() {
     email: email,
     password: password,
   }
-  // useEffect(() => {
-  //   const check = async () => {
-  //     const res = await fetch("/api/auth/validate")
-  //
-  //     if (res.ok) router.replace("/")
-  //   }
-  //
-  //   check()
-  // }, [])
 
   const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -30,7 +21,7 @@ export default function LoginPage() {
     try {
       setErrors("")
 
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/sign-in", {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

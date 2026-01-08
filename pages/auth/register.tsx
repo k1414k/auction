@@ -3,6 +3,7 @@ import AuthLayout from "@/components/AuthLayout";
 import {useState} from "react";
 import apiServer from "@/lib/axios/server";
 import {useRouter} from "next/navigation";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,22 +14,30 @@ export default function RegisterPage() {
     password_confirmation: "",
   })
   const [errors, setErrors] = useState<string[]>([])
-  const handleSubmit = (e) => {
-    e.preventDefault();
 
-    if (validateForm()){
-      apiServer.post("/auth", form).then((res)=>{
-        router.replace("/auth/login")
-      }).catch(e=>{
-        console.log(e)
-        setErrors(["既に加入しているメールアドレスです"]) //<-----------------------------1
+  const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!validateForm()) return
+
+    try {
+      setErrors([])
+
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+        credentials: "include",// ??
       })
-    }
-    else {
-      console.log("フロントバリデーションエラー")
+
+      if (!res.ok) {
+        throw new Error()
+      }
+
+      router.replace('/auth/sign-in')
+    } catch {
+      setErrors(["既に加入しているメールアドレスです"]) //<-----------------------------1
     }
   }
-
 
   const validateForm = () => { //異常ない場合true
     const newErrors:string[] = []
@@ -113,9 +122,9 @@ export default function RegisterPage() {
       </form>
       <p className="text-sm text-center text-gray-600 mt-4">
         すでにアカウントがありますか？{" "}
-        <a href="/auth/login" className="text-blue-600 hover:underline">
+        <Link href="/auth/sign-in" className="text-blue-600 hover:underline">
           ログイン
-        </a>
+        </Link>
       </p>
     </AuthLayout>
   );

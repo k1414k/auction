@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import apiBrowser from "@/lib/axios/browser";
+import api from "@/lib/axios";
 
 export default async function handler(
     req: NextApiRequest,
@@ -13,7 +13,7 @@ export default async function handler(
         const { email, password } = req.body
 
         // Rails にログインリクエスト
-        const apiRes = await apiBrowser.post(
+        const apiRes = await api.post(
             '/auth/sign_in',
             { email, password }
         )
