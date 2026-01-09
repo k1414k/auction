@@ -1,14 +1,13 @@
 // app/register/page.tsx
 import AuthLayout from "@/components/AuthLayout";
 import {useState} from "react";
-import apiServer from "@/lib/axios/server";
 import {useRouter} from "next/navigation";
 import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({
-    username: "",
+    name: "",
     email: "",
     password: "",
     password_confirmation: "",
@@ -42,7 +41,7 @@ export default function RegisterPage() {
   const validateForm = () => { //異常ない場合true
     const newErrors:string[] = []
 
-    if (form.username.trim().length < 4){
+    if (form.name.trim().length < 4){
       newErrors.push("ユーザー名は４文字以上必要です")
     }
     if (form.email.trim().length < 4){
@@ -78,12 +77,12 @@ export default function RegisterPage() {
       }
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="block text-sm mb-1">ユーザー名</label>
+          <label className="block text-sm mb-1">名前</label>
           <input
             type="text"
             className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
             placeholder="Your name"
-            onChange={e=>setForm({...form, username: e.target.value})}
+            onChange={e=>setForm({...form, name: e.target.value})}
           />
         </div>
         <div>

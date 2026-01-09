@@ -10,12 +10,12 @@ export default async function handler(
     }
 
     try {
-        const { username, email, password, password_confirmation } = req.body
+        const { name, email, password, password_confirmation } = req.body
 
         // Rails にログインリクエスト
         const apiRes = await api.post(
             '/auth',
-            { username, email, password, password_confirmation }
+            { name, email, password, password_confirmation }
         )
 
         return res.status(200).json({ user: apiRes.data })
