@@ -71,6 +71,29 @@ account/profile.tsx + pages/account/にapiで情報入れる
 
 
 
+
+
+
+!!!nextapiで401などのエラ番号の他にもjsonを返すところは
+フロントでfetchのあとthen にresとして出力しないと意味がない！！！
+
+### ニックネーム自動生成の設計意図
+
+ユーザー作成時に nickname が未指定の場合、
+`before_create` コールバックで一意な値を生成しています。
+
+DeviseTokenAuth ではユーザー作成時に
+内部的に複数回 validation / save が行われるため、
+`before_validation` を使用すると
+同一レコードに対して nickname が再生成され、
+unique index と衝突する可能性があります。
+
+そのため、本アプリでは
+**DB INSERT 直前に1度だけ実行される `before_create` を採用**
+しています。
+
+
+
 READMEの黄金構成（覚えて）
 
 なにを作ったか（1〜2行）
@@ -84,6 +107,3 @@ READMEの黄金構成（覚えて）
 実務で意識した点
 
 今後の改善点
-
-これを守ると
-「考えるエンジニア」評価になる

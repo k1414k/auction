@@ -15,7 +15,7 @@ export default async function handler(
         // Rails にログインリクエスト
         const apiRes = await api.post(
             '/auth',
-            { name, email, password, password_confirmation }
+            JSON.stringify({ name, email, password, password_confirmation }),
         )
 
         return res.status(200).json({ user: apiRes.data })

@@ -1,45 +1,56 @@
-"use client";
 import Link from "next/link";
-import { House, List, Ellipsis, CirclePlus, CircleUser } from "lucide-react";
-
+import { useRouter } from "next/router";
+import {
+  House,
+  List,
+  Search,
+  CircleUser,
+  CameraIcon,
+} from "lucide-react";
 
 export function BottomNav() {
-  class Button {
-    btnNames = ["ホーム","リスト","販売","ログイン","メニュ"];
-    create(i:number){
-      if (this.btnNames[i]){
-        
-      }
-    }
-  }
+  const { pathname } = useRouter()
+  const navItems = [
+    { href: "/", label: "ホーム", icon: House },
+    { href: "/search", label: "検索", icon: Search },
+    { href: "/sell", label: "出品", icon: CameraIcon },
+    { href: "/list", label: "閲覧", icon: List },
+    { href: "/user/profile", label: "マイページ", icon: CircleUser },
+  ]
+
 
   return (
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] 
-    max-w-screen-sm bg-white/95 border rounded-xl shadow-lg z-50">
-      <div className="flex justify-around py-2 cursor-pointer">
-        <Link href="/" className="flex flex-col items-center text-xs cursor-pointer">
-          <House className="/" />
-          <span>ホーム</span>
-        </Link>
-        <Link href="/list" className="flex flex-col items-center text-xs">
-          <List />
-          <span>リスト</span>
-        </Link>
-        <Link href="#" className="flex flex-col items-center text-xs">
-          <CirclePlus />
-          <span>販売</span>
-        </Link>
-        <Link href="/account" className="flex flex-col items-center text-xs">
-          <CircleUser />
-          <span>
-            マイページ
-          </span>
-        </Link>
-        <div className="flex flex-col items-center text-xs">
-          <Ellipsis />
-          <span>メニュ</span>
-        </div>
+    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[55%]
+      max-w-screen-sm bg-white/20 border rounded-full shadow-lg z-50 py-0.5">
+      <div className="flex justify-between px-1">
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const isActive =
+            href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+          return (
+            <Link key={label} href={href}>
+              <div
+                className={`
+                  flex flex-col items-center justify-center
+                  w-20 h-14 rounded-full
+                  transition
+                  ${
+                    isActive
+                      ? "bg-gray-200 text-black font-bold"
+                      : "text-slate-500 hover:text-black"
+                  }
+                `}
+              >
+                <Icon size={20} />
+                <span className="text-[10px] leading-tight">
+                  {label}
+                </span>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </nav>
+
   );
 }

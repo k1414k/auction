@@ -1,20 +1,18 @@
 import AuthLayout from "@/components/AuthLayout";
 import Link from "next/link";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {useRouter} from "next/navigation"
 
 
 export default function LoginPage() {
   const router = useRouter();
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  type FormType = {email:string; password:string} 
+  const [form, setForm] = useState<FormType>({
+    email: "",
+    password: ""
+  })
   const [errors, setErrors] = useState('')
-  const formData = {
-    email: email,
-    password: password,
-  }
-
   const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
@@ -24,9 +22,8 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/sign-in", {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-        credentials: "include", // ← これ
-
+        body: JSON.stringify(form),
+        credentials: "include",
       })
 
       if (!res.ok) {
@@ -50,7 +47,7 @@ export default function LoginPage() {
             type="email"
             className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
             placeholder="your@example.com"
-            onChange={e=>setEmail(e.target.value)}
+            onChange={e=>setForm({...form, email: (e.target.value)})}
           />
         </div>
         <div>
@@ -59,7 +56,7 @@ export default function LoginPage() {
             type="password"
             className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
             placeholder="••••••••"
-            onChange={e=>setPassword(e.target.value)}
+            onChange={e=>setForm({...form, password: e.target.value})}
           />
         </div>
         <button

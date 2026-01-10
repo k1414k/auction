@@ -33,9 +33,11 @@ export default function RegisterPage() {
       }
 
       router.replace('/auth/sign-in')
-    } catch {
-      setErrors(["既に加入しているメールアドレスです"]) //<-----------------------------1
     }
+    catch {
+      setErrors(["このメールアドレスは使用できません"])
+    }
+
   }
 
   const validateForm = () => { //異常ない場合true
