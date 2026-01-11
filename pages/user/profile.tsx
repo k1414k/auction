@@ -1,4 +1,5 @@
 // app/account/page.tsx
+import { nextApi } from "@/lib/fetch";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
 import { useEffect, useState } from "react";
@@ -6,6 +7,8 @@ import { useEffect, useState } from "react";
 
 export default function MyPage() {
     const router = useRouter()
+
+    const [modalSwitch, setModalSwitch] = useState(false)
     
     type UserInfoType = {id:number; email:string; name:string; nickname:string}
     const [userInfo, setUserInfo] = useState<UserInfoType>({
@@ -14,12 +17,33 @@ export default function MyPage() {
       name: "",
       nickname: ""
     })
+    
+    const [passwordForm, setPasswordForm] = useState({
+      currentPassword: "",
+      newPassword: "",
+      newPasswordConfirmation: ""
+    })
+    const onChangePassword = async() => {
+      try {
 
+        await nextApi("/user/change-password", {
+          method: "PUT",
+          body: passwordForm
+        })
+
+        console.log("success");
+        
+
+      }
+
+      catch {
+        alert("fail")
+      }
+    }
     const logoutUser = async () => {
         await fetch('/api/auth/sign-out', {
             method: 'DELETE',
         })
-
         router.replace("/")
     }
     const getUserInfo = async() => {
@@ -36,8 +60,28 @@ export default function MyPage() {
       console.log(userInfo);
     }, [userInfo])
 
+
   return (
     <div className="px-4 pt-4">
+        {modalSwitch && (
+          <div className="fixed z-50 flex items-center justify-center inset-0">
+            <div className="absolute bg-white/90 p-6 
+            top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+            rounded-md shadow-md">
+              <button onClick={()=>{setModalSwitch(!modalSwitch)}}>
+                モーダルonoff
+              </button>
+              <div className="p-10">
+                <input type="password" placeholder="currentpassword" onChange={e=>setPasswordForm({...passwordForm, currentPassword: e.target.value})}/>
+                <input type="password" placeholder="newpassword" onChange={e=>setPasswordForm({...passwordForm, newPassword: e.target.value})}/>
+                <input type="password" placeholder="newpasswordconfirm" onChange={e=>setPasswordForm({...passwordForm, newPasswordConfirmation: e.target.value})}/>
+                <div className="mt-4 bg-indigo-200 p-2 cursor-pointer" onClick={onChangePassword}>
+                  パスワード変更
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         <section className="relative mb-4">
             <div className="rounded-xl bg-white p-4 shadow-sm">
                 <div className="font-semibold">
@@ -58,7 +102,9 @@ export default function MyPage() {
               <div className="text-blue-500 cursor-pointer">
                 住所変更
               </div>
-              <div className="text-blue-500 my-1 cursor-pointer">
+              <div className="text-blue-500 my-1 cursor-pointer" onClick={()=>{
+                setModalSwitch(true)
+              }}>
                 パスワード変更
               </div>
               <div className="text-red-500 cursor-pointer" onClick={logoutUser}>

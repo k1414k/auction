@@ -37,7 +37,6 @@ export default function RegisterPage() {
     catch {
       setErrors(["このメールアドレスは使用できません"])
     }
-
   }
 
   const validateForm = () => { //異常ない場合true
