@@ -12,16 +12,13 @@ export default async function handler(
     try {
         const { name, email, password, password_confirmation } = req.body
 
-        // Rails にログインリクエスト
         const apiRes = await api.post(
             '/auth',
-            JSON.stringify({ name, email, password, password_confirmation }),
+            { name, email, password, password_confirmation },
         )
 
         return res.status(200).json({ user: apiRes.data })
     } catch (e) {
-        return res.status(401).json({
-            message: 'メールアドレスまたはパスワードが違います',
-        })
+        return res.status(401).json({e})
     }
 }
