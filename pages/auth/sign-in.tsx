@@ -2,6 +2,7 @@ import AuthLayout from "@/components/AuthLayout";
 import Link from "next/link";
 import {useState} from "react";
 import {useRouter} from "next/navigation"
+import {nextApi} from "@/lib/fetch";
 
 
 export default function LoginPage() {
@@ -15,24 +16,18 @@ export default function LoginPage() {
   const [errors, setErrors] = useState('')
   const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setErrors("")
 
     try {
-      setErrors("")
-
-      const res = await fetch("/api/auth/sign-in", {
+      await nextApi("/auth/sign-in", {
         method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-        credentials: "include",
+        body: form,
       })
-
-      if (!res.ok) {
-        throw new Error()
-      }
-
       router.replace('/')
-    } catch {
-      setErrors("メールアドレスとパスワードが違います")
+    }
+    catch (e){
+      console.log(e)
+      setErrors(e.message)
     }
   }
 

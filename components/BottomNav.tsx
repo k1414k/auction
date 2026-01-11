@@ -20,7 +20,7 @@ export function BottomNav() {
 
 
   return (
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[55%]
+    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2
       max-w-screen-sm bg-white/20 border rounded-full shadow-lg z-50 py-0.5">
       <div className="flex justify-between px-1">
         {navItems.map(({ href, label, icon: Icon }) => {
