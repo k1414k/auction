@@ -9,6 +9,7 @@ export default function MyPage() {
     const router = useRouter()
 
     const [modalSwitch, setModalSwitch] = useState(false)
+    const [nicknameModal, setNicknameModal] = useState(false)
     
     type UserInfoType = {id:number; email:string; name:string; nickname:string}
     const [userInfo, setUserInfo] = useState<UserInfoType>({
@@ -18,11 +19,30 @@ export default function MyPage() {
       nickname: ""
     })
     
+    const [newNickname, setNewNickname] = useState("")
     const [passwordForm, setPasswordForm] = useState({
       currentPassword: "",
       newPassword: "",
       newPasswordConfirmation: ""
     })
+    const onChangeNicknmae = async() => {
+      try {
+
+        await nextApi("/user/change-nickname", {
+          method: "PUT",
+          body: {
+            nickname: newNickname
+          }
+        })
+
+        console.log("success")
+        router.refresh()
+      }
+
+      catch {
+        alert("fail")
+      }
+    }
     const onChangePassword = async() => {
       try {
 
@@ -32,8 +52,6 @@ export default function MyPage() {
         })
 
         console.log("success");
-        
-
       }
 
       catch {
@@ -81,11 +99,29 @@ export default function MyPage() {
               </div>
             </div>
           </div>
+        )}{nicknameModal && (
+          <div className="fixed z-50 flex items-center justify-center inset-0">
+            <div className="absolute bg-white/90 p-6 
+            top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+            rounded-md shadow-md">
+              <button onClick={()=>{setNicknameModal(!nicknameModal)}}>
+                モーダルonoff
+              </button>
+              <div className="p-10">
+                <input type="text" placeholder="新しいニックネーム入力" onChange={e=>setNewNickname(e.target.value)}/>
+                <div className="mt-4 bg-indigo-200 p-2 cursor-pointer" onClick={onChangeNicknmae}>
+                  ニックネーム変更
+                </div>
+              </div>
+            </div>
+          </div>
         )}
         <section className="relative mb-4">
             <div className="rounded-xl bg-white p-4 shadow-sm">
                 <div className="font-semibold">
-                  <button className="mr-2 mb-2 py-1.5 px-2 rounded-lg text-xl bg-gray-600 text-white">
+                  <button className="mr-2 mb-2 py-1.5 px-2 rounded-lg text-xl bg-gray-600 text-white"
+                    onClick={()=>setNicknameModal(!nicknameModal)}
+                  >
                     》{userInfo.nickname}
                   </button>
                 </div>
