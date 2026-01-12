@@ -1,9 +1,13 @@
 import { nextApi } from "@/lib/fetch";
+import { useUserStore } from "@/stores/userStore";
+import { formatNumber } from "@/utils/format-number";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Wallet() {
   const router = useRouter()
+  const user = useUserStore(state=>state.user)
+  const setUser = useUserStore(state=>state.setUser)
   const [onModal,setOnModal] = useState("")
   const [form,setForm] = useState({
     type: "",
@@ -15,15 +19,24 @@ export default function Wallet() {
   }, [onModal])
   
   const handleSubmit = async() => {
+    setOnModal("")
     try {
       await nextApi("/user/change-wallet", {
         method: "PATCH",
         body: form
       })
-      router.refresh()
+      if (user){
+        form.type === "balance" ? 
+        setUser({...user, balance: user.balance + form.amount}) : 
+        setUser({...user, points: user.points + form.amount})
+      } 
+      else router.refresh()
     }
     catch {
       console.log("失敗");
+      // ここに何かの操作でご入力と対策必要
+      //　及びバリデーションも必要
+      // 条件は 0入力、残高がマイナスになる、１００００００くらいの大きい数字はいる
     }
   }
   const rows = [
@@ -53,7 +66,11 @@ export default function Wallet() {
       <section className="mb-4">
         <div className="rounded-xl bg-white p-4 shadow-sm">
           <div className="text-sm text-gray-500">売上高・ポイント</div>
-          <div className="text-2xl font-bold mt-1">5,000￥・0p</div>
+          <div className="text-2xl font-bold mt-1">
+            ¥ { user?.balance ? formatNumber(user.balance) : 0 }
+            ・
+            P { user?.points ? formatNumber(user.points) : 0 }
+          </div>
           <div className="mt-3 flex gap-2">
             <button className="flex-1 py-2 rounded-lg bg-sky-600 text-white"
               onClick={()=>setOnModal("売上")}>売上</button>

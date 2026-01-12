@@ -1,27 +1,18 @@
-// app/account/page.tsx
 import { nextApi } from "@/lib/fetch";
+import { useUserStore } from "@/stores/userStore";
 import { formatNumber } from "@/utils/format-number";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 
 export default function MyPage() {
     const router = useRouter()
+    const user = useUserStore(state=>state.user)
+    const setUser = useUserStore(state=>state.setUser)
 
     const [modalSwitch, setModalSwitch] = useState(false)
     const [nicknameModal, setNicknameModal] = useState(false)
-    
-    type UserInfoType = {id:number; email:string; name:string; nickname:string; balance:0; points:0}
-    const [userInfo, setUserInfo] = useState<UserInfoType>({
-      id: 0,
-      email: "",
-      name: "",
-      nickname: "",
-      balance: 0,
-      points: 0,
-    })
-    
     const [newNickname, setNewNickname] = useState("")
     const [passwordForm, setPasswordForm] = useState({
       currentPassword: "",
@@ -30,16 +21,15 @@ export default function MyPage() {
     })
     const onChangeNicknmae = async() => {
       try {
-
         await nextApi("/user/change-nickname", {
           method: "PUT",
           body: {
             nickname: newNickname
           }
         })
-
-        console.log("success")
-        router.refresh()
+        setNicknameModal(false)
+        if (user) setUser({...user, nickname: newNickname}) //storeに保存
+        else router.refresh()
       }
 
       catch {
@@ -67,19 +57,6 @@ export default function MyPage() {
         })
         router.replace("/")
     }
-    const getUserInfo = async() => {
-      const res = await fetch('/api/auth/user', {
-        method: 'GET',
-      })
-      const data = await res.json()
-      setUserInfo(data.user)
-    }
-    useEffect(()=>{
-      getUserInfo()
-    },[])
-    useEffect(()=>{
-      console.log(userInfo);
-    }, [userInfo])
 
 
   return (
@@ -125,7 +102,7 @@ export default function MyPage() {
                   <button className="mr-2 mb-2 py-1.5 px-2 rounded-lg text-xl bg-gray-600 text-white"
                     onClick={()=>setNicknameModal(!nicknameModal)}
                   >
-                    》{userInfo.nickname}
+                    》{user?.nickname}
                   </button>
                 </div>
                 <div className="mt-3 text-sm text-gray-600">
@@ -156,8 +133,8 @@ export default function MyPage() {
           <section className="mb-4">
             <div className="rounded-xl bg-white p-4 shadow-sm">
               <h3 className="font-semibold">財布</h3>
-              <h3 className="font-semibold">売上高 {formatNumber(userInfo.balance)} ¥</h3>
-              <h3 className="font-semibold">ポイント {formatNumber(userInfo.points)}P</h3>
+              <h3 className="font-semibold">売上高 {user?.balance ? formatNumber(user.balance) : 0} ¥</h3>
+              <h3 className="font-semibold">ポイント {user?.points ? formatNumber(user.points) : 0} P</h3>
             </div>
           </section>
         </Link>

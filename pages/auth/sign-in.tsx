@@ -6,13 +6,12 @@ import {nextApi} from "@/lib/fetch";
 
 
 export default function LoginPage() {
-  const router = useRouter();
-
-  type FormType = {email:string; password:string} 
-  const [form, setForm] = useState<FormType>({
+  const router = useRouter()
+  const [form, setForm] = useState({
     email: "",
     password: ""
   })
+
   const [errors, setErrors] = useState('')
   const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -26,8 +25,12 @@ export default function LoginPage() {
       router.replace('/')
     }
     catch (e){
-      console.log(e)
-      setErrors(e.message)
+      if (e instanceof Error){
+        setErrors(e.message)
+      }
+      else {
+        setErrors("ログイン失敗しました。")
+      }
     }
   }
 

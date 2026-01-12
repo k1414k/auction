@@ -1,7 +1,9 @@
+// app/_app.tsx
 import "@/styles/globals.css";
-import { Header } from "@/components/Header";
 import { AppProps } from "next/app";
+import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
+import { UserInitializer } from "@/components/UserInitializer"; // 先ほど作ったやつ
 
 export const metadata = {
   title: "Auction (mock)",
@@ -10,15 +12,16 @@ export const metadata = {
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
+    <UserInitializer>
       <div className="bg-gray-50 min-h-screen text-gray-800">
         <div className="max-w-screen-sm mx-auto">
           <Header />
-          <main className="pb-24"> {/* 下部ナビ分の余白 */}
+          <main className="pb-24">
             <Component {...pageProps} />
           </main>
           <BottomNav />
         </div>
       </div>
+    </UserInitializer>
   );
 }
-
