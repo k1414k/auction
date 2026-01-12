@@ -1,5 +1,6 @@
 // app/account/page.tsx
 import { nextApi } from "@/lib/fetch";
+import { formatNumber } from "@/utils/format-number";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
 import { useEffect, useState } from "react";
@@ -11,12 +12,14 @@ export default function MyPage() {
     const [modalSwitch, setModalSwitch] = useState(false)
     const [nicknameModal, setNicknameModal] = useState(false)
     
-    type UserInfoType = {id:number; email:string; name:string; nickname:string}
+    type UserInfoType = {id:number; email:string; name:string; nickname:string; balance:0; points:0}
     const [userInfo, setUserInfo] = useState<UserInfoType>({
       id: 0,
       email: "",
       name: "",
-      nickname: ""
+      nickname: "",
+      balance: 0,
+      points: 0,
     })
     
     const [newNickname, setNewNickname] = useState("")
@@ -153,8 +156,8 @@ export default function MyPage() {
           <section className="mb-4">
             <div className="rounded-xl bg-white p-4 shadow-sm">
               <h3 className="font-semibold">財布</h3>
-              <h3 className="font-semibold">売上高 50,000¥</h3>
-              <h3 className="font-semibold">ポイント 1,000P</h3>
+              <h3 className="font-semibold">売上高 {formatNumber(userInfo.balance)} ¥</h3>
+              <h3 className="font-semibold">ポイント {formatNumber(userInfo.points)}P</h3>
             </div>
           </section>
         </Link>

@@ -38,7 +38,7 @@ account/profile.tsx + pages/account/にapiで情報入れる
 
 
 
-
+デプロイ時にrails側のサーバー閉ざされたり問題ある時にreact側も５００などにするべき
 
 
 
