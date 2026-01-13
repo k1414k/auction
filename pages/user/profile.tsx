@@ -1,6 +1,7 @@
 import { nextApi } from "@/lib/fetch";
 import { useUserStore } from "@/stores/userStore";
 import { formatNumber } from "@/utils/format-number";
+import Image from "next/image";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
 import { useState } from "react";
@@ -11,6 +12,33 @@ export default function MyPage() {
     const user = useUserStore(state=>state.user)
     const setUser = useUserStore(state=>state.setUser)
 
+    const uploadAvatar = async (file: File) => {
+      if (!user) return
+
+      const formData = new FormData()
+      formData.append("avatar", file)
+
+
+      try {
+        const res = await fetch(`/api/user/change-avatar`, {
+          method: "PATCH",
+          body: formData,
+          credentials: "include", // cookie 認証
+        });
+
+        if (!res.ok) throw new Error("upload failed");
+
+        const data = await res.json()
+
+        setUser({
+          ...user,
+          avatarUrl: data.avatar_url,
+        });
+      } catch (e) {
+        alert("画像アップロードに失敗しました")
+        console.error(e)
+      }
+    };
     const [modalSwitch, setModalSwitch] = useState(false)
     const [nicknameModal, setNicknameModal] = useState(false)
     const [newNickname, setNewNickname] = useState("")
@@ -52,10 +80,15 @@ export default function MyPage() {
       }
     }
     const logoutUser = async () => {
-        await fetch('/api/auth/sign-out', {
-            method: 'DELETE',
+      try{
+        await nextApi('/auth/sign-out', {
+          method: 'DELETE',
         })
         router.replace("/")
+      }
+      catch{
+        alert("fail")
+      }
     }
 
 
@@ -98,12 +131,29 @@ export default function MyPage() {
         )}
         <section className="relative mb-4">
             <div className="rounded-xl bg-white p-4 shadow-sm">
-                <div className="font-semibold">
-                  <button className="mr-2 mb-2 py-1.5 px-2 rounded-lg text-xl bg-gray-600 text-white"
+                <div className="font-semibold flex items-center ">
+                  <Image
+                    src={user?.avatarUrl || "/apple.png"}
+                    alt="avatar"
+                    width={70}
+                    height={70}
+                    className="rounded-md"
+                    onClick={()=>setNicknameModal(!nicknameModal)}
+                  />
+                  <button className="mr-2 py-1.5 px-2 rounded-lg text-xl bg-gray-600 text-white"
                     onClick={()=>setNicknameModal(!nicknameModal)}
                   >
                     》{user?.nickname}
                   </button>
+                  <input
+                      type="file"
+                      accept="image/*"
+                      onChange={e=>{
+                        const file = e.target.files?.[0]
+                        if (file) uploadAvatar(file)
+                      }}
+                    />
+
                 </div>
                 <div className="mt-3 text-sm text-gray-600">
                     <span>

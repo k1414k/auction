@@ -19,7 +19,6 @@ export default async function handler(
             return res.status(401).json({ message: '認証情報がありません' })
         }
 
-        // 🚪 Rails の sign_out を呼び出す（DELETE）
         await api.delete('/auth/sign_out', {
             headers: {
                 'access-token': accessToken,

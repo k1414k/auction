@@ -19,10 +19,21 @@ export function UserInitializer({ children }:UserInitailizerProps) {
             nickname: string
             balance: number
             points: number
+            avatar_url: string
           }
       }
         const userData: UserDataResponse = await nextApi("/auth/user", {method:"GET"})
-        setUser(userData.user)
+        console.log(userData);
+        
+        setUser({
+          email: userData.user.email,
+          name: userData.user.name,
+          nickname: userData.user.nickname,
+          balance: userData.user.balance,
+          points: userData.user.points,
+          avatarUrl: userData.user.avatar_url,
+        })
+
       } catch {
         setUser(null)
       }

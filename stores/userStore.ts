@@ -1,29 +1,21 @@
+// stores/userStore.ts
 import { create } from "zustand";
 
-export type UserInfo = {
+export type User = {
   email: string;
   name: string;
   nickname: string;
   balance: number;
   points: number;
-} | null;
+  avatarUrl?: string;
+};
 
 type UserState = {
-  user: UserInfo | null;
-  setUser: (user: UserInfo) => void;
-  updateUser: (partial: Partial<UserInfo>) => void;
-  clearUser: () => void;
+  user: User | null;
+  setUser: (user: User | null) => void;
 };
 
 export const useUserStore = create<UserState>((set) => ({
   user: null,
-
   setUser: (user) => set({ user }),
-
-  updateUser: (partial) =>
-    set((state) => ({
-      user: state.user ? { ...state.user, ...partial } : null,
-    })),
-
-  clearUser: () => set({ user: null }),
 }));
