@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import {
   House,
-  List,
+  Heart,
   Search,
   CircleUser,
   CameraIcon,
@@ -14,7 +14,7 @@ export function BottomNav() {
     { href: "/", label: "ホーム", icon: House },
     { href: "/search", label: "検索", icon: Search },
     { href: "/sell", label: "出品", icon: CameraIcon },
-    { href: "/activity", label: "閲覧", icon: List },
+    { href: "/favorites", label: "いいね", icon: Heart },
     { href: "/user/profile", label: "マイページ", icon: CircleUser },
   ]
 

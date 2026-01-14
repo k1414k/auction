@@ -75,12 +75,7 @@ export default function SellPage() {
                         />
                     </div>
                 </div>
-            </div>
-
-            {/* 出品ボタン */}
-            <div className="fixed bottom-24 left-0 right-0 px-4 flex justify-center pointer-events-none">
-                {/* 注意: BottomNavのZ-indexより高く設定する必要があります */}
-                <button className="pointer-events-auto w-full max-w-md bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-full shadow-lg shadow-blue-500/30 active:scale-95 transition transform">
+                <button className="pointer-events-auto w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-full shadow-lg shadow-blue-500/30 active:scale-95 transition transform">
                     出品する
                 </button>
             </div>

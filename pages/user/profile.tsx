@@ -162,6 +162,15 @@ export default function MyPage() {
                     <span>
                       出品中 
                     </span>
+                    <span>
+                      購入履歴 
+                    </span>
+                    <span>
+                      販売履歴 
+                    </span>
+                    <span>
+                      ポイント履歴 
+                    </span>
                 </div>
             </div>
             <span className="absolute right-3 top-3 text-right">
