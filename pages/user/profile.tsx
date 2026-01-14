@@ -135,25 +135,25 @@ export default function MyPage() {
                   <Image
                     src={user?.avatarUrl || "/apple.png"}
                     alt="avatar"
-                    width={70}
-                    height={70}
+                    width={50}
+                    height={50} // height-autoになっている
                     className="rounded-md"
-                    onClick={()=>setNicknameModal(!nicknameModal)}
                   />
-                  <button className="mr-2 py-1.5 px-2 rounded-lg text-xl bg-gray-600 text-white"
+                  <button className="mx-2 py-1.5 px-2 rounded-lg text-xl bg-gray-600 text-white"
                     onClick={()=>setNicknameModal(!nicknameModal)}
                   >
                     》{user?.nickname}
                   </button>
-                  <input
-                      type="file"
-                      accept="image/*"
-                      onChange={e=>{
-                        const file = e.target.files?.[0]
-                        if (file) uploadAvatar(file)
-                      }}
+                 </div>
+                <div className="mt-3">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={e=>{
+                            const file = e.target.files?.[0]
+                            if (file) uploadAvatar(file)
+                        }}
                     />
-
                 </div>
                 <div className="mt-3 text-sm text-gray-600">
                     <span>

@@ -14,7 +14,7 @@ const samples = [
 
 export default function Home() {
   const [openFilters, setOpenFilters] = useState(false);
-
+// 以前の商品ページ　・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・
   return (
     <div className="px-4 pt-4">
       {/* ヒーロー */}

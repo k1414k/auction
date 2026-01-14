@@ -16,7 +16,6 @@ export default function LoginPage() {
   const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setErrors("")
-
     try {
       await nextApi("/auth/sign-in", {
         method: "POST",
@@ -26,7 +25,8 @@ export default function LoginPage() {
     }
     catch (e){
       if (e instanceof Error){
-        setErrors(e.message)
+        const errorMessage= JSON.parse(e.message)
+        setErrors(errorMessage.message)
       }
       else {
         setErrors("ログイン失敗しました。")

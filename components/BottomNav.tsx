@@ -14,7 +14,7 @@ export function BottomNav() {
     { href: "/", label: "ホーム", icon: House },
     { href: "/search", label: "検索", icon: Search },
     { href: "/sell", label: "出品", icon: CameraIcon },
-    { href: "/list", label: "閲覧", icon: List },
+    { href: "/activity", label: "閲覧", icon: List },
     { href: "/user/profile", label: "マイページ", icon: CircleUser },
   ]
 
