@@ -12,7 +12,7 @@ export function BottomNav() {
   const { pathname } = useRouter()
   const navItems = [
     { href: "/", label: "ホーム", icon: House },
-    { href: "/search", label: "検索", icon: Search },
+    { href: "/search", label: "探す", icon: Search },
     { href: "/sell", label: "出品", icon: CameraIcon },
     { href: "/favorites", label: "いいね", icon: Heart },
     { href: "/user/profile", label: "マイページ", icon: CircleUser },

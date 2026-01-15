@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Search, TrendingUp } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 
 export function SearchTop() {
     const router = useRouter();
@@ -14,7 +14,7 @@ export function SearchTop() {
     return (
         <>
             {/* 検索バー */}
-            <div className="mb-6">
+            {/* <div className="mb-6">
                 <div className="relative">
                     <input
                         placeholder="キーワードから探す"
@@ -25,25 +25,32 @@ export function SearchTop() {
                     />
                     <Search className="absolute left-4 top-3.5 text-gray-400 w-5 h-5" />
                 </div>
-            </div>
+            </div> */}
 
             {/* 急上昇 */}
             <section className="mb-6">
                 <h2 className="text-sm font-bold text-gray-500 flex gap-2">
-                    <TrendingUp size={16} /> 急上昇
+                    検索履歴
                 </h2>
                 {["PS5 本体", "MacBook Pro"].map((w) => (
-                    <button
+                    <div
                         key={w}
-                        onClick={() => pushSearch(w)}
-                        className="block w-full text-left p-3 bg-white rounded-xl mt-2"
+                        className="
+                            hover:bg-slate-200 p-1 mt-0.5 border-b border-b-gray-300 
+                            cursor-pointer flex justify-between
+                        "
                     >
-                        {w}
-                    </button>
+                        <button
+                            onClick={() => pushSearch(w)}
+                            className="text-left"
+                        >
+                            》{w}
+                        </button>
+                        <Trash2 />
+                    </div>
                 ))}
             </section>
 
-            {/* カテゴリ */}
             <section>
                 <h2 className="text-sm font-bold text-gray-500 mb-3">カテゴリ</h2>
                 <div className="grid grid-cols-2 gap-3">
@@ -58,6 +65,13 @@ export function SearchTop() {
                     ))}
                 </div>
             </section>
+            
+            <section className="mt-5">
+                <h2 className="text-sm font-bold text-gray-500 mb-3">新着順</h2>
+                <div className="grid grid-cols-2 gap-3">
+                </div>
+            </section>
+
         </>
     );
 }
