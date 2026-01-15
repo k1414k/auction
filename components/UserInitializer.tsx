@@ -38,6 +38,7 @@ export function UserInitializer({ children }:UserInitailizerProps) {
         setUser(null)
       }
     }
+    
     init()
   }, [setUser])
 

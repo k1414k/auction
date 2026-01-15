@@ -3,10 +3,23 @@ import Link from "next/link";
 import {useState} from "react";
 import {useRouter} from "next/navigation"
 import {nextApi} from "@/lib/fetch";
+import { useUserStore } from "@/stores/userStore";
 
+
+type UserDataResponse = {
+  user: {
+    email: string
+    name: string
+    nickname: string
+    balance: number
+    points: number
+    avatar_url: string
+  }
+}
 
 export default function LoginPage() {
   const router = useRouter()
+  const setUser = useUserStore(state=>state.setUser)
   const [form, setForm] = useState({
     email: "",
     password: ""
@@ -16,13 +29,26 @@ export default function LoginPage() {
   const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setErrors("")
+
     try {
       await nextApi("/auth/sign-in", {
         method: "POST",
         body: form,
       })
-      router.replace('/')
-    }
+
+      const userData: UserDataResponse = await nextApi("/auth/user", {method:"GET"})
+        // ログイン成功したのでユーザー情報取得後zustandに入れる もし失敗したらcatchに飛ぶので可能
+      setUser({
+          email: userData.user.email,
+          name: userData.user.name,
+          nickname: userData.user.nickname,
+          balance: userData.user.balance,
+          points: userData.user.points,
+          avatarUrl: userData.user.avatar_url,
+        })
+
+        router.replace('/')
+      } 
     catch (e){
       if (e instanceof Error){
         const errorMessage= JSON.parse(e.message)
