@@ -3,7 +3,7 @@ import { useUserStore } from "@/stores/userStore";
 import { formatNumber } from "@/utils/format-number";
 import Image from "next/image";
 import Link from "next/link";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 
@@ -154,6 +154,9 @@ export default function MyPage() {
                             if (file) uploadAvatar(file)
                         }}
                     />
+                </div>
+                <div className="p-4 mt-2 text-gray-600">
+                  introduction hereintroduction hereintroduction hereintroduction hereintroduction hereintroduction hereintroduction hereintroduction hereintroduction hereintroduction hereintroduction here
                 </div>
                 <div className="mt-3 text-sm text-gray-600">
                     <span>
