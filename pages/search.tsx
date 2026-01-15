@@ -3,10 +3,37 @@ import { useRouter } from "next/router";
 import { AuctionGrid, Filters } from "@/components/AuctionGrid";
 import { SearchTop } from "@/components/SearchTop";
 import { CategoryChips } from "@/components/CategoryChips";
+import { nextApi } from "@/lib/fetch";
+import { useEffect, useState } from "react";
 
 export default function SearchPage() {
     const router = useRouter();
     const { q, category, tag } = router.query;
+    const [categories, setCategories] = useState([])
+    const getCategories = async() => {
+        try {
+            type ResType = {data:[]}
+            const res:ResType = await nextApi("/categories", {method:"GET"})
+            setCategories(res.data)
+            console.log(categories);
+            
+        }   
+        catch (e){
+            if (e instanceof Error){
+                const errorMessage= JSON.parse(e.message)
+                console.log(errorMessage);
+            }
+            else {
+                alert(1)
+            }
+        }
+    }
+    useEffect(()=>{
+        getCategories()
+    }    
+    ,[])
+
+
 
     // URLのqueryから検索条件を判定
     const hasFilter =
@@ -23,11 +50,11 @@ export default function SearchPage() {
 
     return (
         <div className="px-4 pt-4 pb-28">
-            {!hasFilter && <SearchTop />}
+            {!hasFilter && <SearchTop categories={categories} />}
 
             {hasFilter && (
                 <>
-                    <CategoryChips />
+                    <CategoryChips categories={categories}/>
                     <AuctionGrid filters={filters} />
                 </>
             )}

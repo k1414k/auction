@@ -97,3 +97,40 @@ unique index と衝突する可能性があります。
 実務で意識した点
 
 今後の改善点
+
+
+# Auction App API
+
+## 概要
+モバイル利用を前提としたオークションサービスのAPIです。
+フロントエンドは Next.js、バックエンドは Rails API として分離構成を採用しています。
+
+## 技術スタック
+- Backend: Ruby on Rails 7 (API mode)
+- Frontend: Next.js
+- DB: PostgreSQL
+- Auth: Devise Token Auth
+- Infra: AWS (EC2 / RDS)
+- CI/CD: GitHub Actions
+
+## 設計方針
+- RESTful API を基本とした設計
+- resource / resources を用途に応じて使い分け
+- current_user 前提のAPIは単数 resource を使用
+- モバイルファーストUI（PCでは破綻しない最低限対応）
+
+## 主な機能
+- ユーザー認証（トークンベース）
+- 商品出品・閲覧
+- カテゴリ管理
+- オークション入札
+
+## ディレクトリ構成
+- app/controllers/v1
+- app/models
+- app/services（必要に応じて）
+
+## 今後の改善点
+- 認可の厳密化（Pundit）
+- N+1対策
+- バックグラウンドジョブ導入

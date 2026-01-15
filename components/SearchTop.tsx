@@ -1,10 +1,16 @@
-// components/SearchTop.tsx
-"use client";
-
 import { useRouter } from "next/navigation";
-import { Search, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
-export function SearchTop() {
+type Category = {
+  id: number;
+  name: string;
+};
+
+type Props = {
+  categories: Category[];
+};
+
+export function SearchTop({categories}: Props) {
     const router = useRouter();
 
     const pushSearch = (q: string) => {
@@ -54,13 +60,13 @@ export function SearchTop() {
             <section>
                 <h2 className="text-sm font-bold text-gray-500 mb-3">カテゴリ</h2>
                 <div className="grid grid-cols-2 gap-3">
-                    {["PC", "スマホ", "ゲーム"].map((c) => (
+                    {categories.map((c) => (
                         <button
-                            key={c}
-                            onClick={() => router.push(`/search?category=${c}`)}
+                            key={c.id}
+                            onClick={() => router.push(`/search?category=${c.name}`)}
                             className="bg-white p-4 rounded-xl shadow-sm"
                         >
-                            {c}
+                            {c.name}
                         </button>
                     ))}
                 </div>
