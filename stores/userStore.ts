@@ -7,6 +7,7 @@ export type User = {
   nickname: string;
   balance: number;
   points: number;
+  introduction: string;
   avatarUrl?: string;
 };
 

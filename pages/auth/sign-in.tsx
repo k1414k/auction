@@ -13,6 +13,7 @@ type UserDataResponse = {
     nickname: string
     balance: number
     points: number
+    introduction: string
     avatar_url: string
   }
 }
@@ -44,6 +45,7 @@ export default function LoginPage() {
           nickname: userData.user.nickname,
           balance: userData.user.balance,
           points: userData.user.points,
+          introduction: userData.user.introduction,
           avatarUrl: userData.user.avatar_url,
         })
 

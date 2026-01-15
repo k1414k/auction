@@ -19,6 +19,7 @@ export function UserInitializer({ children }:UserInitailizerProps) {
             nickname: string
             balance: number
             points: number
+            introduction: string
             avatar_url: string
           }
       }
@@ -31,6 +32,7 @@ export function UserInitializer({ children }:UserInitailizerProps) {
           nickname: userData.user.nickname,
           balance: userData.user.balance,
           points: userData.user.points,
+          introduction: userData.user.introduction,
           avatarUrl: userData.user.avatar_url,
         })
 

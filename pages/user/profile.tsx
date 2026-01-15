@@ -11,6 +11,7 @@ export default function MyPage() {
     const router = useRouter()
     const user = useUserStore(state=>state.user)
     const setUser = useUserStore(state=>state.setUser)
+    const [instroEdit, setInstroEdit] = useState(false)
 
     const uploadAvatar = async (file: File) => {
       if (!user) return
@@ -155,9 +156,15 @@ export default function MyPage() {
                         }}
                     />
                 </div>
-                <div className="p-4 mt-2 text-gray-600">
-                  introduction hereintroduction hereintroduction hereintroduction hereintroduction hereintroduction hereintroduction hereintroduction hereintroduction hereintroduction hereintroduction here
-                </div>
+                { // textarea大きさ調整できないように。修正後api発生必要
+                  instroEdit ? <div className="p-4 mt-2">
+                    <textarea className="w-full h-32 text-lg p-3 focus:outline-cyan-600" name="" id=""></textarea>
+                    <button className="p-3 bg-slate-100" onClick={()=>setInstroEdit(!instroEdit)}>cancel</button>
+                  </div> :
+                  <div className="p-4 mt-2 text-gray-600 cursor-pointer" onClick={()=>setInstroEdit(!instroEdit)}>
+                    {user?.introduction}
+                  </div>
+                }
                 <div className="mt-3 text-sm text-gray-600">
                     <span>
                       入札中 
