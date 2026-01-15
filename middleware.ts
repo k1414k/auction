@@ -13,6 +13,8 @@ export function middleware(req: NextRequest) {
     // 1:: ユーザーの権限(ログイン必要)なページにアクセスした場合
     const protectedPaths = [
         "/user",
+        "/sell",
+        "/favorites",
     ]
     const isProtected = protectedPaths.some(path => // protectedPathsが入った経路は遮断される
         pathname.startsWith(path)

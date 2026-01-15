@@ -1,13 +1,40 @@
-import React, { useState } from 'react';
-import { Camera, Plus, X, ChevronRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Camera, X, ChevronRight } from 'lucide-react';
+import { nextApi } from '@/lib/fetch';
+import { SelectRow } from '@/components/SelectRow';
 
 export default function SellPage() {
     const [images, setImages] = useState<string[]>([]);
     const [price, setPrice] = useState('');
+    const [categories, setCategories] = useState([])
+    const [categoryId, setCategoryId] = useState<number | "">("");
+
+        const getCategories = async() => {
+            try {
+                type ResType = {data:[]}
+                const res:ResType = await nextApi("/categories", {method:"GET"})
+                setCategories(res.data)
+                console.log(categories);
+                
+            }   
+            catch (e){
+                if (e instanceof Error){
+                    const errorMessage= JSON.parse(e.message)
+                    console.log(errorMessage);
+                }
+                else {
+                    alert("ERR_CODE_500")
+                }
+            }
+        }
+        useEffect(()=>{
+            getCategories()
+        }    
+        ,[])
+    
 
     return (
         <div className="min-h-screen bg-gray-50 pb-32 pt-20 px-4">
-            {/* ページタイトル */}
             <h1 className="text-xl font-bold text-gray-800 mb-6 px-1">商品の出品</h1>
 
             {/* 画像アップロードエリア */}
@@ -47,6 +74,13 @@ export default function SellPage() {
                         ></textarea>
                     </div>
                 </div>
+                
+                <SelectRow
+                    label="カテゴリ"
+                    value={categoryId}
+                    options={categories}
+                    onChange={setCategoryId}
+                />
 
                 {/* 詳細設定（セレクトボックス風） */}
                 <div className="bg-white rounded-2xl shadow-sm divide-y divide-gray-100">

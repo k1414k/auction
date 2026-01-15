@@ -24,7 +24,7 @@ export default function SearchPage() {
                 console.log(errorMessage);
             }
             else {
-                alert(1)
+                alert("ERR_CODE_500")
             }
         }
     }
