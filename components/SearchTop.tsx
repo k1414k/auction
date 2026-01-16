@@ -5,12 +5,18 @@ type Category = {
   id: number;
   name: string;
 };
-
-type Props = {
-  categories: Category[];
+type Items = {
+  id: number;
+  name: string;
 };
 
-export function SearchTop({categories}: Props) {
+type SearchTopProps = {
+  categories: Category[];
+  items: Items[];
+};
+
+export function SearchTop({categories, items}:SearchTopProps
+) {
     const router = useRouter();
 
     const pushSearch = (q: string) => {
@@ -75,6 +81,13 @@ export function SearchTop({categories}: Props) {
             <section className="mt-5">
                 <h2 className="text-sm font-bold text-gray-500 mb-3">新着順</h2>
                 <div className="grid grid-cols-2 gap-3">
+                    {
+                        items.map(v=>(
+                            <div key={v.id}>
+                                {v.name}
+                            </div>
+                        ))
+                    }
                 </div>
             </section>
 

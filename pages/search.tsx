@@ -10,13 +10,28 @@ export default function SearchPage() {
     const router = useRouter();
     const { q, category, tag } = router.query;
     const [categories, setCategories] = useState([])
+    const [items, setItems] = useState([])
     const getCategories = async() => {
         try {
             type ResType = {data:[]}
             const res:ResType = await nextApi("/categories", {method:"GET"})
             setCategories(res.data)
-            console.log(categories);
-            
+        }   
+        catch (e){
+            if (e instanceof Error){
+                const errorMessage= JSON.parse(e.message)
+                console.log(errorMessage);
+            }
+            else {
+                alert("ERR_CODE_500")
+            }
+        }
+    }
+    const getItems = async() => {
+        try {
+            type ResType = {data:[]}
+            const res:ResType = await nextApi("/items", {method:"GET"})
+            setItems(res.data);
         }   
         catch (e){
             if (e instanceof Error){
@@ -30,6 +45,7 @@ export default function SearchPage() {
     }
     useEffect(()=>{
         getCategories()
+        getItems()
     }    
     ,[])
 
@@ -50,7 +66,7 @@ export default function SearchPage() {
 
     return (
         <div className="px-4 pt-4 pb-28">
-            {!hasFilter && <SearchTop categories={categories} />}
+            {!hasFilter && <SearchTop categories={categories} items={items}/>}
 
             {hasFilter && (
                 <>

@@ -84,7 +84,7 @@ export default function SellPage() {
 
                 {/* 詳細設定（セレクトボックス風） */}
                 <div className="bg-white rounded-2xl shadow-sm divide-y divide-gray-100">
-                    {['カテゴリ', '商品の状態', '配送について'].map((label, idx) => (
+                    {['カテゴリ', '商品の状態', '配送(送料)について'].map((label, idx) => (
                         <button key={idx} className="w-full flex items-center justify-between p-4 active:bg-gray-50 text-left">
                             <span className="text-sm font-medium text-gray-700">{label}</span>
                             <div className="flex items-center gap-2 text-gray-400">
