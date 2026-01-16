@@ -7,7 +7,15 @@ type Category = {
 };
 type Items = {
   id: number;
+  user_id: number;
+  category_id: number;
   name: string;
+
+  description: string;
+  price: number;
+  trading_status: string;
+  created_at: string;
+  updated_at: string;
 };
 
 type SearchTopProps = {

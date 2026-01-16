@@ -2,12 +2,34 @@ import React, { useEffect, useState } from 'react';
 import { Camera, X, ChevronRight } from 'lucide-react';
 import { nextApi } from '@/lib/fetch';
 import { SelectRow } from '@/components/SelectRow';
+import { useRouter } from 'next/navigation';
 
 export default function SellPage() {
+    const router = useRouter()
     const [images, setImages] = useState<string[]>([]);
-    const [price, setPrice] = useState('');
+    const [form, setForm] = useState({
+        category_id: 0,
+        name: "",
+        description: "",
+        price: 0
+    });
+    const formHandler = async() => {
+        try {
+            const res = await nextApi("/items", {
+                method:"POST",
+                body: form
+            })
+            console.log(res)
+            router.replace('/search')
+        }
+        catch (e){
+            if (e instanceof Error){
+                const errorMessage= JSON.parse(e.message)
+                console.log(errorMessage);
+            }
+        }
+    }
     const [categories, setCategories] = useState([])
-    const [categoryId, setCategoryId] = useState<number | "">("");
 
         const getCategories = async() => {
             try {
@@ -64,6 +86,7 @@ export default function SellPage() {
                             type="text"
                             className="w-full text-lg font-bold border-b border-gray-200 py-2 focus:border-blue-500 outline-none placeholder-gray-300"
                             placeholder="商品名を入力"
+                            onChange={e=>setForm({...form, name: e.target.value})}
                         />
                     </div>
                     <div>
@@ -71,15 +94,16 @@ export default function SellPage() {
                         <textarea
                             className="w-full text-sm text-gray-700 h-32 resize-none outline-none placeholder-gray-300"
                             placeholder="色、素材、重さ、定価、注意点などを入力してください"
+                            onChange={e=>setForm({...form, description: e.target.value})}
                         ></textarea>
                     </div>
                 </div>
                 
                 <SelectRow
                     label="カテゴリ"
-                    value={categoryId}
+                    value={form.category_id}
                     options={categories}
-                    onChange={setCategoryId}
+                    onChange={v=>setForm({...form, category_id: v})}
                 />
 
                 {/* 詳細設定（セレクトボックス風） */}
@@ -102,14 +126,17 @@ export default function SellPage() {
                         <span className="text-gray-400 text-xl font-bold">¥</span>
                         <input
                             type="number"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
+                            value={form.price}
+                            onChange={(e) => setForm({...form, price: Number(e.target.value)})}
                             className="w-32 text-right text-2xl font-bold text-gray-800 outline-none placeholder-gray-200"
                             placeholder="0"
                         />
                     </div>
                 </div>
-                <button className="pointer-events-auto w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-full shadow-lg shadow-blue-500/30 active:scale-95 transition transform">
+                <button 
+                    className="pointer-events-auto w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-full shadow-lg shadow-blue-500/30 active:scale-95 transition transform"
+                    onClick={formHandler}
+                >
                     出品する
                 </button>
             </div>

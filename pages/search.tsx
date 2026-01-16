@@ -31,6 +31,8 @@ export default function SearchPage() {
         try {
             type ResType = {data:[]}
             const res:ResType = await nextApi("/items", {method:"GET"})
+            console.log(res.data);
+            
             setItems(res.data);
         }   
         catch (e){

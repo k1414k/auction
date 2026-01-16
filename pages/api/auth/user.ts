@@ -10,16 +10,11 @@ export default async function handler(
     }
 
     try {
-        // ブラウザから送られてきた Cookie を取得
-        const accessToken = req.cookies['access-token']
-        const client = req.cookies['client']
-        const uid = req.cookies['uid']
-
         const apiRes = await api.get('/v1/user', {
             headers: {
-                'access-token': accessToken,
-                client,
-                uid,
+                'access-token': req.cookies['access-token'],
+                client: req.cookies['client'],
+                uid: req.cookies['uid']
             },
         })
 
