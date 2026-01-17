@@ -1,19 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next"
 import api from "@/lib/axios"
 
-type Items = {
-  id: number;
-  user_id: number;
-  category_id: number;
-  name: string;
-
-  description: string;
-  price: number;
-  trading_status: string;
-  created_at: string;
-  updated_at: string;
-};
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse

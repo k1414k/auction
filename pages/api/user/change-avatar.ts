@@ -1,4 +1,3 @@
-// pages/api/user/change-avatar.ts
 import type { NextApiRequest, NextApiResponse } from "next"
 import api from "@/lib/axios"
 import formidable from "formidable"

@@ -3,10 +3,11 @@ import { Camera, X, ChevronRight } from 'lucide-react';
 import { nextApi } from '@/lib/fetch';
 import { SelectRow } from '@/components/SelectRow';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function SellPage() {
     const router = useRouter()
-    const [images, setImages] = useState<string[]>([]);
+    const [images, setImages] = useState<File[]>([])
     const [form, setForm] = useState({
         category_id: 0,
         name: "",
@@ -31,28 +32,34 @@ export default function SellPage() {
     }
     const [categories, setCategories] = useState([])
 
-        const getCategories = async() => {
-            try {
-                type ResType = {data:[]}
-                const res:ResType = await nextApi("/categories", {method:"GET"})
-                setCategories(res.data)
-                console.log(categories);
-                
-            }   
-            catch (e){
-                if (e instanceof Error){
-                    const errorMessage= JSON.parse(e.message)
-                    console.log(errorMessage);
-                }
-                else {
-                    alert("ERR_CODE_500")
-                }
+    const getCategories = async() => {
+        try {
+            type ResType = {data:[]}
+            const res:ResType = await nextApi("/categories", {method:"GET"})
+            setCategories(res.data)
+            console.log(categories);
+            
+        }   
+        catch (e){
+            if (e instanceof Error){
+                const errorMessage= JSON.parse(e.message)
+                console.log(errorMessage);
+            }
+            else {
+                alert("ERR_CODE_500")
             }
         }
-        useEffect(()=>{
-            getCategories()
-        }    
-        ,[])
+    }
+    
+    useEffect(()=>{
+        getCategories()
+    }    
+    ,[])
+    
+    useEffect(()=>{
+        console.log(images);
+    }    
+    ,[images])
     
 
     return (
@@ -61,19 +68,45 @@ export default function SellPage() {
 
             {/* 画像アップロードエリア */}
             <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
-                <button className="flex-shrink-0 w-24 h-24 bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:bg-gray-200 transition">
+                <label className="cursor-pointer flex-shrink-0 w-24 h-24 bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:bg-gray-200 transition">
                     <Camera size={24} className="mb-1" />
                     <span className="text-xs font-bold">0/10</span>
-                </button>
-                {/* アップロードされた画像のプレビュー（ダミー） */}
-                {[1, 2].map((i) => (
-                    <div key={i} className="flex-shrink-0 w-24 h-24 bg-gray-200 rounded-xl relative overflow-hidden group">
-                        <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">img_{i}</div>
-                        <button className="absolute top-1 right-1 bg-black/50 p-1 rounded-full text-white">
-                            <X size={12} />
-                        </button>
-                    </div>
-                ))}
+
+                    <input type="file" className="hidden" onChange={e=>{
+                        const newFile = e.target.files?.[0]
+                        if (!newFile) return
+                        setImages(prev=>[...prev, newFile])
+                    }}
+                        accept="image/*"
+                    />
+                    {/* multipleオプションを使わず配列に一つずつ追加する形 */}
+                </label>
+                {/* アップロードされた画像のプレビュー */}
+                {images.map((file, index) => {
+                    
+                    const imageUrl = URL.createObjectURL(file)
+
+                    return (
+                        <div key={index} className="flex-shrink-0 w-24 h-24 bg-gray-200 rounded-xl relative overflow-hidden group">
+                            <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">
+                                <Image src={imageUrl} 
+                                    fill
+                                    alt='Image'
+                                />
+                            </div>
+                            <button className="absolute top-1 right-1 bg-black/50 p-1 rounded-full text-white"
+                                onClick={()=>{ // アップロード画像削除
+                                    setImages(prev => [...prev.slice(0, index),
+                                        ...prev.slice(index + 1)]);
+                                    // メモリ解放（URL.createObjectURL の）
+                                    URL.revokeObjectURL(imageUrl);
+                                }}  
+                            >
+                                <X size={12} />
+                            </button>
+                        </div>
+                    )
+                })}
             </div>
 
             {/* 入力フォーム */}

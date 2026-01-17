@@ -24,7 +24,6 @@ export default function MyPage() {
         const res = await fetch(`/api/user/change-avatar`, {
           method: "PATCH",
           body: formData,
-          credentials: "include", // cookie 認証
         });
 
         if (!res.ok) throw new Error("upload failed");
