@@ -9,19 +9,29 @@ export default function SellPage() {
     const router = useRouter()
     const [images, setImages] = useState<File[]>([])
     const [form, setForm] = useState({
-        category_id: 0,
         name: "",
         description: "",
+        category_id: 0,
         price: 0
     });
     const formHandler = async() => {
+        const formData = new FormData()
+        formData.append("name", form.name)
+        formData.append("description", form.description)
+        formData.append("category_id", String(form.category_id))
+        formData.append("price", String(form.price))
+
+        images.forEach(file=>{
+            formData.append("images", file)
+        })
+        
+
         try {
-            const res = await nextApi("/items", {
+            const res = await fetch("/api/items/create", {
                 method:"POST",
-                body: form
+                body: formData
             })
-            console.log(res)
-            router.replace('/search')
+            // router.replace('/search')
         }
         catch (e){
             if (e instanceof Error){
