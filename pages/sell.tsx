@@ -156,13 +156,20 @@ export default function SellPage() {
                     onChange={v=>setForm({...form, category_id: v})}
                 />
 
-                {/*<SelectRow*/}
-                {/*    label="送料選択"*/}
-                {/*    value={form.category_id}*/}
-                {/*    options={categories}*/}
-                {/*    onChange={v=>setForm({...form, category_id: v})}*/}
-                {/*/>*/}
-
+                {/* 価格設定 */}
+                <div className="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
+                    <label className="font-bold text-gray-700">販売価格</label>
+                    <div className="flex items-center gap-2 border-b-2 border-transparent focus-within:border-blue-500 pb-1 transition">
+                        <span className="text-gray-400 text-xl font-bold">¥</span>
+                        <input
+                            type="number"
+                            value={form.price}
+                            onChange={(e) => setForm({...form, price: Number(e.target.value)})}
+                            className="w-32 text-right text-2xl font-bold text-gray-800 outline-none placeholder-gray-200"
+                            placeholder="0"
+                        />
+                    </div>
+                </div>
                 <button
                     className="pointer-events-auto w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-full shadow-lg shadow-blue-500/30 active:scale-95 transition transform"
                     onClick={formHandler}

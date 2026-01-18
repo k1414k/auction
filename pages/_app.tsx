@@ -3,7 +3,8 @@ import "@/styles/globals.css";
 import { AppProps } from "next/app";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
-import { UserInitializer } from "@/components/UserInitializer"; // 先ほど作ったやつ
+import { UserInitializer } from "@/components/UserInitializer";
+import {useRouter} from "next/router"; // 先ほど作ったやつ
 
 export const metadata = {
   title: "Auction (mock)",
@@ -11,6 +12,17 @@ export const metadata = {
 };
 
 export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter()
+  const isAdminPage = router.pathname.startsWith("/admin")
+
+  if (isAdminPage) {
+    return (
+        <UserInitializer>
+          <Component {...pageProps} />
+        </UserInitializer>
+    )
+  }
+
   return (
     <UserInitializer>
       <div className="bg-gray-50 min-h-screen text-gray-800">
