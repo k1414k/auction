@@ -28,7 +28,7 @@ export default function TransactionPage() {
                 </div>
             </div>
 
-            <div className="fixed bottom-24 left-0 right-0 p-4 bg-white/90 backdrop-blur-sm border-t flex gap-2">
+            <div className="mt-5 p-4 bg-white/90 backdrop-blur-sm border-t flex gap-2">
                 <button className="p-3 text-gray-400 bg-gray-100 rounded-full"><Image size={20} /></button>
                 <input className="flex-1 bg-gray-100 rounded-full px-5 py-3 text-sm outline-none border-none focus:ring-2 focus:ring-blue-100" placeholder="メッセージを入力" />
                 <button className="bg-blue-500 text-white p-3 rounded-full shadow-lg"><Send size={20} /></button>

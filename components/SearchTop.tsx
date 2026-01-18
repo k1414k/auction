@@ -1,5 +1,7 @@
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
+import {AuctionCard} from "@/components/AuctionCard";
+import Link from "next/link";
 
 type Category = {
   id: number;
@@ -10,10 +12,10 @@ type Items = {
   user_id: number;
   category_id: number;
   name: string;
-
   description: string;
   price: number;
   trading_status: string;
+  image: string;
   created_at: string;
   updated_at: string;
 };
@@ -33,41 +35,28 @@ export function SearchTop({categories, items}:SearchTopProps
 
     return (
         <>
-            {/* 検索バー */}
-            {/* <div className="mb-6">
-                <div className="relative">
-                    <input
-                        placeholder="キーワードから探す"
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") pushSearch(e.currentTarget.value);
-                        }}
-                        className="w-full rounded-xl py-3 pl-12 shadow-sm"
-                    />
-                    <Search className="absolute left-4 top-3.5 text-gray-400 w-5 h-5" />
-                </div>
-            </div> */}
-
-            {/* 急上昇 */}
             <section className="mb-6">
                 <h2 className="text-sm font-bold text-gray-500 flex gap-2">
                     検索履歴
                 </h2>
                 {["PS5 本体", "MacBook Pro"].map((w) => (
-                    <div
-                        key={w}
-                        className="
-                            hover:bg-slate-200 p-1 mt-0.5 border-b border-b-gray-300 
+                    <div className={"flex items-center"} key={w}>
+                        <div
+                            className="
+                            hover:bg-slate-200 p-1 px-3 mt-0.5 border-b border-b-gray-300
                             cursor-pointer flex justify-between
                         "
-                    >
-                        <button
                             onClick={() => pushSearch(w)}
-                            className="text-left"
                         >
-                            》{w}
-                        </button>
-                        <Trash2 />
+                            <button
+                                className="text-left"
+                            >
+                                》{w}
+                            </button>
+                        </div>
+                        <Trash2 className="text-red-500 cursor-pointer"/>
                     </div>
+
                 ))}
             </section>
 
@@ -85,15 +74,15 @@ export function SearchTop({categories, items}:SearchTopProps
                     ))}
                 </div>
             </section>
-            
+
             <section className="mt-5">
                 <h2 className="text-sm font-bold text-gray-500 mb-3">新着順</h2>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-4">
                     {
-                        items.map(v=>(
-                            <div key={v.id}>
-                                {v.name}
-                            </div>
+                        items.map(item=>(
+                            <Link key={item.id} href={`/items/${item.id}`}>
+                                <AuctionCard item={item} />
+                            </Link>
                         ))
                     }
                 </div>

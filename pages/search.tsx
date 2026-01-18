@@ -51,8 +51,6 @@ export default function SearchPage() {
     }    
     ,[])
 
-
-
     // URLのqueryから検索条件を判定
     const hasFilter =
         typeof q === "string" ||

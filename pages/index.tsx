@@ -19,11 +19,11 @@ export default function Visual() {
       <section className="mb-6">
         <h3 className="text-lg font-semibold mb-2">ピックアップ</h3>
         <div className="flex gap-3 overflow-x-auto pb-2">
-          {[1,2,3,4].map((i)=> (
-            <div key={i} className="min-w-[220px]">
-              <AuctionCard title={`アイテム ${i}`} price={15000 + i*1000} remain="残り2日" img="/laptop.png" />
-            </div>
-          ))}
+          {/*{[1,2,3,4].map((i)=> (*/}
+          {/*  <div key={i} className="min-w-[220px]">*/}
+          {/*    <AuctionCard title={`アイテム ${i}`} price={15000 + i*1000} remain="残り2日" img="/laptop.png" />*/}
+          {/*  </div>*/}
+          {/*))}*/}
         </div>
       </section>
 

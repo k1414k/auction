@@ -40,7 +40,7 @@ export default function ProductDetailPage() {
                 </section>
             </div>
 
-            <div className="fixed bottom-24 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t flex gap-3">
+            <div className="mt-4 p-4 bg-white/80 backdrop-blur-md border-t flex gap-3">
                 <button className="flex-1 bg-gray-800 text-white font-bold py-4 rounded-full active:scale-95 transition shadow-lg">
                     コメント
                 </button>

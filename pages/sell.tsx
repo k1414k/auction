@@ -31,7 +31,8 @@ export default function SellPage() {
                 method:"POST",
                 body: formData
             })
-            // router.replace('/search')
+
+            if (res.ok) router.replace('/search')
         }
         catch (e){
             if (e instanceof Error){
