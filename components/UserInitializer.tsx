@@ -21,6 +21,7 @@ export function UserInitializer({ children }:UserInitailizerProps) {
             points: number
             introduction: string
             avatar_url: string
+            role: string
           }
       }
         const userData: UserDataResponse = await nextApi("/auth/user", {method:"GET"})
@@ -34,6 +35,7 @@ export function UserInitializer({ children }:UserInitailizerProps) {
           points: userData.user.points,
           introduction: userData.user.introduction,
           avatarUrl: userData.user.avatar_url,
+          role: userData.user.role,
         })
 
       } catch {

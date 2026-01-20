@@ -9,6 +9,7 @@ export type User = {
   points: number;
   introduction: string;
   avatarUrl?: string;
+  role: string;
 };
 
 type UserState = {

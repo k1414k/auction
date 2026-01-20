@@ -14,7 +14,9 @@ export function AuctionCard({ item }) {
                     src={item.image}
                     alt={item.name}
                     fill
+                    sizes="(max-width: 640px) 50vw, 25vw" //修正必要
                     className="
+                    rounded-md
                     z-0
                     object-cover
                     p-2
