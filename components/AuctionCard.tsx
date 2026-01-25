@@ -1,7 +1,22 @@
-// components/AuctionCard.tsx
 import Image from "next/image";
 
-export function AuctionCard({ item }) {
+type ItemType = {
+  id: number;
+  user_id: number;
+  category_id: number;
+  title: string;
+  description: string;
+  price: number;
+  trading_status: string;
+  condition: string;
+  image: string;
+  created_at: string;
+  updated_at: string;
+};
+type Props = {
+    item: ItemType
+}
+export function AuctionCard({item}:Props) {
     return (
         <article className="group text-center overflow-hidden transition cursor-pointer mt-3">
             <div className="relative w-full h-40 bg-gray-100 overflow-hidden rounded">
@@ -12,7 +27,7 @@ export function AuctionCard({ item }) {
 
                 <Image
                     src={item.image}
-                    alt={item.name}
+                    alt={item.title}
                     fill
                     sizes="(max-width: 640px) 50vw, 25vw" //修正必要
                     className="
@@ -30,7 +45,7 @@ export function AuctionCard({ item }) {
 
             <div className="p-1.5 text-xs">
                 <h3 className="text-sm text-slate-800">
-                    {item.name}
+                    {item.title}
                 </h3>
             </div>
         </article>

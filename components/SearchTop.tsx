@@ -11,10 +11,11 @@ type Items = {
   id: number;
   user_id: number;
   category_id: number;
-  name: string;
+  title: string;
   description: string;
   price: number;
   trading_status: string;
+  condition: string;
   image: string;
   created_at: string;
   updated_at: string;

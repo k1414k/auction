@@ -35,10 +35,11 @@ export default async function handler(
     // ② Rails 用 FormData
     const railsForm = new FormData()
     // --- text fields ---
-    railsForm.append("item[name]", getField(fields.name))
+    railsForm.append("item[title]", getField(fields.title))
     railsForm.append("item[description]", getField(fields.description))
     railsForm.append("item[price]", getField(fields.price))
     railsForm.append("item[category_id]", getField(fields.category_id))
+    railsForm.append("item[condition]", getField(fields.condition))
 
     // --- images ---
     const images: File[] = files.images

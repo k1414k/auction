@@ -1,5 +1,4 @@
 import { ChevronRight } from "lucide-react";
-import React from "react";
 
 type Option = {
     id: number;

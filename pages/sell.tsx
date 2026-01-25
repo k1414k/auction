@@ -1,31 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { Camera, X, ChevronRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Camera, X } from 'lucide-react';
 import { nextApi } from '@/lib/fetch';
 import { SelectRow } from '@/components/SelectRow';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
+const CONDITION_OPTIONS = [
+    { id: 0, name: "新品、未使用" },
+    { id: 1, name: "未使用に近い" },
+    { id: 2, name: "目立った傷や汚れなし" },
+    { id: 3, name: "やや傷や汚れあり" },
+]
+
 export default function SellPage() {
+    const [categories, setCategories] = useState([]) // apiからまずもらう
+
     const router = useRouter()
     const [images, setImages] = useState<File[]>([])
     const [form, setForm] = useState({
-        name: "",
+        title: "",
         description: "",
         category_id: 0,
-        price: 0
+        price: 0,
+        condition: 0,
     });
     const formHandler = async() => {
         const formData = new FormData()
-        formData.append("name", form.name)
+        formData.append("title", form.title)
         formData.append("description", form.description)
         formData.append("category_id", String(form.category_id))
         formData.append("price", String(form.price))
+        formData.append("condition", String(form.condition))
 
         images.forEach(file=>{
             formData.append("images", file)
         })
         
-
         try {
             const res = await fetch("/api/items/create", {
                 method:"POST",
@@ -41,8 +51,6 @@ export default function SellPage() {
             }
         }
     }
-    const [categories, setCategories] = useState([])
-
     const getCategories = async() => {
         try {
             type ResType = {data:[]}
@@ -122,7 +130,6 @@ export default function SellPage() {
 
             {/* 入力フォーム */}
             <div className="space-y-4">
-                {/* 商品名・説明 */}
                 <div className="bg-white p-4 rounded-2xl shadow-sm space-y-4">
                     <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1">商品名</label>
@@ -130,7 +137,7 @@ export default function SellPage() {
                             type="text"
                             className="w-full text-lg font-bold border-b border-gray-200 py-2 focus:border-blue-500 outline-none placeholder-gray-300"
                             placeholder="商品名を入力"
-                            onChange={e=>setForm({...form, name: e.target.value})}
+                            onChange={e=>setForm({...form, title: e.target.value})}
                         />
                     </div>
                     <div>
@@ -142,7 +149,8 @@ export default function SellPage() {
                         ></textarea>
                     </div>
                 </div>
-                
+
+                {/* select選択 */}
                 <SelectRow
                     label="カテゴリ"
                     value={form.category_id}
@@ -151,9 +159,9 @@ export default function SellPage() {
                 />
                 <SelectRow
                     label="商品の状態"
-                    value={form.category_id}
-                    options={categories}
-                    onChange={v=>setForm({...form, category_id: v})}
+                    value={form.condition}
+                    options={CONDITION_OPTIONS} // ここに最初定義した配列を渡してることでapiなど不要
+                    onChange={v => setForm({ ...form, condition: v })}
                 />
 
                 {/* 価格設定 */}
@@ -162,11 +170,24 @@ export default function SellPage() {
                     <div className="flex items-center gap-2 border-b-2 border-transparent focus-within:border-blue-500 pb-1 transition">
                         <span className="text-gray-400 text-xl font-bold">¥</span>
                         <input
-                            type="number"
-                            value={form.price}
-                            onChange={(e) => setForm({...form, price: Number(e.target.value)})}
+                            // value={form.price}
+                            // onChange={(e) => setForm({...form, price: Number(e.target.value)})}
                             className="w-32 text-right text-2xl font-bold text-gray-800 outline-none placeholder-gray-200"
                             placeholder="0"
+                            type="text" // numberではなくtextにする
+                            inputMode="numeric" // スマホで数字キーボードを出す
+                            pattern="\d*" // iOSなどで数字キーボードを確実に出す
+                            value={form.price === 0 ? "" : form.price.toLocaleString()} // 表示用にカンマ区切りにしても良い（任意）
+                            onChange={(e) => {
+                                const rawValue = e.target.value.replace(/,/g, ""); // カンマを除去
+                                
+                                // 1. 全角数字を半角に変換し、数字以外をすべて削除するマジック
+                                const sanitized = rawValue
+                                    .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)) // 全角→半角
+                                    .replace(/\D/g, ""); // 数字以外を削除
+
+                                setForm({ ...form, price: Number(sanitized) });
+                            }}
                         />
                     </div>
                 </div>
