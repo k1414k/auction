@@ -18,7 +18,7 @@ export default async function handler(
             },
         })
 
-        return res.status(200).json({ user: apiRes.data })//なぜdataのとこ消すと401になる？
+        return res.status(200).json({ user: apiRes.data })
     } catch (e) {
         return res.status(401).json(e)
     }

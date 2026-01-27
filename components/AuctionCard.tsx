@@ -1,20 +1,8 @@
+import { Item } from "@/types/item";
 import Image from "next/image";
 
-type ItemType = {
-  id: number;
-  user_id: number;
-  category_id: number;
-  title: string;
-  description: string;
-  price: number;
-  trading_status: string;
-  condition: string;
-  image: string;
-  created_at: string;
-  updated_at: string;
-};
 type Props = {
-    item: ItemType
+    item: Item
 }
 export function AuctionCard({item}:Props) {
     return (

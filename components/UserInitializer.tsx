@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from "react"
 import { useUserStore } from "@/stores/userStore"
 import { nextApi } from "@/lib/fetch"
+import { User } from "@/types/user"
 
 type UserInitailizerProps = {
   children: ReactNode
@@ -14,16 +15,7 @@ export function UserInitializer({ children }:UserInitailizerProps) {
     const init = async () => {
       try {
         type UserDataResponse = {
-          user: {
-            email: string
-            name: string
-            nickname: string
-            balance: number
-            points: number
-            introduction: string
-            avatar_url: string
-            role: string
-          }
+          user: User
       }
         const userData: UserDataResponse = await nextApi("/auth/user", {method:"GET"})
         console.log(userData);
@@ -35,7 +27,7 @@ export function UserInitializer({ children }:UserInitailizerProps) {
           balance: userData.user.balance,
           points: userData.user.points,
           introduction: userData.user.introduction,
-          avatarUrl: userData.user.avatar_url,
+          avatar_url: userData.user.avatar_url,
           role: userData.user.role,
         })
 

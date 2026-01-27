@@ -4,18 +4,11 @@ import {useState} from "react";
 import {useRouter} from "next/navigation"
 import {nextApi} from "@/lib/fetch";
 import { useUserStore } from "@/stores/userStore";
+import { User } from "@/types/user";
 
 
 type UserDataResponse = {
-  user: {
-    email: string
-    name: string
-    nickname: string
-    balance: number
-    points: number
-    introduction: string
-    avatar_url: string
-  }
+  user: User
 }
 
 export default function LoginPage() {
@@ -46,7 +39,8 @@ export default function LoginPage() {
           balance: userData.user.balance,
           points: userData.user.points,
           introduction: userData.user.introduction,
-          avatarUrl: userData.user.avatar_url,
+          avatar_url: userData.user.avatar_url,
+          role: userData.user.role
         })
 
         router.replace('/')

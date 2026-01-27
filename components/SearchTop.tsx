@@ -2,28 +2,12 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import {AuctionCard} from "@/components/AuctionCard";
 import Link from "next/link";
-
-type Category = {
-  id: number;
-  name: string;
-};
-type Items = {
-  id: number;
-  user_id: number;
-  category_id: number;
-  title: string;
-  description: string;
-  price: number;
-  trading_status: string;
-  condition: string;
-  image: string;
-  created_at: string;
-  updated_at: string;
-};
+import { Item } from "@/types/item";
+import { Category } from "@/types/category";
 
 type SearchTopProps = {
   categories: Category[];
-  items: Items[];
+  items: Item[];
 };
 
 export function SearchTop({categories, items}:SearchTopProps

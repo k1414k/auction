@@ -6,32 +6,23 @@ import { useEffect, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
+import { Item } from '@/types/item';
 
 
 export default function ProductDetailPage() {
+    const [activeIndex, setActiveIndex] = useState(0)
+
     const swiperRef = useRef<SwiperType|null>(null)
     const router = useRouter()
     const { id } = router.query
-    const [item,setItem] = useState({
-        category_id: 0,
-        condition: "",
-        created_at: "",
-        description: "",
-        id: 0,
-        images: [],
-        price: 0,
-        title: "",
-        trading_status: "",
-        updated_at: "",
-        user_id: 0
-    })
+    const [item,setItem] = useState<Item|null>(null)
 
     useEffect(() => {
         if (!id) return;
         
         const getItem = async() => {
             try {
-                type ResType = {data:[]}
+                type ResType = {data:Item}
                 const res:ResType = await nextApi(`/items/${id}`, {method:"GET"})
                 console.log(res.data);
                 
@@ -60,8 +51,14 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="aspect-square bg-gray-100 w-full flex items-center justify-center text-gray-300 relative">
-                <Swiper spaceBetween={8} slidesPerView={1} pagination={{ clickable: true }} onSwiper={(swiper)=> swiperRef.current = swiper}>
-                    {item.images.map((url) => (
+                <Swiper
+                    spaceBetween={8}
+                    slidesPerView={1}
+                    pagination={{ clickable: true }}
+                    onSwiper={(swiper) => (swiperRef.current = swiper)}
+                    onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+                >
+                    {item?.images.map((url) => (
                         <SwiperSlide key={url}>
                             <img
                                 src={url}
@@ -86,14 +83,28 @@ export default function ProductDetailPage() {
                         》
                     </button>
                 </div>
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                    {item?.images.map((_, i) => (
+                        <span
+                        key={i}
+                        className={`
+                            h-1.5 w-1.5 rounded-full transition-all
+                            ${i === activeIndex
+                            ? "bg-blue-400 scale-125"
+                            : "bg-blue-400/40"}
+                        `}
+                        />
+                    ))}
+                </div>
+
             </div>
 
             <div className="p-5 space-y-6">
                 <div className="space-y-2">
-                    <h1 className="text-xl font-bold text-gray-800">{item.title}</h1>
+                    <h1 className="text-xl font-bold text-gray-800">{item?.title}</h1>
                     <div className="flex items-center justify-between">
                         <p className="text-3xl font-bold text-gray-900">
-                            ${item.price} <span className="text-sm font-normal text-gray-400">送料込み</span>
+                            ${item?.price} <span className="text-sm font-normal text-gray-400">送料込み</span>
                         </p>
                         <button className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 rounded-full border border-gray-100">
                             <Heart size={18} className="text-pink-500" />
@@ -114,7 +125,7 @@ export default function ProductDetailPage() {
                 <section className="space-y-3">
                     <h2 className="font-bold text-gray-800">商品説明</h2>
                     <p className="text-sm text-gray-600 leading-relaxed">
-                        {item.description}
+                        {item?.description}
                     </p>
                 </section>
             </div>

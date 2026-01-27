@@ -1,16 +1,6 @@
 // stores/userStore.ts
+import { User } from "@/types/user";
 import { create } from "zustand";
-
-export type User = {
-  email: string;
-  name: string;
-  nickname: string;
-  balance: number;
-  points: number;
-  introduction: string;
-  avatarUrl?: string;
-  role: string;
-};
 
 type UserState = {
   user: User | null;

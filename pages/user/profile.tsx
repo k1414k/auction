@@ -32,7 +32,7 @@ export default function MyPage() {
 
         setUser({
           ...user,
-          avatarUrl: data.avatar_url,
+          avatar_url: data.avatar_url,
         });
       } catch (e) {
         alert("画像アップロードに失敗しました")
@@ -133,7 +133,7 @@ export default function MyPage() {
             <div className="rounded-xl bg-white p-4 shadow-sm">
                 <div className="font-semibold flex items-center ">
                   <Image
-                    src={user?.avatarUrl || "/apple.png"}
+                    src={user?.avatar_url || "/apple.png"}
                     alt="avatar"
                     width={50}
                     height={50} // height-autoになっている
