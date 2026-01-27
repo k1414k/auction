@@ -6,6 +6,7 @@ type UserInitailizerProps = {
   children: ReactNode
 }
 
+//リロード時にuser取得してzustand:userStoreに保存用途コンポ
 export function UserInitializer({ children }:UserInitailizerProps) {
   const setUser = useUserStore(state => state.setUser)
 

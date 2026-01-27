@@ -9,6 +9,8 @@ const NAV_ITEMS = [
     { label: "ユーザー管理", href: "/admin/users", icon: Users },
 ];
 
+// 別途のドメインを利用/参考
+
 export function AdminLayout({ children }: { children: React.ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
 

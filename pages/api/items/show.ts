@@ -9,7 +9,7 @@ export default async function handler(
 
     try {
       const apiRes = await api.get(
-        "/v1/items",
+        `/v1/item1s/${req}`,
       )
   
       return res.status(200).json({ data: apiRes.data })

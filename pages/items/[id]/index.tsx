@@ -1,10 +1,26 @@
-import { Heart, ChevronLeft, Share, MessageCircle } from 'lucide-react';
+import { Heart, ChevronLeft, Share } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+
+type Item = {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  image: string;
+};
 
 export default function ProductDetailPage() {
+    const router = useRouter()
+    const a = router.query
+    console.log(a);
+    
+
+
     return (
         <div className="bg-white min-h-screen pb-32">
-            <div className="fixed top-0 w-full flex justify-between p-4 z-10">
+            {/* 下が今見えなくなってる */}
+            <div className="w-full flex justify-between p-4"> 
                 <button className="bg-black/20 backdrop-blur-md p-2 rounded-full text-white"><ChevronLeft /></button>
                 <button className="bg-black/20 backdrop-blur-md p-2 rounded-full text-white"><Share size={20} /></button>
             </div>
