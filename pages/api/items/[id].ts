@@ -7,9 +7,15 @@ export default async function handler(
 ) {
     if (req.method !== "GET") return res.status(405).end()
 
+    const { id } = req.query;
+
+    if (!id || Array.isArray(id)) {
+      return res.status(400).json({ error: "Invalid id" });
+    }
+
     try {
       const apiRes = await api.get(
-        `/v1/item1s/${req}`,
+        `/v1/items/${id}`,
       )
   
       return res.status(200).json({ data: apiRes.data })
