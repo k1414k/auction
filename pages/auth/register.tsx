@@ -1,8 +1,8 @@
 // app/register/page.tsx
 import AuthLayout from "@/components/AuthLayout";
 import {useState} from "react";
-import {useRouter} from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function RegisterPage() {
   const router = useRouter();

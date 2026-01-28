@@ -134,7 +134,7 @@ export default function ProductDetailPage() {
                 <button className="flex-1 bg-gray-800 text-white font-bold py-4 rounded-full active:scale-95 transition shadow-lg">
                     コメント ####
                 </button>
-                <Link href="/items/1/checkout" className="flex-[2]">
+                <Link href={`/items/${id}/checkout`} className="flex-[2]">
                     <button className="w-full bg-blue-500 text-white font-bold py-4 rounded-full active:scale-95 transition shadow-lg shadow-blue-200">
                         購入手続きへ
                     </button>

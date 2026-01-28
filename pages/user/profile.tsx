@@ -3,7 +3,7 @@ import { useUserStore } from "@/stores/userStore";
 import { formatNumber } from "@/utils/format-number";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 

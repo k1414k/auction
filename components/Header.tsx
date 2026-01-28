@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 export function Header() {

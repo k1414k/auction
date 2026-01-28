@@ -5,6 +5,8 @@ type Props = {
     item: Item
 }
 export function AuctionCard({item}:Props) {
+    // spiner
+
     return (
         <article className="group text-center overflow-hidden transition cursor-pointer mt-3">
             <div className="relative w-full h-40 bg-gray-100 overflow-hidden rounded">

@@ -1,9 +1,9 @@
-import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import {AuctionCard} from "@/components/AuctionCard";
 import Link from "next/link";
 import { Item } from "@/types/item";
 import { Category } from "@/types/category";
+import { useRouter } from "next/router";
 
 type SearchTopProps = {
   categories: Category[];
@@ -39,7 +39,7 @@ export function SearchTop({categories, items}:SearchTopProps
                                 》{w}
                             </button>
                         </div>
-                        <Trash2 className="text-red-500 cursor-pointer"/>
+                        <Trash2 className="text-red-500 cursor-pointer w-5"/>
                     </div>
 
                 ))}
@@ -52,7 +52,7 @@ export function SearchTop({categories, items}:SearchTopProps
                         <button
                             key={c.id}
                             onClick={() => router.push(`/search?category=${c.name}`)}
-                            className="bg-white p-4 rounded-xl shadow-sm"
+                            className="bg-white p-4 rounded-xl shadow-sm text-center font-medium hover:ring-2 ring-blue-500 transition-all"
                         >
                             {c.name}
                         </button>
@@ -62,7 +62,7 @@ export function SearchTop({categories, items}:SearchTopProps
 
             <section className="mt-5">
                 <h2 className="text-sm font-bold text-gray-500 mb-3">新着順</h2>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {
                         items.map(item=>(
                             <Link key={item.id} href={`/items/${item.id}`}>

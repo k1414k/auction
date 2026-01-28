@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Camera, X } from 'lucide-react';
 import { nextApi } from '@/lib/fetch';
 import { SelectRow } from '@/components/SelectRow';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 
 const CONDITION_OPTIONS = [
     { id: 0, name: "新品、未使用" },

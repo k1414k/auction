@@ -1,10 +1,10 @@
 import AuthLayout from "@/components/AuthLayout";
 import Link from "next/link";
 import {useState} from "react";
-import {useRouter} from "next/navigation"
 import {nextApi} from "@/lib/fetch";
 import { useUserStore } from "@/stores/userStore";
 import { User } from "@/types/user";
+import { useRouter } from "next/router";
 
 
 type UserDataResponse = {

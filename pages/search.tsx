@@ -1,4 +1,3 @@
-// pages/search.tsx
 import { useRouter } from "next/router";
 import { AuctionGrid, Filters } from "@/components/AuctionGrid";
 import { SearchTop } from "@/components/SearchTop";
@@ -7,8 +6,8 @@ import { nextApi } from "@/lib/fetch";
 import { useEffect, useState } from "react";
 
 export default function SearchPage() {
-    const router = useRouter();
-    const { q, category, tag } = router.query;
+    const router = useRouter()
+    const { q, category, tag } = router.query
     const [categories, setCategories] = useState([])
     const [items, setItems] = useState([])
     const getCategories = async() => {
@@ -16,11 +15,11 @@ export default function SearchPage() {
             type ResType = {data:[]}
             const res:ResType = await nextApi("/categories", {method:"GET"})
             setCategories(res.data)
-        }   
+        }
         catch (e){
             if (e instanceof Error){
                 const errorMessage= JSON.parse(e.message)
-                console.log(errorMessage);
+                console.log(errorMessage)
             }
             else {
                 alert("ERR_CODE_500")
@@ -31,14 +30,14 @@ export default function SearchPage() {
         try {
             type ResType = {data:[]}
             const res:ResType = await nextApi("/items", {method:"GET"})
-            console.log(res.data);
-            
-            setItems(res.data);
-        }   
+            console.log(res.data)
+
+            setItems(res.data)
+        }
         catch (e){
             if (e instanceof Error){
                 const errorMessage= JSON.parse(e.message)
-                console.log(errorMessage);
+                console.log(errorMessage)
             }
             else {
                 alert("ERR_CODE_500")
@@ -55,14 +54,14 @@ export default function SearchPage() {
     const hasFilter =
         typeof q === "string" ||
         typeof category === "string" ||
-        typeof tag === "string";
+        typeof tag === "string"
 
     // AuctionGrid 用の安全な filters
     const filters: Filters = {
         q: typeof q === "string" ? q : undefined,
         category: typeof category === "string" ? category : undefined,
         tag: typeof tag === "string" ? tag : undefined,
-    };
+    }
 
     return (
         <div className="px-4 pt-4 pb-28">
@@ -75,5 +74,6 @@ export default function SearchPage() {
                 </>
             )}
         </div>
-    );
+    )
 }
+

@@ -1,42 +1,30 @@
-// components/AuctionGrid.tsx
 import { AuctionCard } from "./AuctionCard";
+import { Item } from "@/types/item";
 
-const samples = [
-    { id: 1, title: "ノートパソコン", price: 29800, remain: "終了まで 2日", img: "/laptop.png" },
-    { id: 2, title: "スマートフォン", price: 25000, remain: "終了まで 5日", img: "/phone.png" },
-    { id: 3, title: "モニター", price: 10000, remain: "終了まで 3日", img: "/monitor.png" },
-];
+type Props = {
+  items: Item[];
+  filters: { q?: string; category?: string };
+};
 
-export type Filters = {
-    q?: string;
-    category?: string;
-    tag?: string;
-};// ここで filters.q は string | undefined になる
-  // undefinedの場合は検索条件なしとして扱える
+export function AuctionGrid({ items, filters }: Props) {
+  const label = filters.q || filters.category || "すべて";
 
-export function AuctionGrid({
-                                filters,
-                            }: {
-    filters: { q?: string; category?: string; tag?: string };
-}) {
-    // 🔹 本来はここでDB検索
-    const items = samples.filter((item) =>
-        filters.q ? item.title.includes(filters.q) : true
-    );
+  return (
+    <div className="animate-in fade-in duration-300">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold">「{label}」の結果</h2>
+        <span className="text-sm text-gray-500">{items.length} 件</span>
+      </div>
 
-    return (
-        <>
-            <div className="flex items-center justify-between mb-3">
-                <div className="text-sm text-gray-600">
-                    {filters.q ? `「${filters.q}」の検索結果` : "商品一覧"}
-                </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-                {items.map((it) => (
-                    <AuctionCard key={it.id} {...it} />
-                ))}
-            </div>
-        </>
-    );
+      {items.length === 0 ? (
+        <div className="py-20 text-center text-gray-400">一致する商品がありません</div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {items.map((item) => (
+            <AuctionCard key={item.id} item={item} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

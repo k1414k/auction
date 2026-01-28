@@ -1,7 +1,7 @@
 import { nextApi } from "@/lib/fetch";
 import { useUserStore } from "@/stores/userStore";
 import { formatNumber } from "@/utils/format-number";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 export default function Wallet() {
