@@ -3,6 +3,17 @@ import { Heart, Clock, ChevronLeft, Trash2, SlidersHorizontal } from 'lucide-rea
 import Link from 'next/link';
 
 export default function FavoritesPage() {
+    
+    // <button
+    //     onClick={() => setActiveTab('history')}
+    //     className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-xl transition-all z-10 ${
+    //         activeTab === 'history' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500'
+    //     }`}
+    // >
+    //     <Clock size={16} />
+    //     閲覧履歴
+    // </button>
+    
     const [activeTab, setActiveTab] = useState<'likes' | 'history'>('likes');
 
     return (
@@ -11,15 +22,7 @@ export default function FavoritesPage() {
                 
                 {/* タブ切り替え */}
                 <div className="flex bg-gray-100 p-1 rounded-2xl relative mt-4">
-                    <button
-                        onClick={() => setActiveTab('history')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-xl transition-all z-10 ${
-                            activeTab === 'history' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500'
-                        }`}
-                    >
-                        <Clock size={16} />
-                        閲覧履歴
-                    </button>
+                    
                     <button
                         onClick={() => setActiveTab('likes')}
                         className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-xl transition-all z-10 ${
@@ -29,7 +32,15 @@ export default function FavoritesPage() {
                         <Heart size={16} fill={activeTab === 'likes' ? 'currentColor' : 'none'} />
                         いいね！
                     </button>
-                    
+                    {/* <button
+                        onClick={() => setActiveTab('history')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-xl transition-all z-10 ${
+                            activeTab === 'history' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500'
+                        }`}
+                    >
+                        <Clock size={16} />
+                        閲覧履歴
+                    </button> */}
             </div>
 
             {/* メインコンテンツ */}

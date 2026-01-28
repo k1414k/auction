@@ -10,12 +10,12 @@ import { Item } from '@/types/item';
 
 
 export default function ProductDetailPage() {
-    const [activeIndex, setActiveIndex] = useState(0)
-
-    const swiperRef = useRef<SwiperType|null>(null)
     const router = useRouter()
+    const [activeIndex, setActiveIndex] = useState(0)
+    const swiperRef = useRef<SwiperType|null>(null)
     const { id } = router.query
     const [item,setItem] = useState<Item|null>(null)
+    const [isLoaded,setIsLoaded] = useState(false)
 
     useEffect(() => {
         if (!id) return;
@@ -42,6 +42,12 @@ export default function ProductDetailPage() {
         getItem()
     }, [id])
 
+    useEffect(() => {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+    }, []);
+
+
     
     return (
         <div className="bg-white min-h-screen pb-32">
@@ -50,55 +56,66 @@ export default function ProductDetailPage() {
                 <button className="bg-black/20 backdrop-blur-md p-2 rounded-full text-white"><Share size={20} /></button>
             </div>
 
+                
             <div className="aspect-square bg-gray-100 w-full flex items-center justify-center text-gray-300 relative">
-                <Swiper
-                    spaceBetween={8}
-                    slidesPerView={1}
-                    pagination={{ clickable: true }}
-                    onSwiper={(swiper) => (swiperRef.current = swiper)}
-                    onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
-                >
-                    {item?.images.map((url) => (
-                        <SwiperSlide key={url}>
-                            <img
-                                src={url}
-                                className="w-full aspect-square object-cover"
-                            />
-                        </SwiperSlide>
-                    ))}
-                </Swiper>
-                <div className="absolute inset-y-0 left-2 flex items-center z-10">
-                    <button
-                        onClick={() => swiperRef.current?.slidePrev()}
-                        className="hover:bg-blue-500/60 bg-black/40 text-white p-1 py-1.5 rounded-full pr-3.5 text-md"
-                    >
-                        《
-                    </button>
-                </div>
-                <div className="absolute inset-y-0 right-2 flex items-center z-10">
-                    <button
-                        onClick={() => swiperRef.current?.slideNext()}
-                        className="hover:bg-blue-500/60 bg-black/40 text-white p-1 py-1.5 rounded-full pl-3.5 text-md"
-                    >
-                        》
-                    </button>
-                </div>
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-                    {item?.images.map((_, i) => (
-                        <span
-                        key={i}
-                        className={`
-                            h-1.5 w-1.5 rounded-full transition-all
-                            ${i === activeIndex
-                            ? "bg-blue-400 scale-125"
-                            : "bg-blue-400/40"}
-                        `}
-                        />
-                    ))}
-                </div>
-
+                {/* スケルトン */}
+                {!item ? (
+                    <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+                        <span className="text-gray-400">Loading...</span>
+                    </div>
+                ) : (
+                    <>
+                        <Swiper
+                            className={isLoaded ? "opacity-100" : "opacity-0"}
+                            style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
+                            spaceBetween={0}
+                            slidesPerView={1}
+                            pagination={{ clickable: true }}
+                            onInit={()=>setIsLoaded(true)}
+                            onSwiper={(swiper) => (swiperRef.current = swiper)}
+                            onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+                        >
+                            {item?.images.map((url) => (
+                                <SwiperSlide key={url}>
+                                    <img
+                                        src={url}
+                                        className="w-full  object-cover"
+                                    />
+                                </SwiperSlide>
+                            ))}
+                        </Swiper>
+                        <div className="absolute inset-y-0 left-2 flex items-center z-10">
+                            <button
+                                onClick={() => swiperRef.current?.slidePrev()}
+                                className="hover:bg-blue-500/60 bg-black/40 text-white p-1 py-1.5 rounded-full pr-3.5 text-md"
+                            >
+                                《
+                            </button>
+                        </div>
+                        <div className="absolute inset-y-0 right-2 flex items-center z-10">
+                            <button
+                                onClick={() => swiperRef.current?.slideNext()}
+                                className="hover:bg-blue-500/60 bg-black/40 text-white p-1 py-1.5 rounded-full pl-3.5 text-md"
+                            >
+                                》
+                            </button>
+                        </div>
+                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                            {item?.images.map((_, i) => (
+                                <span
+                                key={i}
+                                className={`
+                                    h-1.5 w-1.5 rounded-full transition-all
+                                    ${i === activeIndex
+                                    ? "bg-blue-400 scale-125"
+                                    : "bg-blue-400/40"}
+                                `}
+                                />
+                            ))}
+                        </div>
+                    </>
+            )}
             </div>
-
             <div className="p-5 space-y-6">
                 <div className="space-y-2">
                     <h1 className="text-xl font-bold text-gray-800">{item?.title}</h1>

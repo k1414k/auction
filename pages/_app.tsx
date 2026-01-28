@@ -13,12 +13,12 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
       <UserInitializer>
+        <Header />
         <div className="bg-gray-50 min-h-screen text-gray-800">
           <div className="max-w-screen-xl mx-auto">
-            <Header />
-            <main className="pb-24">
-              <Component {...pageProps} />
-            </main>
+              <main className="pb-24" id="scroll-container">
+                <Component {...pageProps} />
+              </main>
             <BottomNav />
           </div>
         </div>
