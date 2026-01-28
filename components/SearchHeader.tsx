@@ -7,13 +7,23 @@ export function SearchHeader() {
   const [keyword, setKeyword] = useState("")
 
   const pushSearch = () => {
-      router.push(`/search?q=${encodeURIComponent(keyword)}`);
+    if (keyword.length > 8){
+      alert("8文字以下で入力してください")
+      return;
+    }
+    saveSearchKeyword();
+    router.push(`/search?q=${encodeURIComponent(keyword)}`);
   };
 
-  // useEffect(()=>{
-  //   console.log(keyword);
+  // 検索時に保存する関数
+  const saveSearchKeyword = () => {
+    const history = JSON.parse(localStorage.getItem('search_history') || '[]');
     
-  // }, [keyword])
+    // 重複削除して先頭に追加（最新5件まで）
+    const newHistory = [keyword, ...history.filter((k :string) => k !== keyword)];
+    
+    localStorage.setItem('search_history', JSON.stringify(newHistory));
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-sm border-b">
@@ -33,7 +43,7 @@ export function SearchHeader() {
           />
           <Search className="absolute top-[15%] right-2 text-gray-300 w-5
             cursor-pointer hover:text-sky-600
-          " />
+          " onClick={()=>(pushSearch())} />
         </div>
       </div>
     </header>

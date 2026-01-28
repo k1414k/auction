@@ -1,6 +1,8 @@
 import { nextApi } from '@/lib/fetch';
 import { Item } from '@/types/item';
+import { formatNumber } from '@/utils/format-number';
 import { ChevronLeft, ChevronRight, CreditCard, MapPin } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -44,10 +46,10 @@ export default function CheckoutPage() {
 
             <main className="p-4 space-y-4">
                 <div className="bg-white p-4 rounded-2xl shadow-sm flex gap-4">
-                    <div className="w-20 h-20 bg-gray-100 rounded-xl flex-shrink-0" />
+                    <Image className="w-20 h-20 bg-gray-100 rounded-xl flex-shrink-0" alt={item ? item?.title : "商品画像"} src={item ? item?.images[0] : ""} width={100} height={100}/>
                     <div className="space-y-1">
                         <p className="text-sm font-bold line-clamp-2">{item?.title}</p>
-                        <p className="text-lg font-bold">¥{item?.price}</p>
+                        <p className="text-lg font-bold">¥{item? formatNumber(item?.price) : 0}</p>
                     </div>
                 </div>
 
@@ -69,9 +71,9 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="p-4 space-y-3">
-                    <div className="flex justify-between text-sm text-gray-500"><span>商品代金</span><span>¥{item?.price}</span></div>
+                    <div className="flex justify-between text-sm text-gray-500"><span>商品代金</span><span>¥{item? formatNumber(item?.price) : 0}</span></div>
                     <div className="flex justify-between text-sm text-gray-500"><span>配送料</span><span>無料</span></div>
-                    <div className="flex justify-between font-bold text-xl pt-4 border-t border-dashed"><span>支払い金額</span><span>¥{item?.price}</span></div>
+                    <div className="flex justify-between font-bold text-xl pt-4 border-t border-dashed"><span>支払い金額</span><span>¥{item? formatNumber(item?.price) : 0}</span></div>
                 </div>
 
                 <button className="w-full bg-blue-500 text-white font-bold py-5 rounded-full shadow-xl shadow-blue-100 active:scale-[0.98] transition mt-4">

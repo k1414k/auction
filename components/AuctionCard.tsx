@@ -1,4 +1,5 @@
 import { Item } from "@/types/item";
+import { formatNumber } from "@/utils/format-number";
 import Image from "next/image";
 
 type Props = {
@@ -12,7 +13,7 @@ export function AuctionCard({item}:Props) {
             <div className="relative w-full h-40 bg-gray-100 overflow-hidden rounded">
 
                 <div className="absolute top-2 right-2 z-10 bg-black/50 text-white text-sm font-semibold px-2 py-1 rounded-sm">
-                    ¥{item.price}
+                    ¥{formatNumber(item.price)}
                 </div>
 
                 <Image

@@ -7,6 +7,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
 import { Item } from '@/types/item';
+import { formatNumber } from '@/utils/format-number';
 
 
 export default function ProductDetailPage() {
@@ -121,7 +122,7 @@ export default function ProductDetailPage() {
                     <h1 className="text-xl font-bold text-gray-800">{item?.title}</h1>
                     <div className="flex items-center justify-between">
                         <p className="text-3xl font-bold text-gray-900">
-                            ${item?.price} <span className="text-sm font-normal text-gray-400">送料込み</span>
+                            ${item ? formatNumber(item?.price) : 0} <span className="text-sm font-normal text-gray-400">送料込み</span>
                         </p>
                         <button className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 rounded-full border border-gray-100">
                             <Heart size={18} className="text-pink-500" />

@@ -45,8 +45,8 @@ export function ItemFilter({
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {filteredItems?.map((it) => (
-                    <AuctionCard key={it.id} item={it} />
+                {filteredItems?.map((item) => (
+                    <AuctionCard key={item.id} item={item} />
                 ))}
             </div>
         </>

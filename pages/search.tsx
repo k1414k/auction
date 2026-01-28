@@ -10,6 +10,7 @@ export default function SearchPage() {
     const { q, category, tag } = router.query
     const [categories, setCategories] = useState([])
     const [items, setItems] = useState([])
+    
     const getCategories = async() => {
         try {
             type ResType = {data:[]}

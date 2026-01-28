@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Item } from "@/types/item";
 import { Category } from "@/types/category";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 type SearchTopProps = {
   categories: Category[];
@@ -13,10 +14,19 @@ type SearchTopProps = {
 export function SearchTop({categories, items}:SearchTopProps
 ) {
     const router = useRouter();
+    const [history, setHistory] = useState([]);
+
+    const findHistory = () => {
+        setHistory(JSON.parse(localStorage.getItem('search_history') || '[]').slice(0,9));
+    };
 
     const pushSearch = (q: string) => {
         router.push(`/search?q=${encodeURIComponent(q)}`);
     };
+
+    useEffect(()=>{
+        findHistory()
+    }, [])
 
     return (
         <>
@@ -24,25 +34,27 @@ export function SearchTop({categories, items}:SearchTopProps
                 <h2 className="text-sm font-bold text-gray-500 flex gap-2">
                     検索履歴
                 </h2>
-                {["PS5 本体", "MacBook Pro"].map((w) => (
-                    <div className={"flex items-center"} key={w}>
-                        <div
-                            className="
-                            hover:bg-slate-200 p-1 px-3 mt-0.5 border-b border-b-gray-300
-                            cursor-pointer flex justify-between
-                        "
-                            onClick={() => pushSearch(w)}
-                        >
-                            <button
-                                className="text-left"
+                <div className="grid grid-cols-3 gap-2">
+                    {history.map((w) => (
+                        <div className={"flex items-center"} key={w}>
+                            <div
+                                className="
+                                hover:bg-slate-200 p-1 px-3 mt-0.5 border-b border-b-gray-300
+                                cursor-pointer flex justify-between w-max
+                            "
+                                onClick={() => pushSearch(w)}
                             >
-                                》{w}
-                            </button>
+                                <button
+                                    className="text-left w-max"
+                                >
+                                    》{w}
+                                </button>
+                            </div>
+                            <Trash2 className="text-red-500 cursor-pointer w-5"/>
                         </div>
-                        <Trash2 className="text-red-500 cursor-pointer w-5"/>
-                    </div>
 
-                ))}
+                    ))}
+                </div>
             </section>
 
             <section>
