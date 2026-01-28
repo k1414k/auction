@@ -1,8 +1,8 @@
 import { Search } from "lucide-react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-export function Header() {
+export function SearchHeader() {
   const router = useRouter()
   const [keyword, setKeyword] = useState("")
 

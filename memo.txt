@@ -1,4 +1,7 @@
-auctioncard spinner
+
+windowTop0,0すべて
+
+かくspinner、skelton
 
 1検索ヘッダー入力じのおすすめとクエリで条件分岐
 

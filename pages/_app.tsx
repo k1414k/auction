@@ -1,8 +1,8 @@
 import "@/styles/globals.css";
 import { AppProps } from "next/app";
-import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { UserInitializer } from "@/components/UserInitializer";
+import { SearchHeader } from "@/components/SearchHeader";
 
 export const metadata = {
   title: "Auction (mock)",
@@ -13,7 +13,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
       <UserInitializer>
-        <Header />
+        <SearchHeader />
         <div className="bg-gray-50 min-h-screen text-gray-800">
           <div className="max-w-screen-xl mx-auto">
               <main className="pb-24" id="scroll-container">
