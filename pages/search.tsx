@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { AuctionGrid, Filters } from "@/components/AuctionGrid";
+import { AuctionGrid } from "@/components/AuctionGrid";
 import { SearchTop } from "@/components/SearchTop";
 import { CategoryChips } from "@/components/CategoryChips";
 import { nextApi } from "@/lib/fetch";
@@ -57,7 +57,7 @@ export default function SearchPage() {
         typeof tag === "string"
 
     // AuctionGrid 用の安全な filters
-    const filters: Filters = {
+    const filters = {
         q: typeof q === "string" ? q : undefined,
         category: typeof category === "string" ? category : undefined,
         tag: typeof tag === "string" ? tag : undefined,
@@ -70,7 +70,7 @@ export default function SearchPage() {
             {hasFilter && (
                 <>
                     <CategoryChips categories={categories}/>
-                    <AuctionGrid filters={filters} />
+                    <AuctionGrid items={items} filters={filters} categories={categories} />
                 </>
             )}
         </div>

@@ -1,30 +1,66 @@
-import { AuctionCard } from "./AuctionCard";
+// components/AuctionGrid.tsx
 import { Item } from "@/types/item";
+import { AuctionCard } from "./AuctionCard";
+import { Category } from "@/types/category";
+import { useEffect, useState } from "react";
 
-type Props = {
-  items: Item[];
-  filters: { q?: string; category?: string };
+export type Filters = {
+    q?: string;
+    category?: string;
+    tag?: string;
 };
 
-export function AuctionGrid({ items, filters }: Props) {
-  const label = filters.q || filters.category || "すべて";
+export function AuctionGrid({
+    items,
+    filters,
+    categories
+}: {
+    items: Item[];
+    categories: Category[];
+    filters: Filters;
+}) {
 
-  return (
-    <div className="animate-in fade-in duration-300">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold">「{label}」の結果</h2>
-        <span className="text-sm text-gray-500">{items.length} 件</span>
-      </div>
+    const [categoryId, setCategoryId] = useState(0) 
+    const [filteredItems, setFilteredItems] = useState<Item[]|null>(null) 
+    const findCategoryId = () => { // まずクエリから持ってきたカテゴリで該当カテゴリのidを探す
+      categories.forEach(category=>{ 
+        if (category.name === filters.category) setCategoryId(category.id)
+      })
+    }
+    const findingItems = () => {
+      findCategoryId()
 
-      {items.length === 0 ? (
-        <div className="py-20 text-center text-gray-400">一致する商品がありません</div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {items.map((item) => (
-            <AuctionCard key={item.id} item={item} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
+      setFilteredItems(items.filter((item) => {
+        // キーワード検索
+        if (filters.q && !item.title.includes(filters.q)) return false;
+
+        // カテゴリ
+        if (filters.category && item.category_id !== categoryId) return false;
+
+        // タグ
+        // if (filters.tag && !item.tags?.includes(filters.tag)) return false;
+
+        return true;
+      }))};
+    useEffect(()=>{
+      findingItems();
+    }, [items, categories, filters])
+
+    return (
+        <>
+            <div className="flex items-center justify-between mb-3">
+                <div className="text-sm text-gray-600">
+                    {filters.q
+                        ? `「${filters.q}」の検索結果（${filteredItems?.length}件）`
+                        : "商品一覧"}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+                {filteredItems?.map((it) => (
+                    <AuctionCard key={it.id} item={it} />
+                ))}
+            </div>
+        </>
+    );
 }
