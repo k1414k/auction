@@ -2,7 +2,6 @@
 import { Item } from "@/types/item";
 import { AuctionCard } from "./AuctionCard";
 import { Category } from "@/types/category";
-import { useEffect, useState } from "react";
 
 export type Filters = {
     q?: string;
@@ -10,7 +9,7 @@ export type Filters = {
     tag?: string;
 };
 
-export function AuctionGrid({
+export function ItemFilter({
     items,
     filters,
     categories
@@ -19,32 +18,21 @@ export function AuctionGrid({
     categories: Category[];
     filters: Filters;
 }) {
+    const selectedCategory = categories.find(c => c.name === filters.category);
+    const categoryId = selectedCategory?.id;
 
-    const [categoryId, setCategoryId] = useState(0) 
-    const [filteredItems, setFilteredItems] = useState<Item[]|null>(null) 
-    const findCategoryId = () => { // まずクエリから持ってきたカテゴリで該当カテゴリのidを探す
-      categories.forEach(category=>{ 
-        if (category.name === filters.category) setCategoryId(category.id)
-      })
-    }
-    const findingItems = () => {
-      findCategoryId()
-
-      setFilteredItems(items.filter((item) => {
+    const filteredItems = items.filter((item) => {
         // キーワード検索
         if (filters.q && !item.title.includes(filters.q)) return false;
 
-        // カテゴリ
+        // カテゴリ (見つかったIDとitemのIDを直接比較)
         if (filters.category && item.category_id !== categoryId) return false;
 
         // タグ
         // if (filters.tag && !item.tags?.includes(filters.tag)) return false;
 
         return true;
-      }))};
-    useEffect(()=>{
-      findingItems();
-    }, [items, categories, filters])
+    });
 
     return (
         <>

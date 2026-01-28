@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { AuctionGrid } from "@/components/AuctionGrid";
+import { ItemFilter } from "@/components/ItemFilter";
 import { SearchTop } from "@/components/SearchTop";
 import { CategoryChips } from "@/components/CategoryChips";
 import { nextApi } from "@/lib/fetch";
@@ -70,7 +70,7 @@ export default function SearchPage() {
             {hasFilter && (
                 <>
                     <CategoryChips categories={categories}/>
-                    <AuctionGrid items={items} filters={filters} categories={categories} />
+                    <ItemFilter items={items} filters={filters} categories={categories} />
                 </>
             )}
         </div>
