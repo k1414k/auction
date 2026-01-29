@@ -17,7 +17,13 @@ export function SearchTop({categories, items}:SearchTopProps
     const [history, setHistory] = useState([]);
 
     const findHistory = () => {
-        setHistory(JSON.parse(localStorage.getItem('search_history') || '[]').slice(0,9));
+        setHistory(JSON.parse(localStorage.getItem('search_history') || '[]').slice(0,14));
+    };
+    const deleteHistoryItem = (q: string) => {
+        const currentHistory: string[] = JSON.parse(localStorage.getItem('search_history') || '[]');
+        const newHistory = currentHistory.filter(item => item !== q);
+            localStorage.setItem('search_history', JSON.stringify(newHistory));
+            findHistory(); // ステートを再更新して画面に反映
     };
 
     const pushSearch = (q: string) => {
@@ -31,32 +37,36 @@ export function SearchTop({categories, items}:SearchTopProps
     return (
         <>
             <section className="mb-6">
-                <h2 className="text-sm font-bold text-gray-500 flex gap-2">
+                <h2 className="text-sm font-bold text-gray-500 mb-3">
                     検索履歴
                 </h2>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
                     {history.map((w) => (
-                        <div className={"flex items-center"} key={w}>
+                        <div 
+                            key={w} 
+                            className="flex items-center justify-between bg-white border border-gray-200 rounded-md overflow-hidden hover:bg-slate-50 transition-colors"
+                        >
+                            {/* 検索実行エリア */}
                             <div
-                                className="
-                                hover:bg-slate-200 p-1 px-3 mt-0.5 border-b border-b-gray-300
-                                cursor-pointer flex justify-between w-max
-                            "
+                                className="flex-1 p-2 cursor-pointer truncate text-sm"
                                 onClick={() => pushSearch(w)}
                             >
-                                <button
-                                    className="text-left w-max"
-                                >
-                                    》{w}
-                                </button>
+                                <span className="text-gray-400 mr-1">》</span>
+                                <span className="text-gray-700">{w}</span>
                             </div>
-                            <Trash2 className="text-red-500 cursor-pointer w-5"/>
+                            
+                            {/* 削除ボタンエリア */}
+                            <button
+                                onClick={() => deleteHistoryItem(w)}
+                                className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                                aria-label="削除"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
                         </div>
-
                     ))}
                 </div>
             </section>
-
             <section>
                 <h2 className="text-sm font-bold text-gray-500 mb-3">カテゴリ</h2>
                 <div className="grid grid-cols-2 gap-3">

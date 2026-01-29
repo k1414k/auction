@@ -45,7 +45,7 @@ export function ItemFilter({
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid md:grid-cols-5 sm:grid-cols-4 xs:grid-cols-2 gap-3">
                 {filteredItems?.map((item) => (
                     <Link key={item.id} href={`/items/${item.id}`}>
                         <AuctionCard item={item} />

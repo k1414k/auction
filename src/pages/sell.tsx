@@ -37,12 +37,14 @@ export default function SellPage() {
         })
         
         try {
-            const res = await fetch("/api/items/create", {
+            await fetch("/api/items/create", {
                 method:"POST",
                 body: formData
+            }).then((res)=>{
+                console.log(res);
+                if (res.ok) router.replace('/search')
             })
 
-            if (res.ok) router.replace('/search')
         }
         catch (e){
             if (e instanceof Error){
