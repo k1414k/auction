@@ -66,14 +66,14 @@ export default function SearchPage() {
 
     return (
         <div className="px-4 pt-4 pb-28">
-            {!hasFilter && <SearchTop categories={categories} items={items}/>}
-
-            {hasFilter && (
-                <>
-                    <CategoryChips categories={categories}/>
-                    <ItemFilter items={items} filters={filters} categories={categories} />
-                </>
-            )}
+            {
+                !hasFilter ? //クエリの有無で異なるコンポーネント
+                    <SearchTop categories={categories} items={items}/> :
+                    <>
+                        <CategoryChips categories={categories}/>
+                        <ItemFilter items={items} filters={filters} categories={categories} />
+                    </>
+            }
         </div>
     )
 }

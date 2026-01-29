@@ -2,6 +2,7 @@
 import { Item } from "@/types/item";
 import { AuctionCard } from "./AuctionCard";
 import { Category } from "@/types/category";
+import Link from "next/link";
 
 export type Filters = {
     q?: string;
@@ -46,7 +47,9 @@ export function ItemFilter({
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {filteredItems?.map((item) => (
-                    <AuctionCard key={item.id} item={item} />
+                    <Link key={item.id} href={`/items/${item.id}`}>
+                        <AuctionCard item={item} />
+                    </Link>
                 ))}
             </div>
         </>
