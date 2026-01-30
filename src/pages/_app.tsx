@@ -15,7 +15,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <UserInitializer>
         <SearchHeader />
         <div className="bg-gray-50 min-h-screen text-gray-800">
-          <div className="max-w-screen-xl mx-auto">
+          <div className="max-w-screen-lg mx-auto">
               <main className="pb-24" id="scroll-container">
                 <Component {...pageProps} />
               </main>

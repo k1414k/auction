@@ -21,7 +21,7 @@ const soldHistory = [
 
 export default function VisualPage() {
   return (
-    <div className="bg-slate-50 min-h-screen pb-24">
+    <div className="bg-slate-50 min-h-screen pt-4 pb-24">
         <section className="mb-4">
         <div className="rounded-xl overflow-hidden bg-gradient-to-r from-slate-800 to-slate-700 text-white p-6">
           <h2 className="text-2xl font-bold">{hero.title}</h2>

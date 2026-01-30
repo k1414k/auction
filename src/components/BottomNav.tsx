@@ -20,9 +20,27 @@ export function BottomNav() {
 
 
   return (
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2
-      max-w-screen-sm bg-white/20 border rounded-full shadow-lg z-50 py-0.5">
-      <div className="flex justify-between px-1">
+    <nav className="fixed z-50 bg-white/20 border shadow-lg transition-all
+          /* 【スマホ (デフォルト)】 
+            位置: 上 (top-20), 左 (left-20)
+            形状: 四角 (rounded-md)
+          */
+          top-20 left-20 rounded-md
+
+          /* 【PC (md以上)】 
+            位置リセット: top指定を解除 (top-auto), 左指定を解除して中央へ
+            位置: 下 (bottom-4)
+            形状: 丸 (rounded-full)
+          */
+          md:top-auto md:bottom-4 md:left-1/2 md:-translate-x-1/2 md:rounded-full
+        ">
+      <div className="
+        /* スマホ: 縦並び (grid) */
+        grid gap-4 p-2
+
+        /* PC: 横並び (flex) */
+        md:flex md:items-center md:gap-2 md:p-1
+      ">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive =
             href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -30,10 +48,16 @@ export function BottomNav() {
           return (
             <Link key={label} href={href}>
               <div
-                className={`
-                  flex flex-col items-center justify-center
-                  w-20 h-14 rounded-full
-                  transition
+              className={`
+                  flex flex-col items-center justify-center transition
+                  
+                  /* アイコン枠のサイズと形状 */
+                  /* スマホ: 四角 */
+                  w-14 h-12 rounded-md
+                  
+                  /* PC: 丸 */
+                  md:w-20 md:h-14 md:rounded-full
+                  
                   ${
                     isActive
                       ? "bg-gray-200 text-black font-bold"

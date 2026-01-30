@@ -40,7 +40,7 @@ export function SearchTop({categories, items}:SearchTopProps
                 <h2 className="text-sm font-bold text-gray-500 mb-3">
                     検索履歴
                 </h2>
-                <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-2 gap-2">
                     {history.map((w) => (
                         <div 
                             key={w} 
