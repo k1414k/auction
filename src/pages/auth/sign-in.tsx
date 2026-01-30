@@ -60,7 +60,7 @@ export default function LoginPage() {
   return (
     <AuthLayout>
       <h1 className="text-2xl font-bold text-center mb-6">ログイン</h1>
-      <form className="space-y-4" onSubmit={handleSubmit} >
+      <form className="min-h-full space-y-4" onSubmit={handleSubmit} >
         <div>
           <label className="block text-sm mb-1">メールアドレス</label>
           <input

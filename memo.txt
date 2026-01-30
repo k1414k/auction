@@ -3,7 +3,7 @@ windowTop0,0作業
 
  spinner、skelton pages: search,
 
-1検索ヘッダー入力じのおすすめとクエリで条件分岐
+searchの検索履歴壊れてる
 
 emailでパスワード変更
 

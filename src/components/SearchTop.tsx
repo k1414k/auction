@@ -84,7 +84,7 @@ export function SearchTop({categories, items}:SearchTopProps
 
             <section className="mt-5">
                 <h2 className="text-sm font-bold text-gray-500 mb-3">新着順</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-4 gap-4 md:grid-cols-3 md:gap-2 sm:grid-cols-2">
                     {
                         items.map(item=>(
                             <Link key={item.id} href={`/items/${item.id}`}>

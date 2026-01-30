@@ -84,13 +84,14 @@ export default function SellPage() {
     
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-32 pt-20 px-4">
+        <div className="min-h-screen bg-gray-50 pb-32 pt-6 px-4">
             <h1 className="text-xl font-bold text-gray-800 mb-6 px-1">商品の出品</h1>
 
             {/* 画像アップロードエリア */}
             <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
                 <label className="cursor-pointer flex-shrink-0 w-24 h-24 bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:bg-gray-200 transition">
-                    <Camera size={24} className="mb-1" />
+                    <Camera size={24} className="mb-1" /> 
+                    {/* camera pc size 40 ! ! */}
                     <span className="text-xs font-bold">0/10</span>
 
                     <input type="file" className="hidden" onChange={e=>{
@@ -108,7 +109,7 @@ export default function SellPage() {
                     const imageUrl = URL.createObjectURL(file)
 
                     return (
-                        <div key={index} className="flex-shrink-0 w-24 h-24 bg-gray-200 rounded-xl relative overflow-hidden group">
+                        <div key={index} className="flex-shrink-0 w-32 h-32 md:w-20 md:h-20 bg-gray-200 rounded-xl relative overflow-hidden group">
                             <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">
                                 <Image src={imageUrl} 
                                     fill
