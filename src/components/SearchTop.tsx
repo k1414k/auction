@@ -17,7 +17,7 @@ export function SearchTop({categories, items}:SearchTopProps
     const [history, setHistory] = useState([]);
 
     const findHistory = () => {
-        setHistory(JSON.parse(localStorage.getItem('search_history') || '[]').slice(0,14));
+        setHistory(JSON.parse(localStorage.getItem('search_history') || '[]').slice(0,8));
     };
     const deleteHistoryItem = (q: string) => {
         const currentHistory: string[] = JSON.parse(localStorage.getItem('search_history') || '[]');

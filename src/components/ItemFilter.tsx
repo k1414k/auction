@@ -23,9 +23,9 @@ export function ItemFilter({
     const categoryId = selectedCategory?.id;
 
     const filteredItems = items.filter((item) => {
-        const q = filters.q?.toLowerCase()
+        const q = (filters.q ?? "").toLowerCase();
         // キーワード検索
-        if (!q) return
+        
         if (filters.q && !item.title.toLowerCase().includes(q) && !item.description.toLowerCase().includes(q)) return false;
 
         // カテゴリ (見つかったIDとitemのIDを直接比較)
@@ -44,7 +44,7 @@ export function ItemFilter({
                 </div>
             </div>
 
-            <div className="grid grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 gap-1">
+            <div className="grid grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 gap-2">
                 {filteredItems?.map((item) => (
                     <Link key={item.id} href={`/items/${item.id}`}>
                         <AuctionCard item={item} />

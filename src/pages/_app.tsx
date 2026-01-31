@@ -21,7 +21,7 @@ export default function App({ Component, pageProps }: AppProps) {
           </div>
         </header>
         <div className="bg-gray-50 min-h-screen text-gray-800 max-w-screen-lg mx-auto">
-              <main className="pt-4 pb-24">
+              <main className="pt-4 pb-24 sm:pt-0">
                 <Component {...pageProps} />
               </main>
             <BottomNav />

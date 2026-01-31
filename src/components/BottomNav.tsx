@@ -35,11 +35,11 @@ export function BottomNav() {
           md:top-auto md:bottom-4 md:left-1/2 md:-translate-x-1/2 md:rounded-full
         ">
       <div className="
-        /* スマホ: 縦並び (grid) */
+        /* pc: 縦並び (grid) */
         grid gap-4 p-2
 
-        /* PC: 横並び (flex) */
-        md:flex md:items-center md:gap-2 md:p-1
+        /* mobile: 横並び (flex) */
+        md:flex md:items-center md:gap-0 md:p-1
       ">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive =
@@ -51,12 +51,11 @@ export function BottomNav() {
               className={`
                   flex flex-col items-center justify-center transition
                   
-                  /* アイコン枠のサイズと形状 */
-                  /* スマホ: 四角 */
+                  /* pc: 四角 */
                   w-14 h-12 rounded-md
                   
-                  /* PC: 丸 */
-                  md:w-20 md:h-14 md:rounded-full
+                  /* mobile: 丸 */
+                  md:w-14 md:h-12 md:rounded-full
                   
                   ${
                     isActive

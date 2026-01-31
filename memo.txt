@@ -3,6 +3,8 @@ windowTop0,0作業
 
  spinner、skelton pages: search,
 
+
+商品管理 : 自分の商品だとアイテムからクリックしてもそこに移動するように
 searchの検索履歴壊れてる searchの空白は切るようにしないとバグる修正必要そういう関数あるので
 
 emailでパスワード変更

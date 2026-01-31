@@ -27,22 +27,23 @@ export function SearchHeader() {
       alert("2文字以上で入力してください")
       return;
     }
-    if (keyword.length > 8){
-      alert("8文字以下で入力してください")
+    if (keyword.length > 10){
+      alert("10文字以下で入力してください")
       return;
     }
     setIsTyping(false);
+    saveSearchKeyword()
     router.push(`/search?q=${encodeURIComponent(keyword)}`);
     
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
   };
-    const [items,setItems] = useState<Item|null>()
+    const [items,setItems] = useState<Item[]|null>()
     useEffect(()=>{
 
           const getItems = async() => {
               try {
-                  type ResType = {data:Item}
+                  type ResType = {data:Item[]}
                   const res:ResType = await nextApi("/items", {method:"GET"})
                   console.log(res.data)
       
@@ -67,14 +68,14 @@ export function SearchHeader() {
     }, [router.asPath])
 
   // 検索時に保存する関数
-  // const saveSearchKeyword = () => {
-  //   const history = JSON.parse(localStorage.getItem('search_history') || '[]');
+  const saveSearchKeyword = () => {
+    const history = JSON.parse(localStorage.getItem('search_history') || '[]');
     
-  //   // 重複削除して先頭に追加（最新5件まで）
-  //   const newHistory = [keyword, ...history.filter((k :string) => k !== keyword)];
+    // 重複削除して先頭に追加（最新5件まで）
+    const newHistory = [keyword, ...history.filter((k :string) => k !== keyword)];
     
-  //   localStorage.setItem('search_history', JSON.stringify(newHistory));
-  // };
+    localStorage.setItem('search_history', JSON.stringify(newHistory));
+  };
 
   const SuggestList = ({ items, keyword }: {
         items: Item[],
@@ -123,12 +124,12 @@ export function SearchHeader() {
           />
           <Search className="absolute top-[15%] right-2 sm:right-2 text-gray-300 w-5
             cursor-pointer hover:text-sky-600" 
-            // onClick={()=>(pushSearch())} 
+            onClick={pushSearch} 
           />
           {keyword.length > 0 && (
             <button 
               onClick={clearKeyword}
-              className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute md:text-sm right-12 md:right-8 top-1/2 -translate-y-1/2 text-white bg-slate-500 px-2 rounded-full"
             >
               clear
             </button>
