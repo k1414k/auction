@@ -41,7 +41,7 @@ export default function SellPage() {
         if (form.description.length < 2) hasError.description = true
         if (form.category_id === 0) hasError.category_id = true
         if (form.price === 0) hasError.prcie = true
-        if (form.condition === 0) hasError.condition = true
+        if (form.condition === -1) hasError.condition = true // <<<<<<<<
 
         if (Object.values(hasError).some(Boolean)){
             setErrorForm(hasError)
@@ -158,9 +158,9 @@ export default function SellPage() {
                 })}
             </div>
             {errorForm.images && (
-                <span className='text-red-500 mb-5 -mt-10'>
+                <div className='text-red-500 mb-5 -mt-8'>
                     画像が一つ以上必要です
-                </span>
+                </div>
             )}
             {/* 入力フォーム */}
             <div className="space-y-4">
@@ -199,14 +199,17 @@ export default function SellPage() {
                 </div>
 
                 {/* select選択 */}
-                <SelectRow
-                    label="カテゴリ"
-                    value={form.category_id}
-                    options={categories}
-                    onChange={v=>setForm({...form, category_id: v})}
-                />
+                <div className='-mb-10'> 
+                    {/* ////// */}
+                    <SelectRow
+                        label="カテゴリ"
+                        value={form.category_id}
+                        options={categories}
+                        onChange={v=>setForm({...form, category_id: v})}
+                    />
+                </div>
                 {errorForm.category_id && (
-                    <div className='text-red-500 text-end -mt-16'>
+                    <div className='text-red-500 text-end -mt-20'>
                         カテゴリを選択してください
                     </div>
                 )}

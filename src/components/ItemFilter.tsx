@@ -23,14 +23,13 @@ export function ItemFilter({
     const categoryId = selectedCategory?.id;
 
     const filteredItems = items.filter((item) => {
+        const q = filters.q?.toLowerCase()
         // キーワード検索
-        if (filters.q && !item.title.includes(filters.q)) return false;
+        if (!q) return
+        if (filters.q && !item.title.toLowerCase().includes(q) && !item.description.toLowerCase().includes(q)) return false;
 
         // カテゴリ (見つかったIDとitemのIDを直接比較)
         if (filters.category && item.category_id !== categoryId) return false;
-
-        // タグ
-        // if (filters.tag && !item.tags?.includes(filters.tag)) return false;
 
         return true;
     });

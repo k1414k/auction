@@ -4,43 +4,12 @@ import { SearchTop } from "@/components/SearchTop";
 import { CategoryChips } from "@/components/CategoryChips";
 import { nextApi } from "@/lib/fetch";
 import { useEffect, useState } from "react";
-import { useSearchStore } from "@/stores/searchStore";
-import { Item } from "@/types/item";
-import { formatNumber } from "@/utils/format-number";
 
 export default function SearchPage() {
     const router = useRouter()
     const { q, category, tag } = router.query
     const [categories, setCategories] = useState([])
     const [items, setItems] = useState([])
-    const search = useSearchStore()
-
-    // サジェストコンポーネント
-    const SuggestList = ({ items, keyword }: {
-        items: Item[],
-        keyword: string
-    }) => { // ここでフィルタリング（タイトル or 説明文）
-        const filtered = items.filter((item: Item) => 
-            item.title.toLowerCase().includes(keyword.toLowerCase()) ||
-            item.description?.toLowerCase().includes(keyword.toLowerCase())
-        ).slice(0, 8);
-
-        return (
-            <ul className="bg-white mb-5 -mt-8 z-10">
-                {filtered.map((item: Item) => (
-                    <li key={item.id} className="border-b px-4 py-3 hover:bg-gray-50 cursor-pointer" onClick={() => {
-                        console.log(1);
-                        
-                        router.push(`/items/${item.id}`);
-                    }}>
-                        <span className="font-bold">{item.title}</span>
-                        <span className="text-xs text-gray-400 ml-2">¥{item? formatNumber(item.price) : 0}</span>
-                    </li>
-                ))}
-            </ul>
-        );
-    };
-    
     const getCategories = async() => {
         try {
             type ResType = {data:[]}
@@ -78,12 +47,11 @@ export default function SearchPage() {
     useEffect(()=>{
         getCategories()
         getItems()
-    }    
-    ,[])
-    useEffect(() => {
+        
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
-    }, [search.keyword, search.isTyping]);
+    }    
+    ,[])
 
     // URLのqueryから検索条件を判定
     const hasFilter =
@@ -100,24 +68,15 @@ export default function SearchPage() {
 
     return (
         <div className="px-4 pt-4 pb-28">
-            {/* 入力がある時： サジェスト（絞り込み結果）を表示 */}
-            {search.isTyping && (
-                <div className="bg-white">
-                    <SuggestList 
-                        items={items} 
-                        keyword={search.keyword} 
-                    />
-                </div>
-            )}
-            <div onClick={()=>search.setIsTyping(false)}>
-            {
-                !hasFilter ? //クエリの有無で異なるコンポーネント
-                    <SearchTop categories={categories} items={items}/> :
-                    <>
-                        <CategoryChips categories={categories}/>
-                        <ItemFilter items={items} filters={filters} categories={categories} />
-                    </>
-            }
+            <div>
+                {
+                    !hasFilter ? //クエリの有無で異なるコンポーネント
+                        <SearchTop categories={categories} items={items}/> :
+                        <>
+                            <CategoryChips categories={categories}/>
+                            <ItemFilter items={items} filters={filters} categories={categories} />
+                        </>
+                }
             </div>
         </div>
     )
