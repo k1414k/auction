@@ -3,7 +3,7 @@ windowTop0,0作業
 
  spinner、skelton pages: search,
 
-searchの検索履歴壊れてる
+searchの検索履歴壊れてる searchの空白は切るようにしないとバグる修正必要そういう関数あるので
 
 emailでパスワード変更
 

@@ -9,13 +9,12 @@ const CONDITION_OPTIONS = [
     { id: 0, name: "新品、未使用" },
     { id: 1, name: "未使用に近い" },
     { id: 2, name: "目立った傷や汚れなし" },
-    { id: 3, name: "やや傷や汚れあり" },
+    { id: 3, name: "傷や汚れあり" },
 ]
 
 export default function SellPage() {
-    const [categories, setCategories] = useState([]) // apiからまずもらう
-
     const router = useRouter()
+    const [categories, setCategories] = useState([])
     const [images, setImages] = useState<File[]>([])
     const [form, setForm] = useState({
         title: "",
@@ -24,7 +23,35 @@ export default function SellPage() {
         price: 0,
         condition: 0,
     });
+    const defaultErrorForm = {
+        images: false,
+        title: false,
+        description: false,
+        category_id: false,
+        prcie: false,
+        condition: false,
+    }
+    const [errorForm, setErrorForm] = useState(defaultErrorForm)
+    const formValidate = ():boolean => {
+        setErrorForm(defaultErrorForm)
+        const hasError = {...defaultErrorForm}
+        
+        if (images.length < 1) hasError.images = true
+        if (form.title.length < 2) hasError.title = true
+        if (form.description.length < 2) hasError.description = true
+        if (form.category_id === 0) hasError.category_id = true
+        if (form.price === 0) hasError.prcie = true
+        if (form.condition === 0) hasError.condition = true
+
+        if (Object.values(hasError).some(Boolean)){
+            setErrorForm(hasError)
+            return true
+        }
+        return false
+    }
     const formHandler = async() => {
+        if (formValidate()) return;
+
         const formData = new FormData()
         formData.append("title", form.title)
         formData.append("description", form.description)
@@ -130,12 +157,23 @@ export default function SellPage() {
                     )
                 })}
             </div>
-
+            {errorForm.images && (
+                <span className='text-red-500 mb-5 -mt-10'>
+                    画像が一つ以上必要です
+                </span>
+            )}
             {/* 入力フォーム */}
             <div className="space-y-4">
                 <div className="bg-white p-4 rounded-2xl shadow-sm space-y-4">
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-1">商品名</label>
+                        <label className="block text-xs font-bold text-gray-500 mb-1">
+                            商品名
+                            {errorForm.title && (
+                                <span className='text-red-500 ml-2'>
+                                    商品名は２文字以上必要です
+                                </span>
+                            )}
+                        </label>
                         <input
                             type="text"
                             className="w-full text-lg font-bold border-b border-gray-200 py-2 focus:border-blue-500 outline-none placeholder-gray-300"
@@ -144,7 +182,14 @@ export default function SellPage() {
                         />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-1">商品の説明</label>
+                        <label className="block text-xs font-bold text-gray-500 mb-1">
+                            商品の説明
+                            {errorForm.description && (
+                                <span className='text-red-500 ml-2'>
+                                    説明は２文字以上必要です
+                                </span>
+                            )}
+                        </label>
                         <textarea
                             className="w-full text-sm text-gray-700 h-32 resize-none outline-none placeholder-gray-300"
                             placeholder="色、素材、重さ、定価、注意点などを入力してください"
@@ -160,16 +205,28 @@ export default function SellPage() {
                     options={categories}
                     onChange={v=>setForm({...form, category_id: v})}
                 />
+                {errorForm.category_id && (
+                    <div className='text-red-500 text-end -mt-16'>
+                        カテゴリを選択してください
+                    </div>
+                )}
                 <SelectRow
                     label="商品の状態"
                     value={form.condition}
                     options={CONDITION_OPTIONS} // ここに最初定義した配列を渡してることでapiなど不要
                     onChange={v => setForm({ ...form, condition: v })}
                 />
+                {errorForm.condition && (
+                    <div className='text-red-500 text-end -mt-16'>
+                        状態を選択してください
+                    </div>
+                )}
 
                 {/* 価格設定 */}
                 <div className="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
-                    <label className="font-bold text-gray-700">販売価格</label>
+                    <label className="font-bold text-gray-700">
+                        販売価格
+                    </label>
                     <div className="flex items-center gap-2 border-b-2 border-transparent focus-within:border-blue-500 pb-1 transition">
                         <span className="text-gray-400 text-xl font-bold">¥</span>
                         <input
@@ -194,6 +251,11 @@ export default function SellPage() {
                         />
                     </div>
                 </div>
+                {errorForm.prcie && (
+                    <div className='text-red-500 text-end -mt-16'>
+                        価格を設定してください
+                    </div>
+                )}
                 <button
                     className="pointer-events-auto w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-full shadow-lg shadow-blue-500/30 active:scale-95 transition transform"
                     onClick={formHandler}
