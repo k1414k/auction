@@ -18,6 +18,31 @@ export default function ProductDetailPage() {
     const [item,setItem] = useState<Item|null>(null)
     const [isLoaded,setIsLoaded] = useState(false)
 
+    const toggleFavorite = async() => {
+        if (!item) return
+
+        try {
+            setItem({...item, is_favorited: !item.is_favorited});
+            type ResType = {data:{
+                favorited: boolean
+            }}
+            const res:ResType = await nextApi(`/items/${item.id}/favorite`, {
+                method: "PUT"
+            })
+            console.log(res.data);
+            setItem({...item, is_favorited: res.data.favorited});//これにより通信失敗がもし起きたら正常の画面が表示される
+        }   
+        catch (e){
+            if (e instanceof Error){
+                const errorMessage= JSON.parse(e.message)
+                console.log(errorMessage);
+            }
+            else {
+                alert("ERR_CODE_500")
+            }
+        }
+    }
+
     useEffect(() => {
         if (!id) return;
         
@@ -125,15 +150,24 @@ export default function ProductDetailPage() {
                             <p className="text-3xl font-bold text-gray-900">
                                 ${item ? formatNumber(item?.price) : 0} <span className="text-sm font-normal text-gray-400">送料込み</span>
                             </p>
-                            <button className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 rounded-full border border-gray-100">
-                                <Heart size={18} className="text-pink-500" />
-                                <span className="text-sm font-bold">24＃＃＃</span>
+                            <button 
+                                onClick={toggleFavorite}
+                                className="flex items-center gap-1.5 px-4 py-2 bg-gray-50 rounded-full border border-gray-100">
+                                <Heart size={18} className={
+                                    item?.is_favorited?  
+                                    "fill-pink-500 stroke-pink-500": "stroke-pink-500" 
+                                    }
+                                />
                             </button>
                         </div>
                         <div className="flex gap-4 p-4 my-4 bg-gray-50 rounded-2xl items-center">
                             <div className="w-10 h-10 bg-gray-200 rounded-full" />
                             <div className="flex-1 text-sm">
-                                <p className="font-bold">出品者名####task</p>
+                                <p className="font-bold">
+                                    {
+                                        item?.user_nickname
+                                    }
+                                </p>
                                 <p className="text-gray-500 text-xs">本人確認済み</p>
                             </div>
                             <ChevronRight size={16} className="text-gray-400" />
@@ -146,17 +180,23 @@ export default function ProductDetailPage() {
                             </p>
                         </section>
                         
-
-                        <div className="mt-4 p-4 bg-white/80 backdrop-blur-md border-t flex gap-3 flex-1">
-                            <button className="flex-1 bg-gray-800 text-white font-bold py-4 rounded-full md:rounded-xl active:scale-95 transition shadow-lg">
-                                コメント
+                        {
+                            item?.created_by_current_user ?
+                            <button className="w-full bg-blue-500 text-white font-bold py-4 rounded-full md:rounded-xl active:scale-95 transition shadow-lg shadow-blue-200">
+                                商品管理
                             </button>
-                            <Link href={`/items/${id}/checkout`} className="flex-[2]">
-                                <button className="w-full bg-blue-500 text-white font-bold py-4 rounded-full md:rounded-xl active:scale-95 transition shadow-lg shadow-blue-200">
-                                    購入手続き
-                                </button>
-                            </Link>
-                        </div>
+                            :
+                            <div className="mt-4 p-4 bg-white/80 backdrop-blur-md border-t flex gap-3 flex-1">
+                                {/* <button className="flex-1 bg-gray-800 text-white font-bold py-4 rounded-full md:rounded-xl active:scale-95 transition shadow-lg">
+                                    値段申込＃
+                                </button> */}
+                                <Link href={`/items/${id}/checkout`} className="flex-[2]">
+                                    <button className="w-full bg-blue-500 text-white font-bold py-4 rounded-full md:rounded-xl active:scale-95 transition shadow-lg shadow-blue-200">
+                                        購入手続き
+                                    </button>
+                                </Link>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>

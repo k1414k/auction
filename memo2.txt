@@ -41,3 +41,15 @@ item.favorites.exists?(user_id: current_user.id)
 結果も同じ。
 
 でも👇
+
+
+② axios instance に interceptor で headers を仕込む（最強）
+api.interceptors.request.use((config) => {
+  config.headers['access-token'] = Cookies.get('access-token')
+  config.headers['client'] = Cookies.get('client')
+  config.headers['uid'] = Cookies.get('uid')
+  return config
+})
+
+
+👉 毎回 headers 書かなくてよくなる

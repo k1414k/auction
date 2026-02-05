@@ -10,6 +10,8 @@ export type Item = {
   images: string[];
   image: string;
   is_favorited: boolean;
+  user_nickname: string;
+  created_by_current_user: boolean;
   created_at: string;
   updated_at: string;
 };
