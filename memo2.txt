@@ -1,0 +1,43 @@
+class FavoritesController < ApplicationController
+  before_action :authenticate_user!
+  before_action :set_item
+
+  def create
+    current_user.favorites.create!(item: @item)
+    render json: { favorited: true }
+  end
+
+  def destroy
+    current_user.favorites.find_by(item: @item)&.destroy
+    render json: { favorited: false }
+  end
+
+  private
+
+  def set_item
+    @item = Item.find(params[:item_id])
+  end
+end
+
+👉 User 側から exists?
+
+current_user.favorites.exists?(item_id: item.id)
+
+
+UX 的に一番多い
+
+❤️ 塗る / 塗らない
+
+toggle favorite
+
+✅ これが基本形
+
+3️⃣ アイテム視点はいつ使う？
+「この商品はこのユーザーにお気に入りされてる？」
+item.favorites.exists?(user_id: current_user.id)
+
+
+論理的には同じ。
+結果も同じ。
+
+でも👇

@@ -1,7 +1,15 @@
+smサイズの反応などxs sm lg サイズ調整方法
 
-windowTop0,0作業
+favorite controller -memo2
 
- spinner、skelton pages: search,
+ページurlで持ってきてる[;id]はバレバレなのでなんとかするべきかまず聞く
+
+order table 注文番号カラムいらないかスキーマ
+windowTop0,0作業の全体について
+
+売上ポイントページui及びどうするか
+
+すぴーなー、スケルトン spinner、skelton pages: search,
 
 
 商品管理 : 自分の商品だとアイテムからクリックしてもそこに移動するように
@@ -10,7 +18,7 @@ searchの検索履歴壊れてる searchの空白は切るようにしないと�
 emailでパスワード変更
 
 vaildation: 会員登録のときrails側のルールを知ってフロントに合わせることにより正確なバリデーションを行う
-（今だとなんでも被るユーザーと知らせてる） , アイテム作るときフロント側バリデーション
+（今だとなんとなく被るユーザーと知らせてる
 
 add to category's ttile image
 

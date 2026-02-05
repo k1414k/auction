@@ -1,9 +1,37 @@
-import React, { useState } from 'react';
-import { Heart, Clock, ChevronLeft, Trash2, SlidersHorizontal, Info } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Heart, Clock, Trash2, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
+import { Item } from '@/types/item';
+import { nextApi } from '@/lib/fetch';
+import Image from 'next/image';
 
 export default function FavoritesPage() {
     const [activeTab, setActiveTab] = useState<'likes' | 'history'>('likes');
+    const [items, setItems] = useState<Item[]|null>(null);
+    const getItems = async()=> {
+        try {
+            type ResType = {
+                data: Item[]
+            }
+            const res:ResType = await nextApi("/items", {
+                method: "GET"
+            })
+            setItems(res.data.filter(item=>{
+                if (item.is_favorited) return true;
+                else return false;
+            }))
+        }
+        catch (e) {
+            if (e instanceof Error){
+                console.log(e.message);
+            }
+            else alert("SERVER ERR 500")
+        }
+    }
+    
+    useEffect(()=>{
+        getItems()
+    }, [])
 
     return (
         <div className="bg-gray-50 min-h-screen pb-32">
@@ -49,16 +77,24 @@ export default function FavoritesPage() {
             <main className="max-w-screen-xl mx-auto p-4">
                 {activeTab === 'likes' ? (
                     /* グリッドレイアウト：スマホ2, タブレット3, PC 4~5 */
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-5">
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                    <div className="grid grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-3 sm:gap-5">
+                        {items && items.map((i) => (
                             <Link 
-                                href={`/items/${i}`} 
-                                key={i} 
+                                href={`/items/${i.id}`} 
+                                key={i.id} 
                                 className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-transparent hover:border-blue-100"
                             >
                                 <div className="aspect-[4/5] bg-gray-100 relative overflow-hidden">
                                     {/* ダミー画像代わりのグレーボックス */}
-                                    <div className="w-full h-full group-hover:scale-105 transition-transform duration-500 bg-gradient-to-br from-gray-100 to-gray-200" />
+                                    <Image 
+                                        src={i.image}
+                                        alt={i.title}
+                                        fill
+                                        // height={100}
+                                        className="w-full h-full group-hover:scale-105 transition-transform duration-500 bg-gradient-to-br from-gray-100 to-gray-200" 
+                                    />
+                                    {/* <div 
+                                    /> */}
                                     
                                     {/* PCのみホバーでゴミ箱表示（SHEIN風） */}
                                     <button className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-red-500">
@@ -66,12 +102,12 @@ export default function FavoritesPage() {
                                     </button>
                                 </div>
                                 <div className="p-3">
-                                    <p className="text-[10px] sm:text-xs text-blue-500 font-bold mb-1 uppercase tracking-wider">Category</p>
-                                    <p className="text-xs sm:text-sm font-medium text-gray-700 truncate mb-1.5">商品タイトルがここに入ります</p>
-                                    <div className="flex items-center justify-between">
-                                        <p className="font-black text-gray-900 text-base">¥12,800</p>
-                                        <Heart size={16} className="text-pink-500 fill-pink-500" />
-                                    </div>
+                                    <p className="text-[10px] sm:text-xs text-blue-500 font-bold mb-1 uppercase tracking-wider">
+                                        {i.category_id}
+                                    </p>
+                                    <p className="text-xs sm:text-sm font-medium text-gray-700 truncate mb-1.5">
+                                        {i.title}
+                                    </p>
                                 </div>
                             </Link>
                         ))}

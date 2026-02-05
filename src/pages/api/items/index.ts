@@ -10,6 +10,13 @@ export default async function handler(
     try {
       const apiRes = await api.get(
         "/v1/items",
+        {
+          headers: {
+                'access-token': req.cookies['access-token'],
+                client: req.cookies['client'],
+                uid: req.cookies['uid']
+            }
+        }
       )
   
       return res.status(200).json({ data: apiRes.data })

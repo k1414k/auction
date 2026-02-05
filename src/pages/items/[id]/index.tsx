@@ -1,5 +1,5 @@
 import { nextApi } from '@/lib/fetch';
-import { Heart, ChevronLeft, Share } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
@@ -52,12 +52,6 @@ export default function ProductDetailPage() {
     
     return (
         <div className="bg-white min-h-screen pb-32">
-            {/* <div className="w-full flex justify-between p-4"> 
-                <button className="bg-black/20 backdrop-blur-md p-2 rounded-full text-white" onClick={()=>router.push("/search")}><ChevronLeft /></button>
-                <button className="bg-black/20 backdrop-blur-md p-2 rounded-full text-white"><Share size={20} /></button>
-            </div> */}
-
-                
             <div className="p-5 space-y-6">
                 <div className="grid grid-cols-7 gap-6 md:grid-cols-1">
                     

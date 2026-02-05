@@ -9,6 +9,7 @@ export type Item = {
   condition: string;
   images: string[];
   image: string;
+  is_favorited: boolean;
   created_at: string;
   updated_at: string;
 };

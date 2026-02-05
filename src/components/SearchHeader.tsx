@@ -1,7 +1,7 @@
 import { nextApi } from "@/lib/fetch";
 import { Item } from "@/types/item";
 import { formatNumber } from "@/utils/format-number";
-import { Search, X } from "lucide-react";
+import { Search } from "lucide-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
