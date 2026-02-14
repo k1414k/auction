@@ -1,4 +1,5 @@
 自分の商品管理ページ
+
 smサイズの反応などxs sm lg サイズ調整方法
 
 favorite controller -memo2
@@ -24,6 +25,11 @@ vaildation: 会員登録のときrails側のルールを知ってフロントに
 add to category's ttile image
 
 デプロイメモ；　rails側のサーバー閉ざされたり問題ある時にreact側も５００などにするべき
+
+
+
+
+
 
 
 ・・・・
