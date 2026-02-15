@@ -1,99 +1,141 @@
 import { nextApi } from "@/lib/fetch";
 import { useUserStore } from "@/stores/userStore";
 import { formatNumber } from "@/utils/format-number";
+import { Banknote, Coins } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 export default function Wallet() {
-  const router = useRouter()
-  const user = useUserStore(state=>state.user)
-  const setUser = useUserStore(state=>state.setUser)
-  const [onModal,setOnModal] = useState("")
-  const [form,setForm] = useState({
-    type: "",
-    amount: 0
-  })
-  useEffect(()=>{
-    if (onModal == "売上") setForm(prev=>({...prev, type: "balance"}))
-    if (onModal == "ポイント") setForm(prev=>({...prev, type: "points"}))
-  }, [onModal])
-  
-  const handleSubmit = async() => {
-    setOnModal("")
+  const router = useRouter();
+  const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
+  const [chargeAmount, setChargeAmount] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const balance = user?.balance ?? 0;
+  const points = user?.points ?? 0;
+  const amountNum = parseInt(chargeAmount, 10) || 0;
+  const canCharge = amountNum > 0 && amountNum <= balance && !loading;
+
+  const fetchUser = async () => {
     try {
-      await nextApi("/user/change-wallet", {
+      type Res = { user: { balance: number; points: number; nickname: string; name: string; email: string; introduction: string; avatar_url: string | null; role: string } };
+      const res = await nextApi<unknown, Res>("/auth/user", { method: "GET" });
+      if (res.user) setUser(res.user);
+    } catch {
+      router.push("/auth/sign-in");
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const handleCharge = async () => {
+    if (!canCharge || !user) return;
+    setError(null);
+    setLoading(true);
+    try {
+      const data = await nextApi<{ amount: number; type: string }, { balance: number; points: number }>("/user/change-wallet", {
         method: "PATCH",
-        body: form
-      })
-      if (user){
-        form.type === "balance" ? 
-        setUser({...user, balance: user.balance + form.amount}) : 
-        setUser({...user, points: user.points + form.amount})
-      } 
-      else router.refresh()
+        body: { amount: amountNum, type: "charge" },
+      });
+      setUser({ ...user, balance: data.balance, points: data.points });
+      setChargeAmount("");
+    } catch (e) {
+      const err = e as Error;
+      let msg = "チャージに失敗しました";
+      try {
+        const parsed = JSON.parse(err.message);
+        if (parsed?.error) msg = parsed.error;
+      } catch {
+        if (err.message) msg = err.message;
+      }
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
-    catch {
-      console.log("失敗");
-      // ここに何かの操作でご入力と対策必要
-      //　及びバリデーションも必要
-      // 条件は 0入力、残高がマイナスになる、１００００００くらいの大きい数字はいる
-    }
-  }
-  const rows = [
-    { name: "Ayaka", amount: -1250 },
-    { name: "Ryota", amount: +3000 },
-  ];
+  };
+
+  const setMaxCharge = () => {
+    setChargeAmount(String(balance));
+    setError(null);
+  };
 
   return (
-    <div className="px-4 pt-4">
-      {
-        onModal != "" && (
-          <div className="z-50 inset-0 fixed flex justify-center items-center">
-            <div className="p-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-sm bg-black/40">
-              <div onClick={()=>setOnModal("")} className="cursor-pointer">
-                close
-              </div>
-              <div>
-                <input type="number" onChange={(e)=>setForm(prev=>({...prev, amount: Number(e.target.value)}))} />
-              </div>
-              <div>
-                <button onClick={handleSubmit}>submit</button>
-              </div>
-            </div>
-          </div>
-        )
-      }
-      <section className="mb-4">
-        <div className="rounded-xl bg-white p-4 shadow-sm">
-          <div className="text-sm text-gray-500">売上高・ポイント</div>
-          <div className="text-2xl font-bold mt-1">
-            ¥ { user?.balance ? formatNumber(user.balance) : 0 }
-            ・
-            P { user?.points ? formatNumber(user.points) : 0 }
-          </div>
-          <div className="mt-3 flex gap-2">
-            <button className="flex-1 py-2 rounded-lg bg-sky-600 text-white"
-              onClick={()=>setOnModal("売上")}>売上</button>
-            <button className="flex-1 py-2 rounded-lg bg-gray-100"
-              onClick={()=>setOnModal("ポイント")}
-            >ポイント</button>
-          </div>
-        </div>
-      </section>
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <header className="h-14 bg-white flex items-center px-4 border-b sticky top-0 z-10">
+        <Link href="/user/profile" className="text-gray-600">戻る</Link>
+        <h1 className="flex-1 text-center font-bold text-gray-800 mr-8">ウォレット</h1>
+      </header>
 
-      <section>
-        <h4 className="text-sm font-semibold mb-2">送金履歴</h4>
-        <div className="space-y-2">
-          {rows.map((r, idx) => (
-            <div key={idx} className="bg-white p-3 rounded-xl shadow-sm flex justify-between">
-              <div>{r.name}</div>
-              <div className={`font-medium ${r.amount > 0 ? "text-green-600" : "text-rose-600"}`}>
-                {r.amount > 0 ? "+" : "-"}¥{Math.abs(r.amount).toLocaleString()}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <main className="p-4 max-w-xl mx-auto space-y-6">
+        <section className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
+          <p className="text-sm text-gray-500 mb-1">売上高</p>
+          <div className="flex items-center gap-2">
+            <Banknote className="text-amber-500" size={24} />
+            <span className="text-2xl font-bold text-gray-800">¥ {formatNumber(balance)}</span>
+          </div>
+          <p className="text-xs text-gray-400 mt-1">商品が売れたらここに入ります。ポイントにチャージして購入に使えます。</p>
+        </section>
+
+        <section className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
+          <p className="text-sm text-gray-500 mb-1">ポイント残高</p>
+          <div className="flex items-center gap-2">
+            <Coins className="text-blue-500" size={24} />
+            <span className="text-2xl font-bold text-gray-800">P {formatNumber(points)}</span>
+          </div>
+          <p className="text-xs text-gray-400 mt-1">購入時にポイントで支払います。売上からチャージできます。</p>
+        </section>
+
+        <section className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
+          <h2 className="font-bold text-gray-800 mb-3">売上をポイントにチャージ</h2>
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 p-2 rounded-lg mb-3">{error}</p>
+          )}
+          <div className="flex gap-2">
+            <input
+              type="number"
+              min={0}
+              max={balance}
+              value={chargeAmount}
+              onChange={(e) => {
+                setChargeAmount(e.target.value);
+                setError(null);
+              }}
+              placeholder="チャージする金額"
+              className="flex-1 p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+            <button
+              type="button"
+              onClick={setMaxCharge}
+              className="px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition"
+            >
+              全額
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">最大 ¥{formatNumber(balance)} までチャージできます。</p>
+          <button
+            type="button"
+            onClick={handleCharge}
+            disabled={!canCharge}
+            className="w-full mt-4 py-3 rounded-xl bg-blue-500 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition"
+          >
+            {loading ? "処理中..." : "チャージする"}
+          </button>
+        </section>
+
+        <section className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
+          <h3 className="font-bold text-gray-800 mb-2">ガイド</h3>
+          <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+            <li>商品が売れると、売上高に金額が入ります。</li>
+            <li>売上高をポイントにチャージすると、他の商品の購入に使えます。</li>
+            <li>チャージしたポイントは購入時に即時で使えます。</li>
+          </ul>
+        </section>
+      </main>
     </div>
   );
 }
