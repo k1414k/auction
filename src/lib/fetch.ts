@@ -1,4 +1,6 @@
 // lib/nextApi.ts
+import { useUserStore } from "@/stores/userStore"
+
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
 export async function nextApi<TRequest = unknown, TResponse = unknown>(
@@ -18,6 +20,9 @@ export async function nextApi<TRequest = unknown, TResponse = unknown>(
     })
 
     if (!res.ok) {
+        if (res.status === 401) {
+            useUserStore.getState().setUser(null)
+        }
         const message = await res.text()
         throw new Error(message || `API Error: ${res.status}`)
     }

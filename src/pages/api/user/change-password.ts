@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import api from "@/lib/axios";
+import { createRailsApi, authHeaders } from "@/lib/rails-api"
 
 export default async function handler(
     req: NextApiRequest,
@@ -9,29 +9,19 @@ export default async function handler(
         return res.status(405).end()
     }
 
+    const api = createRailsApi(req, res)
     try {
-        // ブラウザから送られてきた Cookie を取得
-        const accessToken = req.cookies['access-token']
-        const client = req.cookies['client']
-        const uid = req.cookies['uid']
-        const {currentPassword, newPassword, newPassswordConfirmation} = req.body
+        const { currentPassword, newPassword, newPasswordConfirmation } = req.body
 
         const apiRes = await api.put('/auth', {
-              current_password: currentPassword,
-              password: newPassword,
-              password_confirmation: newPassswordConfirmation
-            },
-            {
-                headers: {
-                    'access-token': accessToken,
-                    client,
-                    uid,
-                },
-            } 
-        )
+            current_password: currentPassword,
+            password: newPassword,
+            password_confirmation: newPasswordConfirmation,
+        }, { headers: authHeaders(req) })
 
-        return res.status(200).json({ user: apiRes.data })//なぜdataのとこ消すと401になる？
-    } catch (e) {
-        return res.status(401).json({errors: e?.response?.data})
+        return res.status(200).json({ user: apiRes.data })
+    } catch (e: unknown) {
+        const err = e as { response?: { data?: unknown } }
+        return res.status(401).json({ errors: err.response?.data ?? "パスワードの変更に失敗しました" })
     }
 }
