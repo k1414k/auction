@@ -24,6 +24,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { id } = router.query;
   const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
   const [item, setItem] = useState<Item | null>(null);
 
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -137,7 +138,7 @@ export default function CheckoutPage() {
 
     try {
       type OrderResponse = { message: string; order_id: number };
-      const res = await nextApi<unknown, OrderResponse>(`/orders`, {
+      await nextApi<unknown, OrderResponse>(`/orders`, {
         method: "POST",
         body: {
           item_id: item.id,
@@ -145,8 +146,11 @@ export default function CheckoutPage() {
           payment_method: paymentMethod,
         },
       });
+      type UserRes = { user: NonNullable<typeof user> };
+      const userRes = await nextApi<unknown, UserRes>("/auth/user", { method: "GET" });
+      if (userRes.user) setUser(userRes.user);
       alert("購入が完了しました！");
-      router.push(`/transaction/${res.order_id}`);
+      router.push("/items");
     } catch (e) {
       const err = e as Error;
       let errorMessage = "購入処理中にエラーが発生しました";

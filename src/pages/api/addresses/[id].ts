@@ -1,11 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import api from "@/lib/axios"
-
-const authHeaders = (req: NextApiRequest) => ({
-  "access-token": req.cookies["access-token"] || "",
-  client: req.cookies["client"] || "",
-  uid: req.cookies["uid"] || "",
-})
+import { createRailsApi, authHeaders } from "@/lib/rails-api"
 
 export default async function handler(
   req: NextApiRequest,
@@ -15,6 +9,8 @@ export default async function handler(
   if (!id || Array.isArray(id)) {
     return res.status(400).json({ error: "Invalid id" })
   }
+
+  const api = createRailsApi(req, res)
 
   if (req.method === "PATCH" || req.method === "PUT") {
     try {

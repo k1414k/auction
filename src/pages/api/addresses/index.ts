@@ -1,16 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import api from "@/lib/axios"
-
-const authHeaders = (req: NextApiRequest) => ({
-  "access-token": req.cookies["access-token"] || "",
-  client: req.cookies["client"] || "",
-  uid: req.cookies["uid"] || "",
-})
+import { createRailsApi, authHeaders } from "@/lib/rails-api"
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const api = createRailsApi(req, res)
+
   if (req.method === "GET") {
     try {
       const apiRes = await api.get("/v1/addresses", {

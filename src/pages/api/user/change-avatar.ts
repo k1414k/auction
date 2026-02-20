@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import api from "@/lib/axios"
+import { createRailsApi, authHeaders } from "@/lib/rails-api"
 import formidable from "formidable"
 import fs from "fs"
 import FormData from "form-data"
@@ -21,7 +21,7 @@ export default async function handler(
   const form = formidable({})
 
   try {
-    const [fields, files] = await form.parse(req)
+    const [, files] = await form.parse(req)
     const avatar =
       Array.isArray(files.avatar) ? files.avatar[0] : files.avatar
 
@@ -36,19 +36,17 @@ export default async function handler(
       avatar.originalFilename || "avatar.png"
     )
 
+    const api = createRailsApi(req, res)
     const apiRes = await api.patch(
       "/v1/user/avatar",
       railsForm,
       {
         headers: {
           ...railsForm.getHeaders(),
-          "access-token": req.cookies["access-token"],
-          client: req.cookies["client"],
-          uid: req.cookies["uid"],
+          ...authHeaders(req),
         },
       }
     )
-
     return res.status(200).json(apiRes.data)
   } catch (e) {
     console.error(e)

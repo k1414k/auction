@@ -2,18 +2,11 @@ import type { NextApiRequest, NextApiResponse } from "next"
 import formidable, { File } from "formidable"
 import fs from "fs"
 import FormData from "form-data"
-import api from "@/lib/axios"
+import { createRailsApi, authHeaders } from "@/lib/rails-api"
 
 export const config = {
   api: { bodyParser: false },
 }
-
-// Rails 認証ヘッダ
-const authHeaders = (req: NextApiRequest) => ({
-  "access-token": req.cookies["access-token"] || "",
-  client: req.cookies["client"] || "",
-  uid: req.cookies["uid"] || "",
-})
 
 // fields を string に正規化する helper
 const getField = (field?: string | string[]) =>
@@ -56,6 +49,7 @@ export default async function handler(
       )})
 
     // ③ Rails API へ中継
+    const api = createRailsApi(req, res)
     const apiRes = await api.post("/v1/items", railsForm, {
       headers: {
         ...railsForm.getHeaders(),

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import api from "@/lib/axios"
+import { createRailsApi, authHeaders } from "@/lib/rails-api"
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,20 +7,11 @@ export default async function handler(
 ) {
     if (req.method !== "GET") return res.status(405).end()
 
+    const api = createRailsApi(req, res)
     try {
-      const apiRes = await api.get(
-        "/v1/items",
-        {
-          headers: {
-                'access-token': req.cookies['access-token'],
-                client: req.cookies['client'],
-                uid: req.cookies['uid']
-            }
-        }
-      )
-  
+      const apiRes = await api.get("/v1/items", { headers: authHeaders(req) })
       return res.status(200).json({ data: apiRes.data })
-    } catch (e) {
-      return res.status(401).json({ error: e })
+    } catch {
+      return res.status(500).json({ error: 'Failed to fetch items' })
     }
 }

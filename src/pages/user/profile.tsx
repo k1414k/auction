@@ -65,11 +65,11 @@ export default function MyPage() {
         })
         setNicknameModal(false)
         if (user) setUser({...user, nickname: newNickname}) //storeに保存
-        else router.refresh()
+        else router.reload()
       }
 
       catch {
-        alert("fail")
+        alert("ニックネームの変更に失敗しました")
       }
     }
     const onChangePassword = async() => {
@@ -81,7 +81,7 @@ export default function MyPage() {
         setModalSwitch(false)
         setPasswordForm({ currentPassword: "", newPassword: "", newPasswordConfirmation: "" })
       } catch {
-        alert("fail")
+        alert("パスワードの変更に失敗しました")
       }
     }
     const logoutUser = async () => {
@@ -91,8 +91,8 @@ export default function MyPage() {
         })
         router.replace("/")
       }
-      catch{
-        alert("fail")
+      catch {
+        alert("ログアウトに失敗しました")
       }
     }
 
