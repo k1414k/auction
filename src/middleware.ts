@@ -15,9 +15,10 @@ export function middleware(req: NextRequest) {
         "/user",
         "/sell",
         "/favorites",
+        "/checkout",
     ]
     const isProtected = protectedPaths.some(path => // protectedPathsが入った経路は遮断される
-        pathname.startsWith(path)
+        pathname.startsWith(path) || pathname.endsWith(path)
     )
     if (isProtected && !hasAuthCookie) {
         return NextResponse.redirect(
