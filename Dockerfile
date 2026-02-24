@@ -55,7 +55,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-USER nextjs   # 非rootユーザーに切り替え
+# 非rootユーザーに切り替え
+USER nextjs
 
 EXPOSE 3001
 
