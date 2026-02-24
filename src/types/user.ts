@@ -5,6 +5,6 @@ export type User = {
   balance: number;
   points: number;
   introduction: string;
-  avatar_url: string;
+  avatar_url: string | null;
   role: string;
 };
