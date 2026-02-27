@@ -1,5 +1,5 @@
 export default function LogoHeader (){
   return (
-    <div className="text-xl font-bold cursor-default text-slate-800">Auction</div>
+    <div className="text-xl font-bold cursor-default text-slate-800">Testing</div>
   )
 }
