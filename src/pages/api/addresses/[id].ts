@@ -14,7 +14,7 @@ export default async function handler(
 
   if (req.method === "PATCH" || req.method === "PUT") {
     try {
-      const apiRes = await api.patch(`/v1/addresses/${id}`, req.body, {
+      const apiRes = await api.patch(`/auction/v1/addresses/${id}`, req.body, {
         headers: authHeaders(req),
       })
       return res.status(200).json(apiRes.data)
@@ -28,7 +28,7 @@ export default async function handler(
 
   if (req.method === "DELETE") {
     try {
-      await api.delete(`/v1/addresses/${id}`, {
+      await api.delete(`/auction/v1/addresses/${id}`, {
         headers: authHeaders(req),
       })
       return res.status(204).end()

@@ -9,9 +9,11 @@ export default async function handler(
 
     const api = createRailsApi(req, res)
     try {
-      const apiRes = await api.get("/v1/items", { headers: authHeaders(req) })
+      const apiRes = await api.get("/auction/v1/items", { headers: authHeaders(req) })
       return res.status(200).json({ data: apiRes.data })
     } catch {
       return res.status(500).json({ error: 'Failed to fetch items' })
     }
 }
+
+

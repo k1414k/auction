@@ -9,7 +9,7 @@ export default async function handler(
 
   if (req.method === "GET") {
     try {
-      const apiRes = await api.get("/v1/addresses", {
+      const apiRes = await api.get("/auction/v1/addresses", {
         headers: authHeaders(req),
       })
       return res.status(200).json(apiRes.data)
@@ -22,7 +22,7 @@ export default async function handler(
 
   if (req.method === "POST") {
     try {
-      const apiRes = await api.post("/v1/addresses", req.body, {
+      const apiRes = await api.post("/auction/v1/addresses", req.body, {
         headers: authHeaders(req),
       })
       return res.status(201).json(apiRes.data)

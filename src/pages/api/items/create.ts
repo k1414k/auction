@@ -50,7 +50,7 @@ export default async function handler(
 
     // ③ Rails API へ中継
     const api = createRailsApi(req, res)
-    const apiRes = await api.post("/v1/items", railsForm, {
+    const apiRes = await api.post("/auction/v1/items", railsForm, {
       headers: {
         ...railsForm.getHeaders(),
         ...authHeaders(req),

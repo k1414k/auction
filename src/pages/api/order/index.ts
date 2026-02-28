@@ -9,7 +9,7 @@ export default async function handler(
 
     const api = createRailsApi(req, res)
     try {
-      const apiRes = await api.post(`/v1/orders`, req.body ?? {}, {
+      const apiRes = await api.post(`/auction/v1/orders`, req.body ?? {}, {
         headers: authHeaders(req),
       })
       return res.status(200).json({ data: apiRes.data })

@@ -15,7 +15,7 @@ export default async function handler(
 
     const api = createRailsApi(req, res)
     try {
-      const apiRes = await api.put(`/v1/favorites/${id}`, {}, {
+      const apiRes = await api.put(`/auction/v1/favorites/${id}`, {}, {
         headers: authHeaders(req),
       })
       return res.status(200).json({ data: apiRes.data })

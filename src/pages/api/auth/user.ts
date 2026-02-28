@@ -11,7 +11,7 @@ export default async function handler(
 
     const api = createRailsApi(req, res)
     try {
-        const apiRes = await api.get('/v1/user', {
+        const apiRes = await api.get('/auction/v1/user', {
             headers: authHeaders(req),
         })
         return res.status(200).json({ user: apiRes.data })

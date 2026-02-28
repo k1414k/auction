@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next"
 import api from "@/lib/axios"
+import axios from "axios"
 
 export default async function handler(
   req: NextApiRequest,
@@ -10,12 +11,20 @@ export default async function handler(
   }
 
   try {
-    const apiRes = await api.get(
-      "/v1/categories",
-    )
-
+    const apiRes = await api.get("/auction/v1/categories")
     return res.status(200).json({ data: apiRes.data })
   } catch (e) {
-    return res.status(401).json({ error: e })
+    if (axios.isAxiosError(e)) {
+      console.error("categories error:", e.message, e.config?.baseURL, e.response?.status)
+      return res.status(e.response?.status || 500).json({
+        error: e.message,
+        baseURL: e.config?.baseURL,
+        url: e.config?.url,
+        status: e.response?.status,
+        data: e.response?.data,
+      })
+    }
+
+    return res.status(500).json({ error: "unknown error" })
   }
 }
