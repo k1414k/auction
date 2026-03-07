@@ -4,14 +4,28 @@ import { BottomNav } from "@/components/BottomNav";
 import { UserInitializer } from "@/components/UserInitializer";
 import { SearchHeader } from "@/components/SearchHeader";
 import LogoHeader from "@/components/LogoHeader";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 
 export const metadata = {
   title: "Auction (mock)",
   description: "Auction mock - mobile-first UI",
 };
 
+function useScrollToTopOnRouteChange() {
+  const router = useRouter();
+  useEffect(() => {
+    const handler = () => window.scrollTo(0, 0);
+    router.events.on("routeChangeComplete", handler);
+    return () => {
+      router.events.off("routeChangeComplete", handler);
+    };
+  }, [router]);
+}
+
 export default function App({ Component, pageProps }: AppProps) {
 
+  useScrollToTopOnRouteChange();
   return (
       <UserInitializer>
         <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-sm border-b px-20 sm:px-0 ">
