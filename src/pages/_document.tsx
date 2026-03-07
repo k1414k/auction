@@ -5,7 +5,10 @@ export default function Document() {
   return (
     <Html lang="ja">
       <Head>
-        {/* ここにGoogle Fontsやmetaタグを追加できる */}
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
       </Head>
       <body className="bg-gray-50 text-gray-800">
         <Main />
