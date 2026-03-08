@@ -20,7 +20,7 @@ export function BottomNav() {
 
 
   return (
-    <nav className="fixed z-50 bg-white/20 border shadow-lg transition-all
+    <nav className="fixed z-50 bg-white/80 border shadow-lg transition-all
           /* 【スマホ (デフォルト)】 
             位置: 上 (top-20), 左 (left-20)
             形状: 四角 (rounded-md)
@@ -39,7 +39,7 @@ export function BottomNav() {
         grid gap-4 p-2
 
         /* mobile: 横並び (flex) */
-        md:flex md:items-center md:gap-0 md:p-1
+        md:flex md:items-center md:gap-0 md:p-1.5 md:px-3.5
       ">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive =
@@ -48,7 +48,7 @@ export function BottomNav() {
           return (
             <Link key={label} href={href}>
               <div
-              className={`
+                className={`
                   flex flex-col items-center justify-center transition
                   
                   /* pc: 四角 */

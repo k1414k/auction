@@ -1,13 +1,15 @@
 import { apiAssetUrl } from "@/lib/apiAssetUrl";
 import { Item } from "@/types/item";
 import { formatNumber } from "@/utils/format-number";
+import { Spinner } from "@/components/ui/Spinner";
 import Image from "next/image";
+import { useState } from "react";
 
 type Props = {
     item: Item
 }
 export function AuctionCard({item}:Props) {
-    // spiner
+    const [imageLoaded, setImageLoaded] = useState(false)
 
     return (
         <article className="group text-center overflow-hidden transition cursor-pointer mt-3">
@@ -17,11 +19,16 @@ export function AuctionCard({item}:Props) {
                     ¥{formatNumber(item.price)}
                 </div>
 
+                {!imageLoaded && (
+                    <div className="absolute inset-0 flex items-center justify-center z-[1]">
+                        <Spinner size="sm" />
+                    </div>
+                )}
                 <Image
                     src={apiAssetUrl(item.image)||""}
                     alt={item.title}
                     fill
-                    sizes="(max-width: 640px) 50vw, 25vw" //修正必要
+                    sizes="(max-width: 640px) 50vw, 25vw"
                     className="
                     rounded-md
                     z-0
@@ -33,6 +40,7 @@ export function AuctionCard({item}:Props) {
                     group-hover:scale-105
                   "
                   unoptimized
+                  onLoad={() => setImageLoaded(true)}
                 />
             </div>
 

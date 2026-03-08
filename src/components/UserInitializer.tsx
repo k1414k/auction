@@ -23,6 +23,8 @@ export function UserInitializer({ children }:UserInitailizerProps) {
         console.log(userData);
         
         setUser({
+          ...userData.user,
+          id: userData.user.id,
           email: userData.user.email,
           name: userData.user.name,
           nickname: userData.user.nickname,

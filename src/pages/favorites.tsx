@@ -5,6 +5,7 @@ import { Item } from '@/types/item';
 import { nextApi } from '@/lib/fetch';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { apiAssetUrl } from '@/lib/apiAssetUrl';
 
 export default function FavoritesPage() {
     const router = useRouter();
@@ -95,19 +96,14 @@ export default function FavoritesPage() {
                                 className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-transparent hover:border-blue-100"
                             >
                                 <div className="aspect-[4/5] bg-gray-100 relative overflow-hidden">
-                                    {/* ダミー画像代わりのグレーボックス */}
                                     <Image 
-                                        src={i.image}
+                                        src={apiAssetUrl(i.image)}
                                         alt={i.title}
-                                        fill
                                         // height={100}
-                                        className="w-full h-full group-hover:scale-105 transition-transform duration-500 bg-gradient-to-br from-gray-100 to-gray-200" 
+                                        fill
+                                        unoptimized
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500 bg-gradient-to-br from-gray-100 to-gray-200" 
                                     />
-                                    
-                                    {/* 削除機能 */}
-                                    {/* <button className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-red-500">
-                                        <Trash2 size={14} />
-                                    </button> */}
                                 </div>
                                 <div className="p-3">
                                     <p className="text-xs sm:text-sm font-medium text-gray-700 truncate mb-1.5">

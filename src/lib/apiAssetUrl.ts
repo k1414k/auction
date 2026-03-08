@@ -1,5 +1,5 @@
-export function apiAssetUrl(path?: string | null): string | null {
-  if (!path) return null;
+export function apiAssetUrl(path?: string): string {
+  if (!path) return "";
 
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
