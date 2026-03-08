@@ -4,6 +4,8 @@ import { useUserStore } from "@/stores/userStore";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { nextApi } from "@/lib/fetch";
+import { User } from "@/types/user";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -27,27 +29,17 @@ export default function RegisterPage() {
       setIsSubmitting(true);
       setErrors([]);
 
-      const res = await fetch("/api/auth/register", {
+      type RegisterResponse = { user: User };
+      const data = await nextApi<typeof form, RegisterResponse>("/auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-        credentials: "include",
+        body: form,
       });
 
-      const data = await res.json();
+      // 登録成功直後に store へ保存（/auth/user と同じ形の User 型を想定）
+      setUser(data.user);
 
-      if (!res.ok) {
-        throw new Error(data?.message || "register failed");
-      }
-
-      // 登録成功直後に store へ保存
-      if (data?.user) {
-        setUser(data.user);
-      }
-
-      // そのままトップへ
+      // プロフィールへ遷移（UserInitializer が route change 毎に /auth/user を再同期）
       router.replace("/user/profile");
-      router.reload();
     } catch (error) {
       console.error(error);
       setErrors(["このメールアドレスは使用できません"]);

@@ -28,20 +28,26 @@ export default function MyPage() {
       const formData = new FormData()
       formData.append("avatar", file)
 
-
       try {
         const res = await fetch(`/api/user/change-avatar`, {
           method: "PATCH",
           body: formData,
+          credentials: "include",
         });
 
         if (!res.ok) throw new Error("upload failed");
 
-        const data = await res.json()
+        const data = await res.json() as { avatar_url?: string | null }
+
+        const rawUrl = data.avatar_url ?? user.avatar_url ?? null
+        const cacheBustedUrl =
+          rawUrl == null
+            ? null
+            : `${rawUrl}${rawUrl.includes("?") ? "&" : "?"}t=${Date.now()}`
 
         setUser({
           ...user,
-          avatar_url: data.avatar_url,
+          avatar_url: cacheBustedUrl,
         });
       } catch (e) {
         alert("画像アップロードに失敗しました")
