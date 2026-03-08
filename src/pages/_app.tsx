@@ -15,7 +15,12 @@ export const metadata = {
 function useScrollToTopOnRouteChange() {
   const router = useRouter();
   useEffect(() => {
-    const handler = () => window.scrollTo(0, 0);
+    const handler = () => {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+
+    
     router.events.on("routeChangeComplete", handler);
     return () => {
       router.events.off("routeChangeComplete", handler);
