@@ -292,6 +292,7 @@ export default function CheckoutPage() {
               alt={item ? item.title : "商品画像"}
               src={item ? item.images[0] : ""}
               fill
+              unoptimized
             />
           </div>
           <div className="space-y-1">

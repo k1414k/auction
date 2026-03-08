@@ -31,6 +31,7 @@ export function AuctionCard({item}:Props) {
                     scale-110
                     group-hover:scale-105
                   "
+                  unoptimized
                 />
             </div>
 

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import { createRailsApi, authHeaders } from "@/lib/rails-api"
+import { createApi } from "@/lib/axios"
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,11 +7,9 @@ export default async function handler(
 ) {
   if (req.method !== "POST") return res.status(405).end()
 
-  const api = createRailsApi(req, res)
+  const api = createApi(req, res)
   try {
-    const apiRes = await api.post(`/auction/v1/orders`, req.body, {
-      headers: authHeaders(req),
-    })
+    const apiRes = await api.post("/auction/v1/orders", req.body)
     return res.status(200).json(apiRes.data)
   } catch (e: unknown) {
     const err = e as { response?: { status: number; data?: { error?: string } } }

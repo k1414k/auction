@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import { createRailsApi, authHeaders } from "@/lib/rails-api"
+import { createApi } from "@/lib/axios"
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,15 +9,10 @@ export default async function handler(
     return res.status(405).end()
   }
 
-  const api = createRailsApi(req, res)
+  const api = createApi(req, res)
   try {
     const { nickname } = req.body
-
-    const apiRes = await api.put(
-      "/auth",
-      { nickname: nickname },
-      { headers: authHeaders(req) }
-    )
+    const apiRes = await api.put("/auth", { nickname })
     return res.status(200).json({ user: apiRes.data.data })
   } catch {
     return res.status(401).json({ error: "ニックネームの更新に失敗しました" })
