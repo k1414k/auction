@@ -5,7 +5,7 @@ export type Item = {
   title: string;
   description: string;
   price: number;
-  trading_status: "selling" | "sold";
+  trading_status: "selling" | "sold" | string;
   condition: string;
   images: string[];
   image: string;
@@ -14,4 +14,10 @@ export type Item = {
   created_by_current_user: boolean;
   created_at: string;
   updated_at: string;
+  sale_type?: "fixed_price" | "auction" | "negotiation" | string;
+  start_price?: number | null;
+  end_at?: string | null;
+  min_increment?: number;
+  current_bid?: number | null;
+  bids_count?: number;
 };
