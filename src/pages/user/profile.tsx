@@ -1,3 +1,4 @@
+import { apiAssetUrl } from "@/lib/apiAssetUrl";
 import { nextApi } from "@/lib/fetch";
 import { useUserStore } from "@/stores/userStore";
 import { formatNumber } from "@/utils/format-number";
@@ -183,7 +184,7 @@ export default function MyPage() {
           <div className="flex items-start gap-4">
             <label className="relative group cursor-pointer shrink-0">
               <Image
-                src={user?.avatar_url || "/apple.png"}
+                src={apiAssetUrl(user?.avatar_url) || "/apple.png"}
                 alt="avatar"
                 width={72}
                 height={72}

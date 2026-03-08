@@ -1,3 +1,4 @@
+import { apiAssetUrl } from "@/lib/apiAssetUrl";
 import { Item } from "@/types/item";
 import { formatNumber } from "@/utils/format-number";
 import Image from "next/image";
@@ -17,7 +18,7 @@ export function AuctionCard({item}:Props) {
                 </div>
 
                 <Image
-                    src={item.image}
+                    src={apiAssetUrl(item.image)||""}
                     alt={item.title}
                     fill
                     sizes="(max-width: 640px) 50vw, 25vw" //修正必要

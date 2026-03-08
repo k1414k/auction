@@ -8,6 +8,7 @@ import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
 import { Item } from '@/types/item';
 import { formatNumber } from '@/utils/format-number';
+import { apiAssetUrl } from '@/lib/apiAssetUrl';
 
 
 export default function ProductDetailPage() {
@@ -103,7 +104,7 @@ export default function ProductDetailPage() {
                                         {item?.images.map((url) => (
                                             <SwiperSlide key={url}>
                                                 <img
-                                                    src={url}
+                                                    src={apiAssetUrl(url)||""}
                                                     className="w-full object-cover"
                                                 />
                                             </SwiperSlide>

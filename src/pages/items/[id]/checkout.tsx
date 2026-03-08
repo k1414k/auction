@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { Modal } from "@/components/Modal";
 import { useUserStore } from "@/stores/userStore";
+import { apiAssetUrl } from "@/lib/apiAssetUrl";
 
 type AddressModalStatus = "select" | "create" | "edit";
 
@@ -290,7 +291,7 @@ export default function CheckoutPage() {
             <Image
               className="object-cover"
               alt={item ? item.title : "商品画像"}
-              src={item ? item.images[0] : ""}
+              src={item ? apiAssetUrl(item.images[0])||"" : ""}
               fill
               unoptimized
             />
