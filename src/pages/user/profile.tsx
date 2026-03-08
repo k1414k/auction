@@ -284,7 +284,7 @@ export default function MyPage() {
           <div className="flex items-start gap-4">
             <label className="relative group cursor-pointer shrink-0">
               <Image
-                src={apiAssetUrl(user?.avatar_url) || "/apple.png"}
+                src={!user?.avatar_url ? "/apple.png" : apiAssetUrl(user?.avatar_url)}
                 alt="avatar"
                 width={72}
                 height={72}

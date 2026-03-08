@@ -11,6 +11,7 @@ import { formatNumber } from '@/utils/format-number';
 import { apiAssetUrl } from '@/lib/apiAssetUrl';
 import { SkeletonDetail } from '@/components/ui/SkeletonDetail';
 import { Modal } from '@/components/Modal';
+import Image from 'next/image';
 
 
 export default function ProductDetailPage() {
@@ -174,9 +175,12 @@ export default function ProductDetailPage() {
                                     >
                                         {item?.images.map((url) => (
                                             <SwiperSlide key={url}>
-                                                <img
-                                                    src={apiAssetUrl(url)||""}
-                                                    className="w-full object-cover"
+                                                <Image
+                                                    fill
+                                                    src={apiAssetUrl(url)}
+                                                    alt={item.title}
+                                                    className="object-cover"
+                                                    unoptimized
                                                 />
                                             </SwiperSlide>
                                         ))}
