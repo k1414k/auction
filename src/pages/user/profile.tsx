@@ -10,17 +10,108 @@ import {
   LogOut,
   MapPin,
   X,
+  Package,
+  ShoppingBag,
+  Gavel,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+type HistoryTab = "入札中" | "出品中" | "購入履歴" | "販売履歴" | "ポイント履歴";
+
+type OrderItem = {
+  id: number;
+  item_id: number;
+  item_title: string;
+  item_image: string | null;
+  price: number;
+  status: string;
+  buyer_nickname: string;
+  seller_nickname: string;
+  created_at: string;
+};
+
+type MyItem = {
+  id: number;
+  title: string;
+  price: number;
+  trading_status: string;
+  image: string | null;
+  category_name: string | null;
+  created_at: string;
+};
+
+function ProfileSkeleton() {
+  return (
+    <>
+      <section className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100 overflow-hidden">
+        <div className="flex items-start gap-4">
+          <div className="w-[72px] h-[72px] rounded-full bg-gray-200 animate-pulse shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-5 bg-gray-200 animate-pulse rounded w-32" />
+            <div className="h-4 bg-gray-100 animate-pulse rounded w-full" />
+          </div>
+        </div>
+        <div className="mt-5 pt-4 border-t border-gray-100">
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-8 w-20 bg-gray-100 animate-pulse rounded-full" />
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
+        <div className="h-5 bg-gray-200 animate-pulse rounded w-24 mb-4" />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="h-16 bg-gray-100 animate-pulse rounded" />
+          <div className="h-16 bg-gray-100 animate-pulse rounded" />
+        </div>
+      </section>
+      <section>
+        <div className="h-4 bg-gray-200 animate-pulse rounded w-20 mb-3" />
+        <div className="h-24 bg-gray-100 animate-pulse rounded-xl" />
+      </section>
+      <section>
+        <div className="h-4 bg-gray-200 animate-pulse rounded w-16 mb-3" />
+        <div className="h-20 bg-gray-100 animate-pulse rounded-xl" />
+      </section>
+    </>
+  );
+}
 
 export default function MyPage() {
     const router = useRouter()
     const user = useUserStore(state=>state.user)
     const setUser = useUserStore(state=>state.setUser)
     const [instroEdit, setInstroEdit] = useState(false)
+    const [activeTab, setActiveTab] = useState<HistoryTab>("出品中")
+    const [buyOrders, setBuyOrders] = useState<OrderItem[]>([])
+    const [sellOrders, setSellOrders] = useState<OrderItem[]>([])
+    const [myItems, setMyItems] = useState<MyItem[]>([])
+
+    const fetchHistory = useCallback(async () => {
+      if (!user) return
+      try {
+        const [buyRes, sellRes, itemsRes] = await Promise.all([
+          nextApi<unknown, OrderItem[]>("/orders?role=buyer", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
+          nextApi<unknown, OrderItem[]>("/orders?role=seller", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
+          nextApi<unknown, MyItem[]>("/user/items", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
+        ])
+        setBuyOrders(buyRes)
+        setSellOrders(sellRes)
+        setMyItems(itemsRes)
+      } catch {
+        setBuyOrders([])
+        setSellOrders([])
+        setMyItems([])
+      }
+    }, [user])
+
+    useEffect(() => {
+      fetchHistory()
+    }, [fetchHistory])
 
     const uploadAvatar = async (file: File) => {
       if (!user) return
@@ -111,6 +202,9 @@ export default function MyPage() {
       </header>
 
       <main className="p-4 max-w-xl mx-auto space-y-6">
+        {!user && <ProfileSkeleton />}
+        {user && (
+        <>
         {modalSwitch && (
           <div className="fixed z-50 flex items-center justify-center inset-0 bg-black/40" onClick={() => setModalSwitch(false)}>
             <div
@@ -249,13 +343,17 @@ export default function MyPage() {
 
           <div className="mt-5 pt-4 border-t border-gray-100">
             <div className="flex flex-wrap gap-2 text-xs">
-              {["入札中", "出品中", "購入履歴", "販売履歴", "ポイント履歴"].map((label) => (
-                <span
+              {(["入札中", "出品中", "購入履歴", "販売履歴", "ポイント履歴"] as const).map((label) => (
+                <button
                   key={label}
-                  className="px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 font-medium"
+                  type="button"
+                  onClick={() => setActiveTab(label)}
+                  className={`px-3 py-1.5 rounded-full font-medium transition ${
+                    activeTab === label ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
                 >
                   {label}
-                </span>
+                </button>
               ))}
             </div>
           </div>
@@ -309,25 +407,117 @@ export default function MyPage() {
         </Link>
 
         <section>
-          <h4 className="text-sm font-bold text-gray-800 mb-3">入札待機</h4>
-          <div className="space-y-2">
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-              <span className="text-gray-500 text-sm">13:20</span>
-              <span className="ml-2 text-gray-800">入札終了予定の通知</span>
+          <h4 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+            {activeTab === "入札中" && <Gavel size={16} />}
+            {activeTab === "出品中" && <Package size={16} />}
+            {activeTab === "購入履歴" && <ShoppingBag size={16} />}
+            {activeTab === "販売履歴" && <Package size={16} />}
+            {activeTab === "ポイント履歴" && <Coins size={16} />}
+            {activeTab}
+          </h4>
+          {activeTab === "入札中" && (
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center text-gray-500">
+              入札履歴は準備中です
             </div>
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-              <span className="text-gray-500 text-sm">15:00</span>
-              <span className="ml-2 text-gray-800">発送予定</span>
+          )}
+          {activeTab === "出品中" && (
+            <div className="space-y-2">
+              {myItems.filter((i) => i.trading_status === "listed").length === 0 ? (
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center text-gray-500">
+                  出品中の商品はありません
+                </div>
+              ) : (
+                myItems.filter((i) => i.trading_status === "listed").map((item) => (
+                  <Link key={item.id} href={`/items/${item.id}`}>
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-3 hover:bg-gray-50">
+                      <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                        {item.image && (
+                          <Image src={apiAssetUrl(item.image) || ""} alt="" fill className="object-cover" unoptimized />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-gray-800 truncate">{item.title}</p>
+                        <p className="text-sm text-gray-600">¥{formatNumber(item.price)}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              )}
+              <Link href="/user/items" className="block text-center text-blue-600 text-sm font-medium mt-2">
+                商品管理へ
+              </Link>
             </div>
-          </div>
+          )}
+          {activeTab === "購入履歴" && (
+            <div className="space-y-2">
+              {buyOrders.length === 0 ? (
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center text-gray-500">
+                  購入履歴はありません
+                </div>
+              ) : (
+                buyOrders.map((o) => (
+                  <Link key={o.id} href={`/transaction/${o.id}`}>
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-3 hover:bg-gray-50">
+                      <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                        {o.item_image && (
+                          <Image src={apiAssetUrl(o.item_image) || ""} alt="" fill className="object-cover" unoptimized />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-gray-800 truncate">{o.item_title}</p>
+                        <p className="text-sm text-gray-600">¥{formatNumber(o.price)}</p>
+                        <p className="text-xs text-gray-400">{o.seller_nickname}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+          )}
+          {activeTab === "販売履歴" && (
+            <div className="space-y-2">
+              {sellOrders.length === 0 ? (
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center text-gray-500">
+                  販売履歴はありません
+                </div>
+              ) : (
+                sellOrders.map((o) => (
+                  <Link key={o.id} href={`/transaction/${o.id}`}>
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-3 hover:bg-gray-50">
+                      <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                        {o.item_image && (
+                          <Image src={apiAssetUrl(o.item_image) || ""} alt="" fill className="object-cover" unoptimized />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-gray-800 truncate">{o.item_title}</p>
+                        <p className="text-sm text-gray-600">¥{formatNumber(o.price)}</p>
+                        <p className="text-xs text-gray-400">{o.buyer_nickname}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+          )}
+          {activeTab === "ポイント履歴" && (
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <p className="text-sm text-gray-600 mb-4">売上高・ポイントの履歴は準備中です</p>
+              <div className="flex gap-4">
+                <div>
+                  <p className="text-xs text-gray-500">現在の売上高</p>
+                  <p className="text-lg font-bold">¥{formatNumber(user?.balance ?? 0)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">現在のポイント</p>
+                  <p className="text-lg font-bold">{formatNumber(user?.points ?? 0)} P</p>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
-
-        <section>
-          <h4 className="text-sm font-bold text-gray-800 mb-3">出品中</h4>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center text-gray-500">
-            該当なし
-          </div>
-        </section>
+        </>
+        )}
       </main>
     </div>
   );

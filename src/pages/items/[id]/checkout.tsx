@@ -139,7 +139,7 @@ export default function CheckoutPage() {
 
     try {
       type OrderResponse = { message: string; order_id: number };
-      await nextApi<unknown, OrderResponse>(`/orders`, {
+      const orderRes = await nextApi<unknown, OrderResponse>(`/orders`, {
         method: "POST",
         body: {
           item_id: item.id,
@@ -151,7 +151,7 @@ export default function CheckoutPage() {
       const userRes = await nextApi<unknown, UserRes>("/auth/user", { method: "GET" });
       if (userRes.user) setUser(userRes.user);
       alert("購入が完了しました！");
-      router.push("/items");
+      router.push(`/transaction/${orderRes.order_id}`);
     } catch (e) {
       const err = e as Error;
       let errorMessage = "購入処理中にエラーが発生しました";
@@ -286,21 +286,31 @@ export default function CheckoutPage() {
       </header>
 
       <main className="p-4 space-y-4 max-w-2xl mx-auto">
+        {!item ? (
+          <div className="bg-white p-4 rounded-2xl shadow-sm flex gap-4">
+            <div className="w-20 h-20 bg-gray-200 animate-pulse rounded-xl flex-shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 bg-gray-200 animate-pulse rounded w-3/4" />
+              <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3" />
+            </div>
+          </div>
+        ) : (
         <div className="bg-white p-4 rounded-2xl shadow-sm flex gap-4">
           <div className="relative w-20 h-20 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
             <Image
               className="object-cover"
-              alt={item ? item.title : "商品画像"}
-              src={item ? apiAssetUrl(item.images[0])||"" : ""}
+              alt={item.title}
+              src={apiAssetUrl(item.images[0])||""}
               fill
               unoptimized
             />
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-bold line-clamp-2 text-gray-800">{item?.title}</p>
-            <p className="text-lg font-bold">¥{item ? formatNumber(item.price) : 0}</p>
+            <p className="text-sm font-bold line-clamp-2 text-gray-800">{item.title}</p>
+            <p className="text-lg font-bold">¥{formatNumber(item.price)}</p>
           </div>
         </div>
+        )}
 
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y">
           <button
@@ -344,7 +354,7 @@ export default function CheckoutPage() {
         <div className="p-4 space-y-3">
           <div className="flex justify-between text-sm text-gray-500">
             <span>商品代金</span>
-            <span>¥ {item ? formatNumber(item.price) : 0}</span>
+            <span>¥ {item ? formatNumber(item.price) : "---"}</span>
           </div>
           <div className="flex justify-between text-sm text-gray-500">
             <span>配送料</span>
@@ -356,7 +366,7 @@ export default function CheckoutPage() {
           </div>
           <div className="flex justify-between text-sm">
             <span>支払い金額</span>
-            <span>¥ {item ? formatNumber(item.price) : 0}</span>
+            <span>¥ {item ? formatNumber(item.price) : "---"}</span>
           </div>
           <div className="flex justify-between font-bold text-xl pt-4 border-t border-dashed border-gray-200">
             <span>
@@ -400,17 +410,19 @@ export default function CheckoutPage() {
 
       <Modal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} title="支払い方法">
         <div className="space-y-2">
-          {["ポイント", "売上高", "クレジットカード (**** 1234)", "メルペイ残高", "コンビニ払い"].map((m) => (
+          {["ポイント", "クレジットカード (現在取り扱っておりません）"].map((m, idx) => (
             <button
               key={m}
               type="button"
               onClick={() => {
+                if (idx==1) return;
                 setPaymentMethod(m);
                 setIsPaymentModalOpen(false);
               }}
               className={`w-full p-4 text-left rounded-xl border-2 transition-all ${
                 paymentMethod === m ? "border-blue-500 bg-blue-50 text-blue-600" : "border-gray-100 text-gray-700"
-              }`}
+                } ${idx === 1 ? "cursor-not-allowed" : ""}
+                `}
             >
               <p className="font-bold text-sm">{m}</p>
             </button>
