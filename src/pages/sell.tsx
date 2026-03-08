@@ -12,6 +12,12 @@ const CONDITION_OPTIONS = [
     { id: 3, name: "傷や汚れあり" },
 ]
 
+const SALE_TYPE_OPTIONS = [
+    { id: 0, name: "固定価格" },
+    { id: 1, name: "オークション" },
+    { id: 2, name: "値段交渉" },
+]
+
 export default function SellPage() {
     const router = useRouter()
     const [categories, setCategories] = useState([])
@@ -22,6 +28,10 @@ export default function SellPage() {
         category_id: 0,
         price: 0,
         condition: 0,
+        sale_type: 0,
+        start_price: 0,
+        end_at: "",
+        min_increment: 100,
     });
     const defaultErrorForm = {
         images: false,
@@ -51,13 +61,23 @@ export default function SellPage() {
     }
     const formHandler = async() => {
         if (formValidate()) return;
+        if (form.sale_type === 1 && (form.start_price <= 0 || !form.end_at)) {
+            alert("オークションの場合は開始価格と終了日時を入力してください")
+            return
+        }
 
         const formData = new FormData()
         formData.append("title", form.title)
         formData.append("description", form.description)
         formData.append("category_id", String(form.category_id))
-        formData.append("price", String(form.price))
+        formData.append("price", String(form.sale_type === 1 ? (form.start_price || form.price) : form.price))
         formData.append("condition", String(form.condition))
+        formData.append("sale_type", String(form.sale_type))
+        if (form.sale_type === 1) {
+            formData.append("start_price", String(form.start_price || form.price))
+            formData.append("end_at", form.end_at)
+            formData.append("min_increment", String(form.min_increment))
+        }
 
         images.forEach(file=>{
             formData.append("images", file)
@@ -225,10 +245,18 @@ export default function SellPage() {
                     </div>
                 )}
 
+                <SelectRow
+                    label="販売タイプ"
+                    value={form.sale_type}
+                    options={SALE_TYPE_OPTIONS}
+                    onChange={v => setForm({ ...form, sale_type: v })}
+                />
+
                 {/* 価格設定 */}
-                <div className="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
+                <div className="bg-white p-4 rounded-2xl shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
                     <label className="font-bold text-gray-700">
-                        販売価格
+                        {form.sale_type === 1 ? "開始価格（オークション）" : "販売価格"}
                     </label>
                     <div className="flex items-center gap-2 border-b-2 border-transparent focus-within:border-blue-500 pb-1 transition">
                         <span className="text-gray-400 text-xl font-bold">¥</span>
@@ -253,6 +281,30 @@ export default function SellPage() {
                             }}
                         />
                     </div>
+                </div>
+                {form.sale_type === 1 && (
+                    <>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 mb-1">オークション終了日時</label>
+                            <input
+                                type="datetime-local"
+                                value={form.end_at}
+                                onChange={(e) => setForm({ ...form, end_at: e.target.value })}
+                                className="w-full p-3 border border-gray-200 rounded-xl"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 mb-1">最低入札単位（円）</label>
+                            <input
+                                type="number"
+                                min={100}
+                                value={form.min_increment}
+                                onChange={(e) => setForm({ ...form, min_increment: parseInt(e.target.value, 10) || 100 })}
+                                className="w-full p-3 border border-gray-200 rounded-xl"
+                            />
+                        </div>
+                    </>
+                )}
                 </div>
                 {errorForm.prcie && (
                     <div className='text-red-500 text-end -mt-16'>

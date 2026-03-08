@@ -1,6 +1,7 @@
 import { nextApi } from "@/lib/fetch";
 import { useUserStore } from "@/stores/userStore";
 import { formatNumber } from "@/utils/format-number";
+import { Spinner } from "@/components/ui/Spinner";
 import { Banknote, Coins } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -121,9 +122,16 @@ export default function Wallet() {
             type="button"
             onClick={handleCharge}
             disabled={!canCharge}
-            className="w-full mt-4 py-3 rounded-xl bg-blue-500 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition"
+            className="w-full mt-4 py-3 rounded-xl bg-blue-500 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition flex items-center justify-center gap-2"
           >
-            {loading ? "処理中..." : "チャージする"}
+            {loading ? (
+              <>
+                <Spinner size="sm" variant="white" />
+                処理中...
+              </>
+            ) : (
+              "チャージする"
+            )}
           </button>
         </section>
 

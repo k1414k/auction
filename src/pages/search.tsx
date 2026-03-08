@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { ItemFilter } from "@/components/ItemFilter";
 import { SearchTop } from "@/components/SearchTop";
 import { CategoryChips } from "@/components/CategoryChips";
+import { SkeletonCard } from "@/components/ui/SkeletonCard";
 import { nextApi } from "@/lib/fetch";
 import { useEffect, useState } from "react";
 
@@ -10,6 +11,7 @@ export default function SearchPage() {
     const { q, category, tag } = router.query
     const [categories, setCategories] = useState([])
     const [items, setItems] = useState([])
+    const [loading, setLoading] = useState(true)
     const getCategories = async() => {
         try {
             type ResType = {data:[]}
@@ -30,8 +32,6 @@ export default function SearchPage() {
         try {
             type ResType = {data:[]}
             const res:ResType = await nextApi("/items", {method:"GET"})
-            console.log(res.data)
-
             setItems(res.data)
         }
         catch (e){
@@ -45,9 +45,8 @@ export default function SearchPage() {
         }
     }
     useEffect(()=>{
-        getCategories()
-        getItems()
-        
+        setLoading(true)
+        Promise.all([getCategories(), getItems()]).finally(() => setLoading(false))
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
     }    
@@ -69,14 +68,18 @@ export default function SearchPage() {
     return (
         <div className="px-4 pt-4 pb-28">
             <div>
-                {
-                    !hasFilter ? //クエリの有無で異なるコンポーネント
-                        <SearchTop categories={categories} items={items}/> :
-                        <>
-                            <CategoryChips categories={categories}/>
-                            <ItemFilter items={items} filters={filters} categories={categories} />
-                        </>
-                }
+                {loading ? (
+                    <div className="grid grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 gap-2">
+                        <SkeletonCard count={8} />
+                    </div>
+                ) : !hasFilter ? (
+                    <SearchTop categories={categories} items={items}/>
+                ) : (
+                    <>
+                        <CategoryChips categories={categories}/>
+                        <ItemFilter items={items} filters={filters} categories={categories} />
+                    </>
+                )}
             </div>
         </div>
     )

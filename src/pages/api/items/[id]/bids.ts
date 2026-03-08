@@ -6,23 +6,17 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const { id } = req.query
-  if (!id || Array.isArray(id)) {
-    return res.status(400).json({ error: "Invalid id" })
-  }
+  if (!id || Array.isArray(id)) return res.status(400).json({ error: "Invalid id" })
 
   const api = createApi(req, res)
   try {
     if (req.method === "GET") {
-      const apiRes = await api.get(`/auction/v1/items/${id}`)
-      return res.status(200).json({ data: apiRes.data })
+      const apiRes = await api.get(`/auction/v1/items/${id}/bids`)
+      return res.status(200).json(apiRes.data)
     }
-    if (req.method === "PATCH") {
-      const apiRes = await api.patch(`/auction/v1/items/${id}`, req.body)
-      return res.status(200).json({ data: apiRes.data })
-    }
-    if (req.method === "DELETE") {
-      await api.delete(`/auction/v1/items/${id}`)
-      return res.status(200).json({ success: true })
+    if (req.method === "POST") {
+      const apiRes = await api.post(`/auction/v1/items/${id}/bids`, req.body)
+      return res.status(apiRes.status).json(apiRes.data)
     }
     return res.status(405).end()
   } catch (e: unknown) {

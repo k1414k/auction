@@ -5,15 +5,17 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const { id } = req.query
+  if (typeof id !== "string") return res.status(400).json({ error: "Invalid order id" })
+
   const api = createApi(req, res)
   try {
     if (req.method === "GET") {
-      const role = typeof req.query.role === "string" ? req.query.role : undefined
-      const apiRes = await api.get("/auction/v1/orders", { params: { role } })
+      const apiRes = await api.get(`/auction/v1/orders/${id}`)
       return res.status(200).json(apiRes.data)
     }
-    if (req.method === "POST") {
-      const apiRes = await api.post("/auction/v1/orders", req.body)
+    if (req.method === "PATCH") {
+      const apiRes = await api.patch(`/auction/v1/orders/${id}`, req.body)
       return res.status(200).json(apiRes.data)
     }
     return res.status(405).end()

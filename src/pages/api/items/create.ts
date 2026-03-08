@@ -29,6 +29,12 @@ export default async function handler(
     railsForm.append("item[price]", getField(fields.price))
     railsForm.append("item[category_id]", getField(fields.category_id))
     railsForm.append("item[condition]", getField(fields.condition))
+    railsForm.append("item[sale_type]", getField(fields.sale_type) || "0")
+    if (getField(fields.sale_type) === "1") {
+      railsForm.append("item[start_price]", getField(fields.start_price) || getField(fields.price))
+      railsForm.append("item[end_at]", getField(fields.end_at))
+      railsForm.append("item[min_increment]", getField(fields.min_increment) || "100")
+    }
 
     const images: File[] = files.images
       ? Array.isArray(files.images)
