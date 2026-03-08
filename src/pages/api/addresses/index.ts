@@ -1,17 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import { createRailsApi, authHeaders } from "@/lib/rails-api"
+import { createApi } from "@/lib/axios"
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const api = createRailsApi(req, res)
+  const api = createApi(req, res)
 
   if (req.method === "GET") {
     try {
-      const apiRes = await api.get("/auction/v1/addresses", {
-        headers: authHeaders(req),
-      })
+      const apiRes = await api.get("/auction/v1/addresses")
       return res.status(200).json(apiRes.data)
     } catch (e: unknown) {
       const err = e as { response?: { status: number; data?: unknown } }
@@ -22,9 +20,7 @@ export default async function handler(
 
   if (req.method === "POST") {
     try {
-      const apiRes = await api.post("/auction/v1/addresses", req.body, {
-        headers: authHeaders(req),
-      })
+      const apiRes = await api.post("/auction/v1/addresses", req.body)
       return res.status(201).json(apiRes.data)
     } catch (e: unknown) {
       const err = e as { response?: { status: number; data?: { errors?: string[] } } }

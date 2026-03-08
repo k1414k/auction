@@ -1,13 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import { createRailsApi, authHeaders } from "@/lib/rails-api"
 import formidable from "formidable"
 import fs from "fs"
 import FormData from "form-data"
+import { createApi } from "@/lib/axios"
 
 export const config = {
-  api: {
-    bodyParser: false,
-  },
+  api: { bodyParser: false },
 }
 
 export default async function handler(
@@ -19,11 +17,9 @@ export default async function handler(
   }
 
   const form = formidable({})
-
   try {
     const [, files] = await form.parse(req)
-    const avatar =
-      Array.isArray(files.avatar) ? files.avatar[0] : files.avatar
+    const avatar = Array.isArray(files.avatar) ? files.avatar[0] : files.avatar
 
     if (!avatar) {
       return res.status(400).json({ error: "no avatar" })
@@ -36,17 +32,10 @@ export default async function handler(
       avatar.originalFilename || "avatar.png"
     )
 
-    const api = createRailsApi(req, res)
-    const apiRes = await api.patch(
-      "/v1/user/avatar",
-      railsForm,
-      {
-        headers: {
-          ...railsForm.getHeaders(),
-          ...authHeaders(req),
-        },
-      }
-    )
+    const api = createApi(req, res)
+    const apiRes = await api.patch("/auction/v1/user/avatar", railsForm, {
+      headers: railsForm.getHeaders(),
+    })
     return res.status(200).json(apiRes.data)
   } catch (e) {
     console.error(e)

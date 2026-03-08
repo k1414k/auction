@@ -85,13 +85,13 @@ export default function MyPage() {
       }
     }
     const logoutUser = async () => {
-      try{
-        await nextApi('/auth/sign-out', {
-          method: 'DELETE',
-        })
+      try {
+        await nextApi("/auth/sign-out", { method: "DELETE" })
+        setUser(null)
         router.replace("/")
-      }
-      catch {
+      } catch {
+        setUser(null)
+        router.replace("/")
         alert("ログアウトに失敗しました")
       }
     }
@@ -188,6 +188,7 @@ export default function MyPage() {
                 width={72}
                 height={72}
                 className="rounded-full object-cover ring-2 ring-gray-100 group-hover:ring-blue-200 transition"
+                unoptimized
               />
               <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                 <Edit3 size={20} className="text-white" />

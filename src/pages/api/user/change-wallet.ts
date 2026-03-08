@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import { createRailsApi, authHeaders } from "@/lib/rails-api"
+import { createApi } from "@/lib/axios"
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,17 +9,16 @@ export default async function handler(
     return res.status(405).end()
   }
 
-  const api = createRailsApi(req, res)
+  const api = createApi(req, res)
   try {
     const { amount, type } = req.body
     if (amount == null || type == null) {
       return res.status(400).json({ error: "amount と type を指定してください" })
     }
-    const apiRes = await api.patch(
-      "/v1/user/wallet",
-      { amount: Number(amount), type: String(type) },
-      { headers: authHeaders(req) }
-    )
+    const apiRes = await api.patch("/auction/v1/user/wallet", {
+      amount: Number(amount),
+      type: String(type),
+    })
     return res.status(200).json(apiRes.data)
   } catch (e: unknown) {
     const err = e as { response?: { status: number; data?: { error?: string } } }

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import { createRailsApi, authHeaders } from "@/lib/rails-api"
+import { createApi } from "@/lib/axios"
 
 export default async function handler(
   req: NextApiRequest,
@@ -10,13 +10,11 @@ export default async function handler(
     return res.status(400).json({ error: "Invalid id" })
   }
 
-  const api = createRailsApi(req, res)
+  const api = createApi(req, res)
 
   if (req.method === "PATCH" || req.method === "PUT") {
     try {
-      const apiRes = await api.patch(`/auction/v1/addresses/${id}`, req.body, {
-        headers: authHeaders(req),
-      })
+      const apiRes = await api.patch(`/auction/v1/addresses/${id}`, req.body)
       return res.status(200).json(apiRes.data)
     } catch (e: unknown) {
       const err = e as { response?: { status: number; data?: { errors?: string[] } } }
@@ -28,9 +26,7 @@ export default async function handler(
 
   if (req.method === "DELETE") {
     try {
-      await api.delete(`/auction/v1/addresses/${id}`, {
-        headers: authHeaders(req),
-      })
+      await api.delete(`/auction/v1/addresses/${id}`)
       return res.status(204).end()
     } catch (e: unknown) {
       const err = e as { response?: { status: number } }
