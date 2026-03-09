@@ -18,7 +18,8 @@ export default async function handler(
       password,
       password_confirmation,
     })
-    return res.status(200).json({ user: apiRes.data })
+    const userData = (apiRes.data as { data?: unknown })?.data ?? apiRes.data
+    return res.status(200).json({ user: userData })
   } catch (e) {
     return res.status(401).json({ e })
   }
