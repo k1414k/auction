@@ -88,17 +88,17 @@ export function SearchHeader() {
         ).slice(0, 7);
 
         return (
-            <ul className="-mb-3 z-10">
+            <ul>
                 {filtered.map((item: Item) => (
-                    <li key={item.id} className="border-b p-2 md:text-sm sm:text-xs hover:bg-gray-50 cursor-pointer" onMouseDown={() => {
+                    <li key={item.id} className="border-b border-gray-100 last:border-0 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer flex justify-between items-center" onMouseDown={() => {
                         setIsTyping(false);
                         setKeyword(item.title)
                         router.push(`/search?q=${item.title}`);
                         document.body.scrollTop = 0;
                         document.documentElement.scrollTop = 0;
                     }}>
-                        <span className="font-bold">{item.title}</span>
-                        <span className="text-xs text-gray-400 ml-2">¥{item? formatNumber(item.price) : 0}</span>
+                        <span className="font-medium truncate pr-2">{item.title}</span>
+                        <span className="text-gray-500 shrink-0">¥{item ? formatNumber(item.price) : 0}</span>
                     </li>
                 ))}
             </ul>
@@ -106,46 +106,38 @@ export function SearchHeader() {
     };
 
   return (
-    <div className="relative flex-1">
+    <div className="relative flex-1 min-w-0">
         <div className="relative">
           <input
             placeholder="何をお探しですか？"
             value={keyword}
             onChange={handleChange}
-            onFocus={()=>{ //入力中判別ロジック <-handleChangeの中でもある
+            onFocus={()=>{
               if (keyword.length > 0) setIsTyping(true);
               else setIsTyping(false);
             }}
             onKeyDown={e=>{
               if (e.key === "Enter") pushSearch()
             }}
-            // onBlur={()=>search.setIsTyping(false)}
-            className="sm:ml-0 w-full bg-gray-100 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+            className="w-full bg-gray-100 px-3 py-2 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-sky-400"
           />
-          <Search className="absolute top-[15%] right-2 sm:right-2 text-gray-300 w-5
-            cursor-pointer hover:text-sky-600" 
-            onClick={pushSearch} 
-          />
+          <Search className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 cursor-pointer hover:text-sky-600" onClick={pushSearch} />
           {keyword.length > 0 && (
-            <button 
+            <button
               onClick={clearKeyword}
-              className="absolute md:text-sm right-12 md:right-8 top-1/2 -translate-y-1/2 text-white bg-slate-500 px-2 rounded-full"
+              className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xs px-1.5 py-0.5 rounded"
+              aria-label="クリア"
             >
-              clear
+              クリア
             </button>
           )}
         </div>
 
-        <div>
-          {isTyping && items && (
-                <div>
-                    <SuggestList 
-                        items={items} 
-                        keyword={keyword} 
-                    />
-                </div>
-            )}
-        </div>
+        {isTyping && items && (
+          <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+            <SuggestList items={items} keyword={keyword} />
+          </div>
+        )}
     </div>
   );
 }
