@@ -83,9 +83,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-slate-200 text-gray-800 pt-8 pb-12 px-4 shadow-md">
+      <section className="bg-slate-200 text-gray-800 pt-4 pb-6 px-4 shadow-md">
         <div className="flex items-center gap-2 mb-4 opacity-80">
-          <History size={18} className="text-blue-400" />
           <h2 className="text-xs font-bold tracking-widest uppercase">最近の落札</h2>
         </div>
         {loading ? (
@@ -98,7 +97,7 @@ export default function HomePage() {
           <div className="grid gap-4 pb-4">
             {soldHistory.map((item) => (
               <Link key={item.id} href={`/items/${item.id}`}>
-                <div className="min-w-[280px] bg-white backdrop-blur-md rounded-2xl p-3 flex items-center gap-4 border border-white/10 hover:bg-white/15 transition">
+                <div className="min-w-[280px] bg-white backdrop-blur-md rounded-2xl p-3 flex items-center gap-4 border border-white/10 text-gray-800 transition">
                   <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-700 flex-shrink-0">
                     {item.image && <img src={apiAssetUrl(item.image) || ""} className="w-full h-full object-cover" alt="" />}
                   </div>
@@ -118,7 +117,10 @@ export default function HomePage() {
         <section className="mb-8">
           <div className="flex items-center justify-between mb-3 px-1">
             <div className="flex items-center gap-2">
-                <h2 className="font-black text-gray-800 animate-pulse　text-lg">もうすぐ終了</h2>
+                <h2 className="font-black text-gray-800 animate-pulse text-lg">
+                  <Clock size={18} className="text-blue-400" />
+                  もうすぐ終了
+                </h2>
             </div>
             <Link href="/search" className="text-xs font-bold text-red-500 flex items-center">
               もっと見る <ChevronRight size={14} />
