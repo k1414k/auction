@@ -38,7 +38,7 @@ export default function RegisterPage() {
       // 登録成功直後に store へ保存（/auth/user と同じ形の User 型を想定）
       setUser(data.user);
 
-      // プロフィールへ遷移（UserInitializer が route change 毎に /auth/user を再同期）
+      // プロフィールへ遷移
       router.replace("/user/profile");
     } catch (error) {
       console.error(error);

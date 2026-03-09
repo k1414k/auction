@@ -98,7 +98,7 @@ export default function HomePage() {
           <div className="grid gap-4 pb-4">
             {soldHistory.map((item) => (
               <Link key={item.id} href={`/items/${item.id}`}>
-                <div className="min-w-[280px] bg-white/10 backdrop-blur-md rounded-2xl p-3 flex items-center gap-4 border border-white/10 hover:bg-white/15 transition">
+                <div className="min-w-[280px] bg-white backdrop-blur-md rounded-2xl p-3 flex items-center gap-4 border border-white/10 hover:bg-white/15 transition">
                   <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-700 flex-shrink-0">
                     {item.image && <img src={apiAssetUrl(item.image) || ""} className="w-full h-full object-cover" alt="" />}
                   </div>
