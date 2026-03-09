@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Heart, Clock, Trash2, SlidersHorizontal } from 'lucide-react';
+import { Heart, Clock, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { Item } from '@/types/item';
 import { nextApi } from '@/lib/fetch';
