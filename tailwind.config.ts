@@ -9,7 +9,8 @@ const config: Config = {
   theme: {
     extend: {
       screens: { //小さいサイズが後に定義されるように !!
-        'xl': {'max': '1200px'}, 
+        'xl': {'max': '1420px'}, 
+        'lg': {'max': '1280px'}, 
         'md': {'max': '900px'},
         'sm': {'max': '650px'},  
         'xs': {'max': '350px'},
