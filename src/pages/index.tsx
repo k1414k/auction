@@ -83,10 +83,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-slate-900 text-white pt-8 pb-12 px-4 shadow-md">
+      <section className="bg-slate-200 text-gray-800 pt-8 pb-12 px-4 shadow-md">
         <div className="flex items-center gap-2 mb-4 opacity-80">
           <History size={18} className="text-blue-400" />
-          <h2 className="text-xs font-bold tracking-widest uppercase">Just Sold - 最近の落札</h2>
+          <h2 className="text-xs font-bold tracking-widest uppercase">最近の落札</h2>
         </div>
         {loading ? (
           <div className="grid grid-cols-2 gap-4">
@@ -118,10 +118,7 @@ export default function HomePage() {
         <section className="mb-8">
           <div className="flex items-center justify-between mb-3 px-1">
             <div className="flex items-center gap-2">
-              <div className="bg-red-500 p-1 rounded-lg animate-pulse">
-                <Clock size={16} className="text-white" />
-              </div>
-              <h2 className="font-black text-gray-800 text-lg italic">LAST 5 MINUTES</h2>
+                <h2 className="font-black text-gray-800 animate-pulse　text-lg">もうすぐ終了</h2>
             </div>
             <Link href="/search" className="text-xs font-bold text-red-500 flex items-center">
               もっと見る <ChevronRight size={14} />
@@ -166,8 +163,7 @@ export default function HomePage() {
 
         <section>
           <div className="flex items-center gap-2 mb-4 px-1">
-            <Gem size={20} className="text-amber-500" />
-            <h2 className="font-black text-gray-800 text-lg">1円スタートお宝市</h2>
+            <h2 className="font-black text-gray-800 text-lg">1円から入札</h2>
           </div>
 
           {loading ? (
@@ -175,7 +171,7 @@ export default function HomePage() {
               <SkeletonCard count={4} />
             </div>
           ) : oneYen.length === 0 ? (
-            <p className="text-sm text-gray-500 py-4">1円スタートの商品はありません</p>
+            <p className="text-sm text-gray-500 py-4">現在の対象商品がありません</p>
           ) : (
             <div className="grid grid-cols-2 gap-4">
               {oneYen.map((item) => (

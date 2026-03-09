@@ -33,9 +33,16 @@ body {
 input,
 textarea,
 button {
-  font-size: 16px;
+  font-size: 16px !important;
   background-color: #ffffff;
   -webkit-text-size-adjust: 100%;
+}
+
+/* モバイル: インプットフォーカス時のズーム防止（16px未満だとiOSが拡大する） */
+@media screen and (max-width: 900px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
 }
 
 * {
