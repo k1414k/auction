@@ -11,11 +11,6 @@ export function SearchHeader() {
   const [keyword, setKeyword] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
-  const clearKeyword = () => {
-    setKeyword("");
-    setIsTyping(false);
-  };
-  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setKeyword(e.target.value);
     if (e.target.value.length > 0) setIsTyping(true);
@@ -122,15 +117,6 @@ export function SearchHeader() {
             className="w-full bg-gray-100 px-3 py-2 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-sky-400"
           />
           <Search className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 cursor-pointer hover:text-sky-600" onClick={pushSearch} />
-          {keyword.length > 0 && (
-            <button
-              onClick={clearKeyword}
-              className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xs px-1.5 py-0.5 rounded"
-              aria-label="クリア"
-            >
-              クリア
-            </button>
-          )}
         </div>
 
         {isTyping && items && (

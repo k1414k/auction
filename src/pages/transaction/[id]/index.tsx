@@ -264,7 +264,7 @@ export default function TransactionPage() {
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-sm border-t">
+      <div className="p-4 bg-white/90 backdrop-blur-sm border-t">
         <div className="flex gap-2 max-w-xl mx-auto">
           <input
             className="flex-1 bg-gray-100 rounded-full px-5 py-3 text-sm outline-none border-none focus:ring-2 focus:ring-blue-100"

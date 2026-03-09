@@ -1,12 +1,12 @@
 import axios, { type AxiosInstance, type AxiosResponseHeaders } from "axios"
 import type { NextApiRequest, NextApiResponse } from "next"
 
-const COOKIE_OPTIONS = "Path=/; HttpOnly; SameSite=Lax"
-const COOKIE_CLEAR_HEADERS = [
-  `access-token=; ${COOKIE_OPTIONS}; Max-Age=0`,
-  `client=; ${COOKIE_OPTIONS}; Max-Age=0`,
-  `uid=; ${COOKIE_OPTIONS}; Max-Age=0`,
-]
+function cookieClearOptions(): string {
+  const isProd = process.env.NODE_ENV === "production"
+  return isProd
+    ? "Path=/; HttpOnly; Secure; SameSite=None"
+    : "Path=/; HttpOnly; SameSite=Lax"
+}
 
 function cookieBaseOptions(): string {
   const isProd = process.env.NODE_ENV === "production"
@@ -17,7 +17,12 @@ function cookieBaseOptions(): string {
 
 /** 401 時またはログアウト時に Cookie をクリア */
 export function clearAuthCookies(res: NextApiResponse): void {
-  res.setHeader("Set-Cookie", COOKIE_CLEAR_HEADERS)
+  const opts = cookieClearOptions()
+  res.setHeader("Set-Cookie", [
+    `access-token=; ${opts}; Max-Age=0`,
+    `client=; ${opts}; Max-Age=0`,
+    `uid=; ${opts}; Max-Age=0`,
+  ])
 }
 
 /** Rails のレスポンスヘッダから認証情報を Cookie に保存 */
