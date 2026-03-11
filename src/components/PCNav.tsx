@@ -18,9 +18,9 @@ export function PCNav() {
 
   const stats = [
     { label: "本日の入札数", value: 10 },
-    { label: "本日の落札数", value: 4 },
-    { label: "昨日の入札数", value: 18 },
-    { label: "昨日の落札数", value: 7 },
+    { label: "本日の落札数", value: 0 },
+    { label: "昨日の入札数", value: 3 },
+    { label: "昨日の落札数", value: 2 },
   ];
 
   // ループを自然に見せるために複製
@@ -66,7 +66,7 @@ export function PCNav() {
             return (
               <Link key={label} href={href}>
                 <div
-                  className={`flex items-center gap-1.5 px-4 py-2.5 text-md font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  className={`flex font-bold items-center gap-1.5 px-4 py-2.5 text-md border-b-2 transition-colors whitespace-nowrap ${
                     isActive
                       ? "border-blue-600 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300"

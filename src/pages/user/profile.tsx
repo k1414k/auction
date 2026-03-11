@@ -382,29 +382,33 @@ export default function MyPage() {
             </button>
           </div>
         </section>
-
-        <Link href="/user/wallet">
-          <section className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100 hover:border-blue-200 transition group">
-            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <Banknote size={20} className="text-amber-500" />
-              ウォレット
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-gray-500 mb-0.5">売上高</p>
-                <p className="text-lg font-bold text-gray-800">¥ {user?.balance ? formatNumber(user.balance) : 0}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-0.5">ポイント</p>
-                <p className="text-lg font-bold text-gray-800">{user?.points ? formatNumber(user.points) : 0} P</p>
-              </div>
+            
+            <div
+              className="my-1.5"
+            >
+              <Link href="/user/wallet">
+                <section className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100 hover:border-blue-200 transition group">
+                  <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <Banknote size={20} className="text-amber-500" />
+                    ウォレット
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-0.5">売上高</p>
+                      <p className="text-lg font-bold text-gray-800">¥ {user?.balance ? formatNumber(user.balance) : 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-0.5">ポイント</p>
+                      <p className="text-lg font-bold text-gray-800">{user?.points ? formatNumber(user.points) : 0} P</p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm text-blue-600 font-medium group-hover:text-blue-700 flex items-center gap-1">
+                    詳細を見る
+                    <Coins size={14} />
+                  </p>
+                </section>
+              </Link>
             </div>
-            <p className="mt-4 text-sm text-blue-600 font-medium group-hover:text-blue-700 flex items-center gap-1">
-              詳細を見る
-              <Coins size={14} />
-            </p>
-          </section>
-        </Link>
 
         <section>
           <h4 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">

@@ -19,7 +19,7 @@ export function SearchTop({ categories, items }: SearchTopProps) {
 
   const findHistory = () => {
     setHistory(
-      JSON.parse(localStorage.getItem("search_history") || "[]").slice(0, 10)
+      JSON.parse(localStorage.getItem("search_history") || "[]").slice(0, 5)
     );
   };
 
@@ -110,8 +110,8 @@ export function SearchTop({ categories, items }: SearchTopProps) {
       </section>
 
       <section>
-        <h2 className="text-sm font-bold text-gray-500 mb-3">新着順</h2>
-        <div className="grid grid-cols-5 md:grid-cols-4 sm:grid-cols-3 gap-4">
+        <h2 className="text-sm font-bold text-gray-500 mb-3">おすすめ順</h2>
+        <div className="grid grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-3 gap-2">
           {items.map((item) => (
             <Link key={item.id} href={`/items/${item.id}`}>
               <AuctionCard item={item} />
