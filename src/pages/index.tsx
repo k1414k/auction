@@ -82,51 +82,55 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      <section className="bg-slate-200 text-gray-800 pt-4 pb-6 px-4 shadow-md">
-        <div className="flex items-center gap-2 mb-4 opacity-80">
-          <h2 className="text-xs font-bold tracking-widest uppercase">最近の落札</h2>
-        </div>
-        {loading ? (
-          <div className="grid grid-cols-2 gap-4">
-            <SkeletonCard count={3} />
-          </div>
-        ) : soldHistory.length === 0 ? (
-          <p className="text-sm text-slate-400">まだ落札履歴はありません</p>
-        ) : (
-          <div className="grid gap-4 pb-4">
-            {soldHistory.map((item) => (
-              <Link key={item.id} href={`/items/${item.id}`}>
-                <div className="min-w-[280px] bg-white backdrop-blur-md rounded-2xl p-3 flex items-center gap-4 border border-white/10 text-gray-800 transition">
-                  <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-700 flex-shrink-0">
-                    {item.image && <img src={apiAssetUrl(item.image) || ""} className="w-full h-full object-cover" alt="" />}
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-blue-300 font-bold">{formatAgo(item.updated_at)}に落札</p>
-                    <h3 className="text-sm font-bold truncate w-40">{item.title}</h3>
-                    <p className="text-lg font-black text-white">¥{formatNumber(item.sold_price ?? item.price)}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <div className="px-4 mt-6">
-        <section className="mb-8">
+      <section className="mb-8">
           <div className="flex items-center justify-between mb-3 px-1">
             <div className="flex items-center gap-2">
-                <h2 className="font-black text-gray-800 animate-pulse text-lg">
-                  <Clock size={18} className="text-blue-400" />
-                  もうすぐ終了
+                <h2 className="font-black text-gray-800 text-lg">
+                  最近の取引
                 </h2>
             </div>
             <Link href="/search" className="text-xs font-bold text-red-500 flex items-center">
               もっと見る <ChevronRight size={14} />
             </Link>
           </div>
+          <div>
+            {loading ? (
+              <div className="grid grid-cols-4 md:grid-cols-3 gap-4">
+                <SkeletonCard count={3} />
+              </div>
+            ) : soldHistory.length === 0 ? (
+              <p className="text-sm text-slate-400">まだ落札履歴はありません</p>
+            ) : (
+              <div className="grid gap-4 pb-4">
+                {soldHistory.slice(0, 3).map((item) => (
+                  <Link key={item.id} href={`/items/${item.id}`}>
+                    <div className="min-w-[280px] bg-white backdrop-blur-md rounded-2xl p-3 flex items-center gap-4 border border-white/10 text-gray-800 transition">
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-700 flex-shrink-0">
+                        {item.image && <img src={apiAssetUrl(item.image) || ""} className="w-full h-full object-cover" alt="" />}
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold">{formatAgo(item.updated_at)}に落札</p>
+                        <h3 className="text-sm font-bold truncate w-40">{item.title}</h3>
+                        <p className="text-lg font-black">¥{formatNumber(item.sold_price ?? item.price)}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
 
+          
+
+        </section>
+
+
+      <section className="bg-slate-200 text-gray-800 pt-4 pb-6 px-4 shadow-md">
+        <div className="flex items-center gap-2 mb-4 opacity-80">
+          <h2 className="text-xs font-bold tracking-widest uppercase">もうすぐ終了</h2>
+        </div>
+        
+        <div>
           {loading ? (
             <div className="grid grid-cols-4 gap-2">
               <SkeletonCard count={4} />
@@ -161,7 +165,10 @@ export default function HomePage() {
               ))}
             </div>
           )}
-        </section>
+        </div>
+      </section>
+
+      <div className="px-4 mt-6">
 
         <section>
           <div className="flex items-center gap-2 mb-4 px-1">
