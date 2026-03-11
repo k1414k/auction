@@ -111,7 +111,7 @@ export function SearchTop({ categories, items }: SearchTopProps) {
 
       <section>
         <h2 className="text-sm font-bold text-gray-500 mb-3">おすすめ順</h2>
-        <div className="grid grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-5 md:grid-cols-3 gap-2">
           {items.map((item) => (
             <Link key={item.id} href={`/items/${item.id}`}>
               <AuctionCard item={item} />
