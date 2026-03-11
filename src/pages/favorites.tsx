@@ -58,7 +58,7 @@ export default function FavoritesPage() {
                     </div>
 
                     {/* タブ切り替え（PCでは幅を制限） */}
-                    <div className="flex bg-gray-100 p-1 rounded-xl max-w-md mx-auto">
+                    <div className="flex bg-gray-100 p-1 rounded-xl max-w-md mx-auto gap-2">
                         <button
                             onClick={() => setActiveTab('likes')}
                             className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-lg transition-all ${
