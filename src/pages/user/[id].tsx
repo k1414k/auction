@@ -120,7 +120,7 @@ export default function UserShopPage() {
             出品中の商品はありません
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-5 sm:grid-cols-3 gap-4">
             {itemsForCard.map((item) => (
               <Link key={item.id} href={`/items/${item.id}`}>
                 <AuctionCard item={item} />
