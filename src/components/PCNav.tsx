@@ -55,7 +55,7 @@ export function PCNav() {
   const rowHeight = 28;
 
   return (
-    <div className="md:hidden border-t border-gray-100 bg-white">
+    <div className="md:hidden bg-white">
       <div className="max-w-[1200px] mx-auto px-2 flex items-center justify-between gap-4">
         {/* 左: ナビ */}
         <div className="flex items-center min-w-0">
