@@ -1,0 +1,23 @@
+# PostgreSQL接続設定
+# 環境変数（.env）から値を読み込む。本番ではRDSのエンドポイントを指定する。
+
+default: &default
+  adapter: postgresql           # PostgreSQLを使う
+  encoding: unicode             # 文字コードをUnicodeに設定
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>  # 同時接続スレッド数
+  host:     <%= ENV.fetch("DATABASE_HOST",     "db") %>        # ローカル=Dockerサービス名"db"、本番=RDSエンドポイント
+  port:     <%= ENV.fetch("DATABASE_PORT",     5432) %>        # PostgreSQLのデフォルトポート
+  username: <%= ENV.fetch("DATABASE_USER",     "postgres") %>  # DBユーザー名
+  password: <%= ENV.fetch("DATABASE_PASSWORD", "password") %>  # DBパスワード
+
+development:
+  <<: *default
+  database: products_api_development   # ローカル開発用DB名（共通API用）
+
+test:
+  <<: *default
+  database: products_api_test          # テスト用DB名（共通API用）
+
+production:
+  <<: *default
+  database: products_api_production    # 本番DB名（共通API用、RDS上に作成）

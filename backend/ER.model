@@ -1,0 +1,24 @@
+User (PK: id)
+ ├─< Item (FK: user_id)
+ ├─< Favorite (FK: user_id)
+ ├─< Order (FK: buyer_id)
+ ├─< Order (FK: seller_id)
+ └─< Message (FK: user_id)
+
+Category (PK: id)
+ └─< Item (FK: category_id)
+
+Item (PK: id)
+ ├─< Favorite (FK: item_id)
+ └─ 0..1 Order (FK: item_id)
+
+Order (PK: id)
+ └─< Message (FK: order_id)
+
+Favorite (PK: id)
+ - user_id
+ - item_id
+
+Message (PK: id)
+ - user_id
+ - order_id
