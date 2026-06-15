@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get "health", to: "health#show"
+
   # 共通APIとして、サービス別の入り口を最上位に置き、
   # その下にバージョン（v1）をぶら下げる構造にする。
   #

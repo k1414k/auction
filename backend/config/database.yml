@@ -20,4 +20,8 @@ test:
 
 production:
   <<: *default
-  database: products_api_production    # 本番DB名（共通API用、RDS上に作成）
+  database: <%= ENV.fetch("DATABASE_NAME", "products_api_production") %>    # 本番DB名（共通API用、RDS上に作成）
+  host:     <%= ENV.fetch("DATABASE_HOST") %>
+  port:     <%= ENV.fetch("DATABASE_PORT", 5432) %>
+  username: <%= ENV.fetch("DATABASE_USER") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD") %>

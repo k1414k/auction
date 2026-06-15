@@ -30,6 +30,7 @@ class Item < ApplicationRecord
 
   # Active Storage
   has_many_attached :images
+  validate :images_count_within_limit
   validate :image_type
   validate :image_size
 
