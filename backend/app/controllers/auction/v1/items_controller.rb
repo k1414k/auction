@@ -1,6 +1,7 @@
 class Auction::V1::ItemsController < ApplicationController
   before_action :set_item, only: [:show, :update, :destroy]
-  before_action :authenticate_user!, only: [:create] # index/show は未ログインでも閲覧可
+  before_action :authenticate_user!, only: [:create, :update, :destroy] # index/show は未ログインでも閲覧可
+  before_action :authorize_owner!, only: [:update, :destroy]
 
   def ending_soon
     items = Item.includes(:user, images_attachments: :blob)
@@ -112,6 +113,12 @@ class Auction::V1::ItemsController < ApplicationController
 
   def set_item
     @item = Item.find(params[:id])
+  end
+
+  def authorize_owner!
+    return if @item.user_id == current_user.id
+
+    render json: { error: "自分の商品だけ操作できます" }, status: :forbidden
   end
 
   def item_params

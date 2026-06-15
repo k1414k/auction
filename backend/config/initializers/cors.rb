@@ -7,7 +7,8 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
     # 例）https://auction.jongin.blog,https://admin.jongin.blog
     raw_origins =
       ENV["FRONTEND_ORIGINS"].presence ||
-      ENV.fetch("FRONTEND_URL")
+      ENV["FRONTEND_URL"].presence ||
+      (Rails.env.production? ? ENV.fetch("FRONTEND_URL") : "http://localhost:3001,http://localhost:3003")
 
     origins raw_origins.split(",").map(&:strip)
 
