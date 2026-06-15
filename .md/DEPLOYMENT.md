@@ -87,18 +87,18 @@ docker run --rm ruby:3.2.4 ruby -rsecurerandom -e 'puts SecureRandom.hex(64)'
 スクリプト内部では以下を実行します。
 
 ```bash
-docker compose build
-docker compose run --rm backend bundle exec rails db:prepare
-docker compose up -d
-docker compose ps
+docker compose --env-file .env -f docker-compose.yml build
+docker compose --env-file .env -f docker-compose.yml run --rm backend bundle exec rails db:prepare
+docker compose --env-file .env -f docker-compose.yml up -d
+docker compose --env-file .env -f docker-compose.yml ps
 ```
 
 ### 4. 動作確認
 
 ```bash
 curl https://api.jongin.blog/health
-docker compose ps
-docker compose logs -f backend
+docker compose --env-file .env -f docker-compose.yml ps
+docker compose --env-file .env -f docker-compose.yml logs -f backend
 ```
 
 `{"status":"ok"}` が返れば backend は起動しています。
@@ -118,25 +118,25 @@ DB migration がある場合も `db:prepare` が実行されます。
 
 ```bash
 # 状態確認
-docker compose ps
+docker compose --env-file .env -f docker-compose.yml ps
 
 # ログ確認
-docker compose logs -f backend
-docker compose logs -f frontend
-docker compose logs -f admin
-docker compose logs -f caddy
+docker compose --env-file .env -f docker-compose.yml logs -f backend
+docker compose --env-file .env -f docker-compose.yml logs -f frontend
+docker compose --env-file .env -f docker-compose.yml logs -f admin
+docker compose --env-file .env -f docker-compose.yml logs -f caddy
 
 # Rails console
-docker compose exec backend bundle exec rails console
+docker compose --env-file .env -f docker-compose.yml exec backend bundle exec rails console
 
 # migration だけ実行
-docker compose run --rm backend bundle exec rails db:migrate
+docker compose --env-file .env -f docker-compose.yml run --rm backend bundle exec rails db:migrate
 
 # 再起動
-docker compose restart backend
+docker compose --env-file .env -f docker-compose.yml restart backend
 
 # 停止
-docker compose down
+docker compose --env-file .env -f docker-compose.yml down
 ```
 
 ## データ永続化
@@ -171,5 +171,5 @@ EC2 IAM Role を使う形に寄せるのがより安全です。その場合は 
 - Caddy が証明書を取得するため、初回起動前に DNS が EC2 を向いている必要があります。
 - `FRONTEND_ORIGINS` には `https://auction...` と `https://admin...` の両方を入れてください。
 - `admin` はまだ Rails API をブラウザから直接呼びます。将来的には Nuxt server route を使った BFF 化が望ましいです。
-- `docker compose down -v` は DB・画像・証明書 volume を削除します。本番では実行しないでください。
+- `docker compose --env-file .env -f docker-compose.yml down -v` は DB・画像・証明書 volume を削除します。本番では実行しないでください。
 - DB backup は別途必須です。まずは `pg_dump` を定期実行する運用を用意してください。
