@@ -55,24 +55,12 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     restoreFromStorage() {
       if (!process.client) return
-
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (!raw) return
-
-      try {
-        const parsed = JSON.parse(raw) as { user: AdminUser; token: AuthState['token'] }
-        this.user = parsed.user
-        this.token = parsed.token
-        this.isAuthenticated = !!parsed.user && !!parsed.token
-      } catch {
-        localStorage.removeItem(STORAGE_KEY)
-      }
+      localStorage.removeItem(STORAGE_KEY)
     },
 
     persistToStorage() {
       if (!process.client) return
-      if (!this.user || !this.token) return
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: this.user, token: this.token }))
+      localStorage.removeItem(STORAGE_KEY)
     },
 
     clearStorage() {
