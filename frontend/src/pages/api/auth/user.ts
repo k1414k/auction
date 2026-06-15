@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import { createApi } from "@/lib/axios"
+import { clearAuthCookies, createApi } from "@/lib/axios"
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,6 +7,19 @@ export default async function handler(
 ) {
   if (req.method !== "GET") {
     return res.status(405).end()
+  }
+
+  const hasAuthCookies =
+    Boolean(req.cookies["access-token"]) &&
+    Boolean(req.cookies["client"]) &&
+    Boolean(req.cookies["uid"])
+
+  if (!hasAuthCookies) {
+    clearAuthCookies(res)
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "認証情報がありません。",
+    })
   }
 
   const api = createApi(req, res)

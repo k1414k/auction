@@ -19,13 +19,26 @@ export async function nextApi<TRequest = unknown, TResponse = unknown>(
         credentials: "include",
     })
 
-    if (!res.ok) {
-        if (res.status === 401) {
-            useUserStore.getState().setUser(null)
-        }
-        const message = await res.text()
-        throw new Error(message || `API Error: ${res.status}`)
+    const text = await res.text()
+    let data: unknown = null
+    try {
+        data = text ? JSON.parse(text) : null
+    } catch {
+        data = text
     }
 
-    return await res.json() as Promise<TResponse>
+    if (!res.ok) {
+        if (res.status === 401) {
+            useUserStore.getState().clearUser()
+        }
+        const message =
+            data == null
+                ? `API Error: ${res.status}`
+                : typeof data === "string"
+                    ? data
+                    : JSON.stringify(data)
+        throw new Error(message)
+    }
+
+    return data as TResponse
 }

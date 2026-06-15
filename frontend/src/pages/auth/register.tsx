@@ -29,14 +29,18 @@ export default function RegisterPage() {
       setIsSubmitting(true);
       setErrors([]);
 
-      type RegisterResponse = { user: User };
-      const data = await nextApi<typeof form, RegisterResponse>("/auth/register", {
+      await nextApi<typeof form, { user: User }>("/auth/register", {
         method: "POST",
         body: form,
       });
 
-      // 登録成功直後に store へ保存（/auth/user と同じ形の User 型を想定）
-      setUser(data.user);
+      type UserDataResponse = { user: User };
+      const userData = await nextApi<unknown, UserDataResponse>("/auth/user", {
+        method: "GET",
+      });
+
+      // Cookie が反映され、current user が取れたことを確認してから store と画面遷移を進める
+      setUser(userData.user);
 
       // プロフィールへ遷移
       router.replace("/user/profile");

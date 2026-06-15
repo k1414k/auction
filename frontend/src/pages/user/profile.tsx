@@ -85,6 +85,7 @@ export default function MyPage() {
     const router = useRouter()
     const user = useUserStore(state=>state.user)
     const setUser = useUserStore(state=>state.setUser)
+    const clearUser = useUserStore(state=>state.clearUser)
     const [instroEdit, setInstroEdit] = useState(false)
     const [activeTab, setActiveTab] = useState<HistoryTab>("出品中")
     const [buyOrders, setBuyOrders] = useState<OrderItem[]>([])
@@ -185,10 +186,10 @@ export default function MyPage() {
     const logoutUser = async () => {
       try {
         await nextApi("/auth/sign-out", { method: "DELETE" })
-        setUser(null)
+        clearUser()
         router.replace("/")
       } catch {
-        setUser(null)
+        clearUser()
         router.replace("/")
         alert("ログアウトに失敗しました")
       }

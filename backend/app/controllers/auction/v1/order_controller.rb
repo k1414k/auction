@@ -22,12 +22,11 @@ class Auction::V1::OrderController < ApplicationController
   end
 
   def create
-    item = Item.find(order_params[:item_id])
-
-    validate_purchase!(item)
-
     order = nil
     ActiveRecord::Base.transaction do
+      item = Item.lock.find(order_params[:item_id])
+      validate_purchase!(item)
+
       shipping_address = build_shipping_address
 
       order = Order.create!(
@@ -42,7 +41,9 @@ class Auction::V1::OrderController < ApplicationController
 
       if order_params[:payment_method].to_s == "ポイント"
         seller = item.user
-        seller.update!(balance: seller.balance + item.price)
+        seller.with_lock do
+          seller.update!(balance: seller.balance + item.price)
+        end
       end
 
       item.update!(trading_status: :trading)
@@ -109,9 +110,11 @@ class Auction::V1::OrderController < ApplicationController
   def process_payment!(item, payment_method)
     return unless payment_method == "ポイント"
 
-    raise PurchaseError, "残高が足りません" if current_user.points < item.price
+    current_user.with_lock do
+      raise PurchaseError, "残高が足りません" if current_user.points < item.price
 
-    current_user.update!(points: current_user.points - item.price)
+      current_user.update!(points: current_user.points - item.price)
+    end
   end
 
   def set_order

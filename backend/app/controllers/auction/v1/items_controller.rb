@@ -56,7 +56,7 @@ class Auction::V1::ItemsController < ApplicationController
   end
 
   def index
-    items = Item.includes(:user, images_attachments: :blob)
+    items = Item.searchable.includes(:user, images_attachments: :blob)
 
     render json: items.map { |item| item_list_json(item) }
   end

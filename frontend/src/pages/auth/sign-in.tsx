@@ -31,24 +31,18 @@ export default function LoginPage() {
       })
 
       const userData: UserDataResponse = await nextApi("/auth/user", {method:"GET"})
-        // ログイン成功したのでユーザー情報取得後zustandに入れる もし失敗したらcatchに飛ぶので可能
-      setUser({
-          email: userData.user.email,
-          name: userData.user.name,
-          nickname: userData.user.nickname,
-          balance: userData.user.balance,
-          points: userData.user.points,
-          introduction: userData.user.introduction,
-          avatar_url: userData.user.avatar_url,
-          role: userData.user.role
-        })
+      // Cookie が反映され、current user が取れたことを確認してから store と画面遷移を進める
+      setUser(userData.user)
 
-        router.replace('/')
-      } 
-    catch (e){
+      router.replace('/')
+    } catch (e){
       if (e instanceof Error){
-        const errorMessage= JSON.parse(e.message)
-        setErrors(errorMessage.message)
+        try {
+          const errorMessage= JSON.parse(e.message)
+          setErrors(errorMessage.message)
+        } catch {
+          setErrors(e.message)
+        }
       }
       else {
         setErrors("ログイン失敗しました。")

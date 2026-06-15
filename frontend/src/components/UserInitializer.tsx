@@ -14,32 +14,24 @@ type UserInitailizerProps = {
 // setUser(null) でユーザー状態が競合して上書きされるバグが起きる。
 export function UserInitializer({ children }:UserInitailizerProps) {
   const setUser = useUserStore(state => state.setUser)
+  const clearUser = useUserStore(state => state.clearUser)
+  const setLoading = useUserStore(state => state.setLoading)
 
   useEffect(() => {
     const init = async () => {
+      setLoading(true)
       try {
         type UserDataResponse = {
           user: User
         }
         const userData: UserDataResponse = await nextApi("/auth/user", {method:"GET"})
-        setUser({
-          ...userData.user,
-          id: userData.user.id,
-          email: userData.user.email,
-          name: userData.user.name,
-          nickname: userData.user.nickname,
-          balance: userData.user.balance,
-          points: userData.user.points,
-          introduction: userData.user.introduction,
-          avatar_url: userData.user.avatar_url,
-          role: userData.user.role,
-        })
+        setUser(userData.user)
       } catch {
-        setUser(null)
+        clearUser()
       }
     }
     init()
-  }, [setUser])
+  }, [clearUser, setLoading, setUser])
 
   return <>{children}</>
 }

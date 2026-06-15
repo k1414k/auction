@@ -16,11 +16,12 @@ class User < ActiveRecord::Base
 
   include DeviseTokenAuth::Concerns::User
 
-  before_validation :create_nickname, on: :create
+  before_create :create_nickname
 
   has_one_attached :avatar
 
-  validates :nickname, presence: true, uniqueness: true, length: { minimum: 2, maximum: 10 }
+  validates :nickname, uniqueness: true, length: { minimum: 2, maximum: 10 }, allow_blank: true
+  validates :nickname, presence: true, on: :update
 
   enum role: { user: 0, admin: 1, super_admin: 2 }
 

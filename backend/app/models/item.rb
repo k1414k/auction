@@ -23,6 +23,8 @@ class Item < ApplicationRecord
     fair: 3,
   }
 
+  scope :searchable, -> { where.not(trading_status: trading_statuses[:sold]) }
+
   # enum shipping_fee_payer: {
   #   seller: 0,
   #   buyer: 1
