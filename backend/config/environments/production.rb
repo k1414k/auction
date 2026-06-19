@@ -83,9 +83,8 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  ENV.fetch("RAILS_HOSTS", "").split(",").map(&:strip).reject(&:blank?).each do |host|
-    config.hosts << host
-  end
+  # Host allow-list values are loaded from RAILS_HOSTS and RAILS_INTERNAL_HOSTS
+  # in config/initializers/allowed_hosts.rb.
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
   routes.default_url_options = {

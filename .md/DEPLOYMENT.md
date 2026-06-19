@@ -170,6 +170,7 @@ EC2 IAM Role を使う形に寄せるのがより安全です。その場合は 
 
 - Caddy が証明書を取得するため、初回起動前に DNS が EC2 を向いている必要があります。
 - `FRONTEND_ORIGINS` には `https://auction...` と `https://admin...` の両方を入れてください。
+- `frontend` の Next.js API Routes は Docker 内で `http://backend:3000` を呼ぶため、`RAILS_INTERNAL_HOSTS=backend` を設定してください。
 - `admin` はまだ Rails API をブラウザから直接呼びます。将来的には Nuxt server route を使った BFF 化が望ましいです。
 - `docker compose --env-file .env -f docker-compose.yml down -v` は DB・画像・証明書 volume を削除します。本番では実行しないでください。
 - DB backup は別途必須です。まずは `pg_dump` を定期実行する運用を用意してください。

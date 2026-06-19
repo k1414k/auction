@@ -197,6 +197,7 @@ DATABASE_PASSWORD=strong-password
 
 APP_HOST=api.example.com
 RAILS_HOSTS=api.example.com
+RAILS_INTERNAL_HOSTS=backend
 FRONTEND_ORIGINS=https://auction.example.com,https://admin.example.com
 
 NEXT_PUBLIC_API_BASE_URL=https://api.example.com
