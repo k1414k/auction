@@ -346,6 +346,7 @@ DATABASE_PASSWORD=postgres
 
 RAILS_ENV=development
 FRONTEND_ORIGINS=http://localhost:3001,http://localhost:3003
+RAILS_INTERNAL_HOSTS=backend
 
 INTERNAL_API_BASE_URL=http://backend:3000
 NEXT_PUBLIC_APP_URL=http://localhost:3001
@@ -552,4 +553,3 @@ CI の最初の到達点:
    - orders item unique
    - auth/authorization request spec
    - purchase/bid race condition spec
-

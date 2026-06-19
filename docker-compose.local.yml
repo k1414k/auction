@@ -35,6 +35,7 @@ services:
       FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:-http://localhost:3001,http://localhost:3003}
       APP_HOST: localhost:3000
       APP_PROTOCOL: http
+      RAILS_INTERNAL_HOSTS: ${RAILS_INTERNAL_HOSTS:-backend}
     ports:
       - "3000:3000"
     volumes:

@@ -39,6 +39,7 @@ services:
       FORCE_SSL: ${FORCE_SSL:-false}
       ASSUME_SSL: ${ASSUME_SSL:-true}
       RAILS_HOSTS: ${RAILS_HOSTS}
+      RAILS_INTERNAL_HOSTS: ${RAILS_INTERNAL_HOSTS:-backend}
       RAILS_LOG_LEVEL: ${RAILS_LOG_LEVEL:-info}
       RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
       AWS_REGION: ${AWS_REGION:-ap-northeast-1}
