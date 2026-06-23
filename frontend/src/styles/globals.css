@@ -32,10 +32,37 @@ body {
 
 input,
 textarea,
+select,
 button {
   font-size: 16px !important;
   background-color: #ffffff;
   -webkit-text-size-adjust: 100%;
+}
+
+:where(button, a[href], input, textarea, select) {
+  -webkit-tap-highlight-color: rgba(37, 99, 235, 0.12);
+}
+
+:where(button, a[href]) {
+  touch-action: manipulation;
+}
+
+:where(button:not(:disabled), a[href]):active {
+  transform: translateY(1px);
+}
+
+:where(button:disabled) {
+  cursor: not-allowed;
+}
+
+:where(button, a[href], input, textarea, select):focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.55);
+  outline-offset: 2px;
+}
+
+:where(input, textarea, select):focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
 }
 
 /* モバイル: インプットフォーカス時のズーム防止（16px未満だとiOSが拡大する） */

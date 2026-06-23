@@ -127,12 +127,16 @@ export function SearchHeader() {
           onKeyDown={(e) => {
             if (e.key === "Enter") pushSearch();
           }}
-          className="w-full bg-gray-100 px-3 py-2 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-sky-400"
+          className="w-full bg-gray-100 px-3 pr-10 py-2 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-sky-400"
         />
-        <Search
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 cursor-pointer hover:text-sky-600"
+        <button
+          type="button"
+          aria-label="検索する"
           onClick={pushSearch}
-        />
+          className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md bg-transparent p-1 text-gray-400 hover:bg-white hover:text-sky-600 active:bg-sky-50 transition"
+        >
+          <Search className="w-5 h-5" />
+        </button>
       </div>
 
       {isTyping && items && (
