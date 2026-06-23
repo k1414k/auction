@@ -25,6 +25,18 @@ class Item < ApplicationRecord
 
   scope :searchable, -> { where.not(trading_status: trading_statuses[:sold]) }
 
+  def auction_ended?
+    auction? && end_at.present? && end_at <= Time.current
+  end
+
+  def highest_bid
+    bids.order(amount: :desc, created_at: :asc, id: :asc).first
+  end
+
+  def highest_bidder?(user)
+    user.present? && highest_bid&.user_id == user.id
+  end
+
   # enum shipping_fee_payer: {
   #   seller: 0,
   #   buyer: 1

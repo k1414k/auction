@@ -38,6 +38,14 @@ export default function CheckoutPage() {
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [addressError, setAddressError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState("ポイント");
+  const purchasePrice = item
+    ? item.sale_type === "auction"
+      ? item.winning_bid_amount ?? item.current_bid ?? item.price
+      : item.price
+    : null;
+  const isAuctionCheckout = item?.sale_type === "auction";
+  const isAuctionCheckoutBlocked = isAuctionCheckout && !item?.can_checkout_auction;
+  const canPay = user != null && purchasePrice != null && user.points - purchasePrice >= 0;
 
   const fetchAddresses = useCallback(async () => {
     try {
@@ -132,6 +140,10 @@ export default function CheckoutPage() {
 
   const handleConfirmPurchase = async () => {
     if (!item) return;
+    if (isAuctionCheckoutBlocked) {
+      alert(item.auction_order_id ? "このオークションは取引作成済みです" : "落札者のみ購入手続きできます");
+      return;
+    }
     if (!selectedAddress) {
       alert("配送先を選択してください");
       return;
@@ -307,9 +319,23 @@ export default function CheckoutPage() {
           </div>
           <div className="space-y-1">
             <p className="text-sm font-bold line-clamp-2 text-gray-800">{item.title}</p>
-            <p className="text-lg font-bold">¥{formatNumber(item.price)}</p>
+            <p className="text-lg font-bold">¥{formatNumber(purchasePrice ?? item.price)}</p>
           </div>
         </div>
+        )}
+
+        {item?.sale_type === "auction" && (
+          <div className="bg-white p-4 rounded-2xl shadow-sm text-sm text-gray-600">
+            {item.auction_order_id ? (
+              <Link href={`/transaction/${item.auction_order_id}`} className="text-blue-600 font-bold">
+                取引ページへ進む
+              </Link>
+            ) : item.can_checkout_auction ? (
+              <p>落札価格で購入手続きを進めます</p>
+            ) : (
+              <p>落札者のみ購入手続きできます</p>
+            )}
+          </div>
         )}
 
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden divide-y">
@@ -354,7 +380,7 @@ export default function CheckoutPage() {
         <div className="p-4 space-y-3">
           <div className="flex justify-between text-sm text-gray-500">
             <span>商品代金</span>
-            <span>¥ {item ? formatNumber(item.price) : "---"}</span>
+            <span>¥ {purchasePrice != null ? formatNumber(purchasePrice) : "---"}</span>
           </div>
           <div className="flex justify-between text-sm text-gray-500">
             <span>配送料</span>
@@ -366,17 +392,17 @@ export default function CheckoutPage() {
           </div>
           <div className="flex justify-between text-sm">
             <span>支払い金額</span>
-            <span>¥ {item ? formatNumber(item.price) : "---"}</span>
+            <span>¥ {purchasePrice != null ? formatNumber(purchasePrice) : "---"}</span>
           </div>
           <div className="flex justify-between font-bold text-xl pt-4 border-t border-dashed border-gray-200">
             <span>
-              {user != null && item != null && user.points - item.price >= 0
+              {canPay
                 ? "支払い後の残高"
                 : "残高が足りません"}
             </span>
             <span>
-              {user != null && item != null && user.points - item.price >= 0
-                ? `¥ ${formatNumber(user.points - item.price)}`
+              {canPay && purchasePrice != null
+                ? `¥ ${formatNumber(user.points - purchasePrice)}`
                 : ""}
             </span>
           </div>
@@ -388,13 +414,13 @@ export default function CheckoutPage() {
           チャージする
         </button>
         
-        {user != null && item != null && user.points - item.price >= 0 &&
+        {canPay && !isAuctionCheckoutBlocked &&
           <button
             type="button"
             onClick={handleConfirmPurchase}
             className="w-full bg-blue-500 text-white font-bold py-5 rounded-full shadow-xl shadow-blue-100 active:scale-[0.98] transition mt-4"
           >
-            購入を確定する
+            {isAuctionCheckout ? "落札商品を購入する" : "購入を確定する"}
           </button>
         }
       </main>

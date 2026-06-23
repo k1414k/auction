@@ -61,11 +61,13 @@ export interface Category {
 // 注文
 export interface Order {
   id: number;
-  userId: number;
   itemId: number;
   itemTitle: string;
   price: number;
-  status: 'pending' | 'completed' | 'cancelled';
+  status: 'waiting_payment' | 'waiting_shipping' | 'waiting_review' | 'completed';
+  buyer: string;
+  seller: string;
+  shippingAddress?: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -22,6 +22,7 @@ Rails.application.routes.draw do
       get "dashboard", to: "dashboard#index"
       resources :items
       resources :categories
+      resources :orders, only: [:index, :show, :update]
     end
   end
 
@@ -38,8 +39,12 @@ Rails.application.routes.draw do
     namespace :v1, module: :v1, path: "v1" do
       get "user", to: "users#my_profile"
       get "user/items", to: "users#my_items"
+      get "user/bids", to: "users#my_bids"
+      get "user/wallet_transactions", to: "users#wallet_transactions"
+      patch "user/profile", to: "users#update_profile"
       patch "user/wallet", to: "users#update_wallet"
       patch "user/avatar", to: "users#update_avatar"
+      get "stats/summary", to: "stats#summary"
 
       get "users/:id/items", to: "items#user_items"
 
@@ -52,7 +57,8 @@ Rails.application.routes.draw do
         resources :bids, only: [:index, :create], controller: "bids"
         resources :offers, only: [:create], controller: "offers"
       end
-      resources :offers, only: [:update], controller: "offers"
+      resources :offers, only: [:index, :update], controller: "offers"
+      resources :notifications, only: [:index, :update]
       resources :addresses, only: [:index, :create, :update, :destroy]
       resources :orders, only: [:index, :show, :create, :update], controller: "order" do
         resources :messages, only: [:index, :create], controller: "messages"

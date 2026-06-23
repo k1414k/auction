@@ -164,6 +164,13 @@ export default function TransactionPage() {
 
       <div className="p-4 space-y-6">
         <div className="flex flex-col items-center py-4">
+          {order.status === "waiting_payment" && (
+            <>
+              <Package className="text-blue-500 mb-2" size={32} />
+              <p className="text-sm font-bold text-gray-800">購入手続きを完了してください</p>
+              <p className="text-xs text-gray-400 mt-1">配送先と支払いを登録すると出品者へ通知されます</p>
+            </>
+          )}
           {order.status === "waiting_shipping" && (
             <>
               <Package className="text-blue-500 mb-2" size={32} />
@@ -227,6 +234,17 @@ export default function TransactionPage() {
             <div ref={messagesEndRef} />
           </div>
         </div>
+
+        {order.status === "waiting_payment" && isBuyer && (
+          <Link href={`/items/${order.item_id}/checkout`} className="block">
+            <button
+              type="button"
+              className="w-full bg-blue-500 text-white font-bold py-3 rounded-xl active:scale-95 transition"
+            >
+              購入手続きを続ける
+            </button>
+          </Link>
+        )}
 
         {(order.status === "waiting_shipping" || order.status === "waiting_review") && (
           <div className="flex gap-3">

@@ -43,6 +43,33 @@ type MyItem = {
   created_at: string;
 };
 
+type BidItem = {
+  id: number;
+  item_id: number;
+  item_title: string;
+  item_image: string | null;
+  my_bid_amount: number;
+  highest_bid_amount: number | null;
+  end_at: string | null;
+  auction_ended: boolean;
+  status: "winning" | "outbid" | "won" | "lost" | string;
+  order_id: number | null;
+  order_status: string | null;
+  created_at: string;
+};
+
+type WalletTransaction = {
+  id: number;
+  account: "points" | "balance" | string;
+  kind: string;
+  amount: number;
+  balance_after: number;
+  points_after: number;
+  description: string;
+  order_id: number | null;
+  created_at: string;
+};
+
 function ProfileSkeleton() {
   return (
     <>
@@ -91,28 +118,59 @@ export default function MyPage() {
     const [buyOrders, setBuyOrders] = useState<OrderItem[]>([])
     const [sellOrders, setSellOrders] = useState<OrderItem[]>([])
     const [myItems, setMyItems] = useState<MyItem[]>([])
+    const [bids, setBids] = useState<BidItem[]>([])
+    const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([])
+    const [introductionDraft, setIntroductionDraft] = useState("")
+    const [savingIntroduction, setSavingIntroduction] = useState(false)
 
     const fetchHistory = useCallback(async () => {
       if (!user) return
       try {
-        const [buyRes, sellRes, itemsRes] = await Promise.all([
+        const [buyRes, sellRes, itemsRes, bidsRes, walletRes] = await Promise.all([
           nextApi<unknown, OrderItem[]>("/orders?role=buyer", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
           nextApi<unknown, OrderItem[]>("/orders?role=seller", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
           nextApi<unknown, MyItem[]>("/user/items", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
+          nextApi<unknown, BidItem[]>("/user/bids", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
+          nextApi<unknown, WalletTransaction[]>("/user/wallet-transactions", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
         ])
         setBuyOrders(buyRes)
         setSellOrders(sellRes)
         setMyItems(itemsRes)
+        setBids(bidsRes)
+        setWalletTransactions(walletRes)
       } catch {
         setBuyOrders([])
         setSellOrders([])
         setMyItems([])
+        setBids([])
+        setWalletTransactions([])
       }
     }, [user])
 
     useEffect(() => {
       fetchHistory()
     }, [fetchHistory])
+
+    useEffect(() => {
+      if (user) setIntroductionDraft(user.introduction ?? "")
+    }, [user])
+
+    const saveIntroduction = async () => {
+      if (!user || savingIntroduction) return
+      setSavingIntroduction(true)
+      try {
+        const updated = await nextApi<{ introduction: string }, NonNullable<typeof user>>("/user/profile", {
+          method: "PATCH",
+          body: { introduction: introductionDraft },
+        })
+        setUser({ ...user, introduction: updated.introduction })
+        setInstroEdit(false)
+      } catch {
+        alert("自己紹介の保存に失敗しました")
+      } finally {
+        setSavingIntroduction(false)
+      }
+    }
 
     const uploadAvatar = async (file: File) => {
       if (!user) return
@@ -322,13 +380,27 @@ export default function MyPage() {
                     <textarea
                       className="w-full h-24 p-3 text-gray-600 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none"
                       placeholder="自己紹介"
+                      value={introductionDraft}
+                      onChange={(e) => setIntroductionDraft(e.target.value)}
                     />
-                    <button
-                      className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition"
-                      onClick={() => setInstroEdit(false)}
-                    >
-                      キャンセル
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        className="px-4 py-2 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition disabled:opacity-50"
+                        onClick={saveIntroduction}
+                        disabled={savingIntroduction}
+                      >
+                        {savingIntroduction ? "保存中..." : "保存"}
+                      </button>
+                      <button
+                        className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition"
+                        onClick={() => {
+                          setIntroductionDraft(user?.introduction ?? "")
+                          setInstroEdit(false)
+                        }}
+                      >
+                        キャンセル
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <p
@@ -360,13 +432,13 @@ export default function MyPage() {
           </div>
 
           <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-1">
-            <button
-              type="button"
+            <Link
+              href="/user/addresses"
               className="flex items-center gap-2 py-2 text-blue-600 font-medium hover:text-blue-700 transition text-left"
             >
               <MapPin size={16} />
               住所変更
-            </button>
+            </Link>
             <button
               onClick={() => setModalSwitch(true)}
               className="flex items-center gap-2 py-2 text-blue-600 font-medium hover:text-blue-700 transition text-left"
@@ -421,8 +493,32 @@ export default function MyPage() {
             {activeTab}
           </h4>
           {activeTab === "入札中" && (
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center text-gray-500">
-              入札履歴は準備中です
+            <div className="space-y-2">
+              {bids.length === 0 ? (
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center text-gray-500">
+                  入札中の商品はありません
+                </div>
+              ) : (
+                bids.map((bid) => (
+                  <Link key={bid.id} href={bid.order_id ? `/transaction/${bid.order_id}` : `/items/${bid.item_id}`}>
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-3 hover:bg-gray-50">
+                      <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                        {bid.item_image && (
+                          <Image src={apiAssetUrl(bid.item_image) || ""} alt="" fill className="object-cover" unoptimized />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-bold text-gray-800 truncate">{bid.item_title}</p>
+                          <span className="text-xs text-blue-600 font-bold shrink-0">{bidStatusText(bid.status)}</span>
+                        </div>
+                        <p className="text-sm text-gray-600">あなたの入札 ¥{formatNumber(bid.my_bid_amount)}</p>
+                        <p className="text-xs text-gray-400">現在最高 ¥{formatNumber(bid.highest_bid_amount ?? bid.my_bid_amount)}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              )}
             </div>
           )}
           {activeTab === "出品中" && (
@@ -507,7 +603,6 @@ export default function MyPage() {
           )}
           {activeTab === "ポイント履歴" && (
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <p className="text-sm text-gray-600 mb-4">売上高・ポイントの履歴は準備中です</p>
               <div className="flex gap-4">
                 <div>
                   <p className="text-xs text-gray-500">現在の売上高</p>
@@ -518,6 +613,25 @@ export default function MyPage() {
                   <p className="text-lg font-bold">{formatNumber(user?.points ?? 0)} P</p>
                 </div>
               </div>
+              <div className="mt-4 space-y-3">
+                {walletTransactions.length === 0 ? (
+                  <p className="text-sm text-gray-500">履歴はまだありません</p>
+                ) : (
+                  walletTransactions.map((tx) => (
+                    <div key={tx.id} className="border-t border-gray-100 pt-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-medium text-gray-800">{tx.description}</p>
+                        <p className={`text-sm font-bold ${tx.amount >= 0 ? "text-green-600" : "text-red-600"}`}>
+                          {tx.amount >= 0 ? "+" : ""}{formatNumber(tx.amount)}
+                        </p>
+                      </div>
+                      <p className="text-xs text-gray-400">
+                        {tx.account === "points" ? "ポイント" : "売上高"} / {new Date(tx.created_at).toLocaleDateString("ja-JP")}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           )}
         </section>
@@ -526,4 +640,13 @@ export default function MyPage() {
       </main>
     </div>
   );
+}
+
+function bidStatusText(status: string) {
+  return {
+    winning: "最高額",
+    outbid: "更新あり",
+    won: "落札",
+    lost: "終了",
+  }[status] ?? status
 }

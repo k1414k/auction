@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_06_12_090000) do
+ActiveRecord::Schema[7.1].define(version: 2026_06_23_090300) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -124,6 +124,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_12_090000) do
     t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "actor_id"
+    t.string "title", null: false
+    t.text "body"
+    t.string "action_url"
+    t.integer "category", default: 0, null: false
+    t.datetime "read_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_notifications_on_actor_id"
+    t.index ["user_id", "category"], name: "index_notifications_on_user_id_and_category"
+    t.index ["user_id", "read_at"], name: "index_notifications_on_user_id_and_read_at"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
   create_table "offers", force: :cascade do |t|
     t.bigint "item_id", null: false
     t.bigint "user_id", null: false
@@ -162,6 +178,20 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_12_090000) do
     t.index ["status"], name: "index_posts_on_status"
   end
 
+  create_table "reviews", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.bigint "reviewer_id", null: false
+    t.bigint "reviewee_id", null: false
+    t.integer "rating", null: false
+    t.text "comment"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id", "reviewer_id"], name: "index_reviews_on_order_id_and_reviewer_id", unique: true
+    t.index ["order_id"], name: "index_reviews_on_order_id"
+    t.index ["reviewee_id"], name: "index_reviews_on_reviewee_id"
+    t.index ["reviewer_id"], name: "index_reviews_on_reviewer_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "provider", default: "email", null: false
     t.string "uid", default: "", null: false
@@ -186,6 +216,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_12_090000) do
     t.index ["uid", "provider"], name: "index_users_on_uid_and_provider", unique: true
   end
 
+  create_table "wallet_transactions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "order_id"
+    t.integer "account", null: false
+    t.integer "kind", null: false
+    t.integer "amount", null: false
+    t.integer "balance_after", null: false
+    t.integer "points_after", null: false
+    t.string "description", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_wallet_transactions_on_order_id"
+    t.index ["user_id", "created_at"], name: "index_wallet_transactions_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_wallet_transactions_on_user_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "addresses", "users"
@@ -198,9 +244,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_12_090000) do
   add_foreign_key "items", "users"
   add_foreign_key "messages", "orders"
   add_foreign_key "messages", "users"
+  add_foreign_key "notifications", "users", column: "actor_id", on_delete: :nullify
+  add_foreign_key "notifications", "users", on_delete: :cascade
   add_foreign_key "offers", "items"
   add_foreign_key "offers", "users"
   add_foreign_key "orders", "items"
   add_foreign_key "orders", "users", column: "buyer_id"
   add_foreign_key "orders", "users", column: "seller_id"
+  add_foreign_key "reviews", "orders", on_delete: :cascade
+  add_foreign_key "reviews", "users", column: "reviewee_id", on_delete: :cascade
+  add_foreign_key "reviews", "users", column: "reviewer_id", on_delete: :cascade
+  add_foreign_key "wallet_transactions", "orders", on_delete: :nullify
+  add_foreign_key "wallet_transactions", "users", on_delete: :cascade
 end

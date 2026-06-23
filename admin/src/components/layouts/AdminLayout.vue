@@ -107,12 +107,6 @@
 
       <v-spacer />
 
-      <!-- 通知アイコン -->
-      <v-btn icon="mdi-bell-outline" variant="text" />
-
-      <!-- 検索アイコン -->
-      <v-btn icon="mdi-magnify" variant="text" />
-
       <!-- ダークモード切り替え -->
       <v-btn
         :icon="isDark ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent'"
