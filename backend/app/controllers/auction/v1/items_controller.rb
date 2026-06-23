@@ -63,6 +63,12 @@ class Auction::V1::ItemsController < ApplicationController
 
   def show
     item = Item.includes(:user, images_attachments: :blob).find(params[:id])
+    winning_bid = item.highest_bid
+    order = item.order
+    order_visible_to_current_user =
+      current_user.present? &&
+      order.present? &&
+      [order.buyer_id, order.seller_id].include?(current_user.id)
 
     render json: {
       **item.as_json,
@@ -74,8 +80,13 @@ class Auction::V1::ItemsController < ApplicationController
       start_price: item.start_price,
       end_at: item.end_at,
       min_increment: item.min_increment || 100,
-      current_bid: item.bids.maximum(:amount),
-      bids_count: item.bids.count
+      current_bid: winning_bid&.amount,
+      bids_count: item.bids.count,
+      auction_ended: item.auction_ended?,
+      winning_bid_amount: winning_bid&.amount,
+      is_current_user_highest_bidder: item.highest_bidder?(current_user),
+      can_checkout_auction: item.auction_ended? && item.listed? && item.highest_bidder?(current_user),
+      auction_order_id: order_visible_to_current_user ? order.id : nil
     }
   end
 

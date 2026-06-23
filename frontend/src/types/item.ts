@@ -20,4 +20,9 @@ export type Item = {
   min_increment?: number;
   current_bid?: number | null;
   bids_count?: number;
+  auction_ended?: boolean;
+  winning_bid_amount?: number | null;
+  is_current_user_highest_bidder?: boolean;
+  can_checkout_auction?: boolean;
+  auction_order_id?: number | null;
 };

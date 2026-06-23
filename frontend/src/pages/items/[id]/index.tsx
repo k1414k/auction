@@ -83,7 +83,9 @@ export default function ProductDetailPage() {
       return base + inc
     })()
 
-    const isAuctionEnded = item?.end_at ? new Date(item.end_at) < new Date() : false
+    const isAuctionEnded = item?.auction_ended ?? (item?.end_at ? new Date(item.end_at) < new Date() : false)
+    const auctionDisplayPrice = item?.current_bid ?? item?.start_price ?? item?.price ?? 0
+    const displayPrice = item?.sale_type === "auction" ? auctionDisplayPrice : item?.price ?? 0
 
     const handleBid = async () => {
       if (!item || !id || submitting) return
@@ -223,7 +225,7 @@ export default function ProductDetailPage() {
                         <h1 className="text-xl font-bold text-gray-800">{item?.title}</h1>
                         <div className="flex items-center justify-between">
                             <p className="text-3xl font-bold text-gray-900">
-                                ¥{formatNumber(item.price)} <span className="text-sm font-normal text-gray-400">送料込み</span>
+                                ¥{formatNumber(displayPrice)} <span className="text-sm font-normal text-gray-400">送料込み</span>
                             </p>
                             <button 
                                 onClick={toggleFavorite}
@@ -287,8 +289,30 @@ export default function ProductDetailPage() {
                                       </button>
                                     </div>
                                   </>
+                                ) : item.auction_order_id ? (
+                                  <Link href={`/transaction/${item.auction_order_id}`} className="block">
+                                    <button className="w-full bg-blue-500 text-white font-bold py-4 rounded-xl active:scale-95 transition shadow-lg shadow-blue-200">
+                                      取引ページへ
+                                    </button>
+                                  </Link>
+                                ) : item.can_checkout_auction ? (
+                                  <>
+                                    <p className="text-sm text-gray-600">落札価格: ¥{formatNumber(item.winning_bid_amount ?? item.current_bid ?? item.price)}</p>
+                                    <Link href={`/items/${item.id}/checkout`} className="block">
+                                      <button className="w-full bg-blue-500 text-white font-bold py-4 rounded-xl active:scale-95 transition shadow-lg shadow-blue-200">
+                                        購入手続きへ
+                                      </button>
+                                    </Link>
+                                  </>
                                 ) : (
-                                  <p className="text-sm text-gray-500">オークションは終了しました</p>
+                                  <div className="space-y-1">
+                                    <p className="text-sm text-gray-500">オークションは終了しました</p>
+                                    {item.bids_count ? (
+                                      <p className="text-xs text-gray-400">落札価格: ¥{formatNumber(item.winning_bid_amount ?? item.current_bid ?? item.price)}</p>
+                                    ) : (
+                                      <p className="text-xs text-gray-400">入札はありませんでした</p>
+                                    )}
+                                  </div>
                                 )}
                             </div>
                             ) : item.sale_type === "negotiation" ? (

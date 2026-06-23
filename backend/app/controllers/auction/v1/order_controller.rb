@@ -26,6 +26,7 @@ class Auction::V1::OrderController < ApplicationController
     ActiveRecord::Base.transaction do
       item = Item.lock.find(order_params[:item_id])
       validate_purchase!(item)
+      purchase_price = price_for_purchase!(item)
 
       shipping_address = build_shipping_address
 
@@ -37,16 +38,16 @@ class Auction::V1::OrderController < ApplicationController
         status: order_status_for_payment(order_params[:payment_method])
       )
 
-      process_payment!(item, order_params[:payment_method])
+      process_payment!(purchase_price, order_params[:payment_method])
 
       if order_params[:payment_method].to_s == "ポイント"
         seller = item.user
         seller.with_lock do
-          seller.update!(balance: seller.balance + item.price)
+          seller.update!(balance: seller.balance + purchase_price)
         end
       end
 
-      item.update!(trading_status: :trading)
+      item.update!(price: purchase_price, trading_status: :trading)
     end
 
     render json: { message: "success", order_id: order.id }, status: :ok
@@ -89,6 +90,23 @@ class Auction::V1::OrderController < ApplicationController
   def validate_purchase!(item)
     raise PurchaseError, "自分の商品は購入できません" if item.user_id == current_user.id
     raise PurchaseError, "この商品は購入できません" unless item.listed?
+    raise PurchaseError, "この商品はすでに注文されています" if item.order.present?
+
+    return validate_auction_purchase!(item) if item.auction?
+  end
+
+  def validate_auction_purchase!(item)
+    raise PurchaseError, "オークションはまだ終了していません" unless item.auction_ended?
+
+    winning_bid = item.highest_bid
+    raise PurchaseError, "入札がありません" unless winning_bid
+    raise PurchaseError, "落札者のみ購入できます" unless winning_bid.user_id == current_user.id
+  end
+
+  def price_for_purchase!(item)
+    return item.price unless item.auction?
+
+    item.highest_bid.amount
   end
 
   def build_shipping_address
@@ -107,13 +125,13 @@ class Auction::V1::OrderController < ApplicationController
     payment_method == "ポイント" ? :waiting_shipping : :waiting_payment
   end
 
-  def process_payment!(item, payment_method)
+  def process_payment!(purchase_price, payment_method)
     return unless payment_method == "ポイント"
 
     current_user.with_lock do
-      raise PurchaseError, "残高が足りません" if current_user.points < item.price
+      raise PurchaseError, "残高が足りません" if current_user.points < purchase_price
 
-      current_user.update!(points: current_user.points - item.price)
+      current_user.update!(points: current_user.points - purchase_price)
     end
   end
 
