@@ -2,6 +2,7 @@ class Auction::V1::ItemsController < ApplicationController
   before_action :set_item, only: [:show, :update, :destroy]
   before_action :authenticate_user!, only: [:create, :update, :destroy] # index/show は未ログインでも閲覧可
   before_action :authorize_owner!, only: [:update, :destroy]
+  before_action :ensure_editable!, only: [:update]
 
   def ending_soon
     items = Item.includes(:user, images_attachments: :blob)
@@ -134,6 +135,12 @@ class Auction::V1::ItemsController < ApplicationController
     return if @item.user_id == current_user.id
 
     render json: { error: "自分の商品だけ操作できます" }, status: :forbidden
+  end
+
+  def ensure_editable!
+    return if @item.draft? || @item.listed?
+
+    render json: { error: "取引中または販売終了の商品は編集できません" }, status: :unprocessable_entity
   end
 
   def item_params
