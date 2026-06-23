@@ -7,6 +7,10 @@ export function PCNav() {
   const { pathname } = useRouter();
   const [statIndex, setStatIndex] = useState(0);
   const [animate, setAnimate] = useState(true);
+  const [summary, setSummary] = useState<{
+    bids: { today: number; yesterday: number };
+    auctions: { today: number; yesterday: number };
+  } | null>(null);
 
   const navItems = [
     { href: "/", label: "ホーム", icon: House },
@@ -16,12 +20,12 @@ export function PCNav() {
     { href: "/user/profile", label: "マイページ", icon: CircleUser },
   ];
 
-  const stats = [
-    { label: "本日の入札数", value: 10 },
-    { label: "本日の落札数", value: 0 },
-    { label: "昨日の入札数", value: 3 },
-    { label: "昨日の落札数", value: 2 },
-  ];
+  const stats = useMemo(() => [
+    { label: "本日の入札数", value: summary?.bids.today ?? 0 },
+    { label: "本日の落札数", value: summary?.auctions.today ?? 0 },
+    { label: "昨日の入札数", value: summary?.bids.yesterday ?? 0 },
+    { label: "昨日の落札数", value: summary?.auctions.yesterday ?? 0 },
+  ], [summary]);
 
   // ループを自然に見せるために複製
   const loopStats = useMemo(() => [...stats, ...stats], [stats]);
@@ -32,6 +36,15 @@ export function PCNav() {
     }, 2200);
 
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/stats/summary", { credentials: "include" })
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data) setSummary(data);
+      })
+      .catch(() => setSummary(null));
   }, []);
 
   useEffect(() => {

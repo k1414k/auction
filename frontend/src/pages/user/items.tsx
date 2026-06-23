@@ -2,10 +2,9 @@ import { nextApi } from "@/lib/fetch";
 import { apiAssetUrl } from "@/lib/apiAssetUrl";
 import { formatNumber } from "@/utils/format-number";
 import { Spinner } from "@/components/ui/Spinner";
-import { Edit2, Trash2, Plus } from "lucide-react";
+import { Check, Edit2, Plus, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 
 type MyItem = {
@@ -16,6 +15,22 @@ type MyItem = {
   image: string | null;
   category_name: string | null;
   created_at: string;
+};
+
+type ReceivedOffer = {
+  id: number;
+  amount: number;
+  status: "pending" | "accepted" | "rejected" | string;
+  created_at: string;
+  buyer: { id: number; nickname: string };
+  item: {
+    id: number;
+    title: string;
+    price: number;
+    trading_status: string;
+    image: string | null;
+  };
+  order_id: number | null;
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -33,17 +48,23 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 export default function MyItemsPage() {
-  const router = useRouter();
   const [items, setItems] = useState<MyItem[]>([]);
+  const [offers, setOffers] = useState<ReceivedOffer[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [updatingOfferId, setUpdatingOfferId] = useState<number | null>(null);
 
   const fetchItems = useCallback(async () => {
     try {
-      const data = await nextApi<unknown, MyItem[]>("/user/items", { method: "GET" });
+      const [data, offerData] = await Promise.all([
+        nextApi<unknown, MyItem[]>("/user/items", { method: "GET" }),
+        nextApi<unknown, ReceivedOffer[]>("/offers", { method: "GET" }).catch(() => []),
+      ]);
       setItems(Array.isArray(data) ? data : []);
+      setOffers(Array.isArray(offerData) ? offerData : []);
     } catch {
       setItems([]);
+      setOffers([]);
     } finally {
       setLoading(false);
     }
@@ -73,6 +94,33 @@ export default function MyItemsPage() {
     }
   };
 
+  const updateOffer = async (offer: ReceivedOffer, status: "accepted" | "rejected") => {
+    setUpdatingOfferId(offer.id);
+    try {
+      const updated = await nextApi<{ status: string }, { id: number; status: string; order_id?: number }>(`/offers/${offer.id}`, {
+        method: "PATCH",
+        body: { status },
+      });
+      setOffers((prev) => prev.map((item) => (
+        item.id === offer.id
+          ? { ...item, status: updated.status, order_id: updated.order_id ?? item.order_id }
+          : item
+      )));
+      await fetchItems();
+    } catch (e) {
+      if (e instanceof Error) {
+        try {
+          const parsed = JSON.parse(e.message);
+          alert(parsed?.error ?? "オファーの更新に失敗しました");
+        } catch {
+          alert("オファーの更新に失敗しました");
+        }
+      }
+    } finally {
+      setUpdatingOfferId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -96,6 +144,62 @@ export default function MyItemsPage() {
           <Plus size={20} />
           新規出品
         </Link>
+
+        <section className="mb-6">
+          <h2 className="text-sm font-bold text-gray-800 mb-3">受信オファー</h2>
+          {offers.length === 0 ? (
+            <div className="bg-white p-5 rounded-2xl shadow-sm text-sm text-gray-500 text-center">
+              受信中のオファーはありません
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {offers.map((offer) => (
+                <div key={offer.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                  <div className="flex gap-3">
+                    <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+                      {offer.item.image && (
+                        <Image src={apiAssetUrl(offer.item.image) || ""} alt={offer.item.title} fill className="object-cover" unoptimized />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-800 truncate">{offer.item.title}</p>
+                      <p className="text-sm text-gray-600">¥{formatNumber(offer.amount)} / {offer.buyer.nickname}</p>
+                      <span className={`inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold ${offerStatusColor(offer.status)}`}>
+                        {offerStatusLabel(offer.status)}
+                      </span>
+                    </div>
+                  </div>
+                  {offer.status === "pending" ? (
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updateOffer(offer, "accepted")}
+                        disabled={updatingOfferId === offer.id}
+                        className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-blue-500 text-white font-bold disabled:opacity-50"
+                      >
+                        <Check size={16} />
+                        承認
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateOffer(offer, "rejected")}
+                        disabled={updatingOfferId === offer.id}
+                        className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-gray-100 text-gray-700 font-bold disabled:opacity-50"
+                      >
+                        <X size={16} />
+                        拒否
+                      </button>
+                    </div>
+                  ) : offer.order_id ? (
+                    <Link href={`/transaction/${offer.order_id}`} className="mt-3 block text-center text-blue-600 font-bold text-sm">
+                      取引を見る
+                    </Link>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         {items.length === 0 ? (
           <div className="bg-white p-8 rounded-2xl shadow-sm text-center text-gray-500">
@@ -160,4 +264,20 @@ export default function MyItemsPage() {
       </main>
     </div>
   );
+}
+
+function offerStatusLabel(status: string) {
+  return {
+    pending: "確認待ち",
+    accepted: "承認済み",
+    rejected: "拒否済み",
+  }[status] ?? status;
+}
+
+function offerStatusColor(status: string) {
+  return {
+    pending: "bg-blue-100 text-blue-700",
+    accepted: "bg-green-100 text-green-700",
+    rejected: "bg-gray-100 text-gray-600",
+  }[status] ?? "bg-gray-100 text-gray-600";
 }

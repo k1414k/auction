@@ -56,12 +56,14 @@ class Auction::V1::ItemsController < ApplicationController
   end
 
   def index
+    AuctionSettlementService.settle_ended_auctions!
     items = Item.searchable.includes(:user, images_attachments: :blob)
 
     render json: items.map { |item| item_list_json(item) }
   end
 
   def show
+    AuctionSettlementService.settle_item!(Item.find(params[:id]))
     item = Item.includes(:user, images_attachments: :blob).find(params[:id])
     winning_bid = item.highest_bid
     order = item.order
@@ -85,8 +87,10 @@ class Auction::V1::ItemsController < ApplicationController
       auction_ended: item.auction_ended?,
       winning_bid_amount: winning_bid&.amount,
       is_current_user_highest_bidder: item.highest_bidder?(current_user),
-      can_checkout_auction: item.auction_ended? && item.listed? && item.highest_bidder?(current_user),
-      auction_order_id: order_visible_to_current_user ? order.id : nil
+      can_checkout_auction: can_checkout_auction?(item, order, current_user),
+      auction_order_id: order_visible_to_current_user ? order.id : nil,
+      current_user_order_id: order_visible_to_current_user ? order.id : nil,
+      current_user_order_status: order_visible_to_current_user ? order.status : nil
     }
   end
 
@@ -165,5 +169,12 @@ class Auction::V1::ItemsController < ApplicationController
       current_bid: item.bids.maximum(:amount),
       bids_count: item.bids.count
     }
+  end
+
+  def can_checkout_auction?(item, order, user)
+    return false unless user.present? && item.auction?
+    return order.buyer_id == user.id && order.waiting_payment? if order.present?
+
+    item.auction_ended? && item.listed? && item.highest_bidder?(user)
   end
 end

@@ -86,6 +86,36 @@ export default function ProductDetailPage() {
     const isAuctionEnded = item?.auction_ended ?? (item?.end_at ? new Date(item.end_at) < new Date() : false)
     const auctionDisplayPrice = item?.current_bid ?? item?.start_price ?? item?.price ?? 0
     const displayPrice = item?.sale_type === "auction" ? auctionDisplayPrice : item?.price ?? 0
+    const currentOrderId = item?.current_user_order_id ?? item?.auction_order_id ?? null
+    const currentOrderStatus = item?.current_user_order_status ?? null
+
+    useEffect(() => {
+        if (!item || typeof window === "undefined") return
+
+        const key = "auction_view_history"
+        const stored = window.localStorage.getItem(key)
+        let previous: Array<{
+          id: number;
+          title: string;
+          price: number;
+          image: string | null;
+          viewed_at: string;
+        }> = []
+        try {
+          previous = stored ? JSON.parse(stored) : []
+        } catch {
+          previous = []
+        }
+        const entry = {
+          id: item.id,
+          title: item.title,
+          price: displayPrice,
+          image: item.image ?? item.images?.[0] ?? null,
+          viewed_at: new Date().toISOString(),
+        }
+        const next = [entry, ...previous.filter((historyItem) => historyItem.id !== item.id)].slice(0, 30)
+        window.localStorage.setItem(key, JSON.stringify(next))
+    }, [displayPrice, item])
 
     const handleBid = async () => {
       if (!item || !id || submitting) return
@@ -254,13 +284,24 @@ export default function ProductDetailPage() {
                         </section>
                         
                         {
-                            item.created_by_current_user ? (
-                            <Link href="/user/items" className="block">
-                                <button className="w-full bg-blue-500 text-white font-bold py-4 rounded-full md:rounded-xl active:scale-95 transition shadow-lg shadow-blue-200">
-                                    商品管理
-                                </button>
-                            </Link>
-                            ) : item.sale_type === "auction" ? (
+	                            item.created_by_current_user ? (
+	                            <Link href="/user/items" className="block">
+	                                <button className="w-full bg-blue-500 text-white font-bold py-4 rounded-full md:rounded-xl active:scale-95 transition shadow-lg shadow-blue-200">
+	                                    商品管理
+	                                </button>
+	                            </Link>
+	                            ) : currentOrderId ? (
+	                            <div className="mt-4 p-4 bg-white/80 backdrop-blur-md border-t">
+	                                <Link
+	                                  href={currentOrderStatus === "waiting_payment" ? `/items/${item.id}/checkout` : `/transaction/${currentOrderId}`}
+	                                  className="block"
+	                                >
+	                                  <button className="w-full bg-blue-500 text-white font-bold py-4 rounded-full md:rounded-xl active:scale-95 transition shadow-lg shadow-blue-200">
+	                                    {currentOrderStatus === "waiting_payment" ? "購入手続きを続ける" : "取引ページへ"}
+	                                  </button>
+	                                </Link>
+	                            </div>
+	                            ) : item.sale_type === "auction" ? (
                             <div className="mt-4 p-4 bg-white/80 backdrop-blur-md border-t space-y-3">
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-sm text-gray-600">
@@ -315,7 +356,7 @@ export default function ProductDetailPage() {
                                   </div>
                                 )}
                             </div>
-                            ) : item.sale_type === "negotiation" ? (
+	                            ) : item.sale_type === "negotiation" && item.trading_status === "listed" ? (
                             <div className="mt-4 p-4 bg-white/80 backdrop-blur-md border-t flex gap-3">
                                 <button
                                   onClick={() => setOfferModalOpen(true)}
@@ -330,15 +371,19 @@ export default function ProductDetailPage() {
                                     </button>
                                 </Link>
                             </div>
-                            ) : (
-                            <div className="mt-4 p-4 bg-white/80 backdrop-blur-md border-t">
-                                <Link href={`/items/${id}/checkout`} className="block">
-                                    <button className="w-full bg-blue-500 text-white font-bold py-4 rounded-full md:rounded-xl active:scale-95 transition shadow-lg shadow-blue-200">
-                                        購入手続き
-                                    </button>
-                                </Link>
-                            </div>
-                            )
+	                            ) : item.trading_status === "listed" ? (
+	                            <div className="mt-4 p-4 bg-white/80 backdrop-blur-md border-t">
+	                                <Link href={`/items/${id}/checkout`} className="block">
+	                                    <button className="w-full bg-blue-500 text-white font-bold py-4 rounded-full md:rounded-xl active:scale-95 transition shadow-lg shadow-blue-200">
+	                                        購入手続き
+	                                    </button>
+	                                </Link>
+	                            </div>
+	                            ) : (
+	                            <div className="mt-4 p-4 bg-gray-50 border-t text-sm text-gray-500 rounded-xl">
+	                              この商品は現在取引中または販売終了です
+	                            </div>
+	                            )
                         }
                     </div>
                 </div>

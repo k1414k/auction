@@ -53,8 +53,23 @@
         <v-card class="elevation-0">
           <v-card-title>売上推移</v-card-title>
           <v-card-text>
-            <div class="h-80 d-flex align-center justify-center bg-gray-50 rounded">
-              <p class="text-gray-500">グラフはここに表示されます（Chart.js等で実装）</p>
+            <div class="h-80 bg-gray-50 rounded pa-4 d-flex align-end ga-3">
+              <div
+                v-for="point in salesTrend"
+                :key="point.date"
+                class="d-flex flex-column align-center flex-1 h-100 justify-end"
+              >
+                <div class="text-caption mb-2">
+                  ¥{{ Number(point.revenue).toLocaleString() }}
+                </div>
+                <div
+                  class="w-100 rounded bg-primary"
+                  :style="{ height: `${trendHeight(point.revenue)}%`, minHeight: point.revenue > 0 ? '12px' : '4px', opacity: point.revenue > 0 ? 1 : 0.25 }"
+                />
+                <div class="text-caption mt-2 text-medium-emphasis">
+                  {{ shortDate(point.date) }}
+                </div>
+              </div>
             </div>
           </v-card-text>
         </v-card>
@@ -63,16 +78,24 @@
       <v-col cols="12" lg="4">
         <v-card class="elevation-0">
           <v-card-title>最近の活動</v-card-title>
-          <v-list>
-            <v-list-item density="compact" prepend-icon="mdi-account-plus-outline">
+          <v-list v-if="recentActivities.length > 0">
+            <v-list-item
+              v-for="activity in recentActivities"
+              :key="activity.id"
+              density="compact"
+              prepend-icon="mdi-history"
+            >
               <v-list-item-title class="text-sm">
-                デバイスログイン
+                {{ activity.title }}
               </v-list-item-title>
               <v-list-item-subtitle class="text-xs">
-                たった今
+                {{ activity.body }}
               </v-list-item-subtitle>
             </v-list-item>
           </v-list>
+          <v-card-text v-else class="text-medium-emphasis">
+            最近の活動はありません
+          </v-card-text>
         </v-card>
       </v-col>
     </v-row>
@@ -121,6 +144,19 @@ const orderHeaders = [
 ]
 
 const recentOrders = computed(() => dashboardStore.recentOrders)
+const salesTrend = computed(() => dashboardStore.salesTrend)
+const recentActivities = computed(() => dashboardStore.recentActivities)
+const maxRevenue = computed(() => Math.max(...salesTrend.value.map((point) => point.revenue), 0))
+
+const trendHeight = (revenue: number) => {
+  if (maxRevenue.value <= 0) return 4
+  return Math.max(8, Math.round((revenue / maxRevenue.value) * 100))
+}
+
+const shortDate = (value: string) => {
+  const date = new Date(value)
+  return `${date.getMonth() + 1}/${date.getDate()}`
+}
 
 onMounted(async () => {
   await dashboardStore.fetchStats()

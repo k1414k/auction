@@ -10,21 +10,40 @@ interface DashboardOrderSummary {
   createdAt: string
 }
 
+interface SalesTrendPoint {
+  date: string
+  orders: number
+  revenue: number
+}
+
+interface RecentActivity {
+  id: string
+  title: string
+  body: string
+  createdAt: string
+}
+
 interface DashboardState {
   stats: DashboardStats | null
   recentOrders: DashboardOrderSummary[]
+  salesTrend: SalesTrendPoint[]
+  recentActivities: RecentActivity[]
   isLoading: boolean
 }
 
 interface DashboardResponse {
   stats: DashboardStats
   recent_orders: DashboardOrderSummary[]
+  sales_trend: SalesTrendPoint[]
+  recent_activities: RecentActivity[]
 }
 
 export const useDashboardStore = defineStore('dashboard', {
   state: (): DashboardState => ({
     stats: null,
     recentOrders: [],
+    salesTrend: [],
+    recentActivities: [],
     isLoading: false
   }),
 
@@ -49,6 +68,8 @@ export const useDashboardStore = defineStore('dashboard', {
 
         this.stats = data.stats
         this.recentOrders = data.recent_orders
+        this.salesTrend = data.sales_trend
+        this.recentActivities = data.recent_activities
       } finally {
         this.isLoading = false
       }

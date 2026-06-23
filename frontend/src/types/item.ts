@@ -25,4 +25,6 @@ export type Item = {
   is_current_user_highest_bidder?: boolean;
   can_checkout_auction?: boolean;
   auction_order_id?: number | null;
+  current_user_order_id?: number | null;
+  current_user_order_status?: string | null;
 };

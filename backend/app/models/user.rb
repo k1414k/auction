@@ -5,6 +5,11 @@ class User < ActiveRecord::Base
   has_many :offers, dependent: :destroy
   has_many :buy_orders, class_name: "Order", foreign_key: :buyer_id
   has_many :sell_orders, class_name: "Order", foreign_key: :seller_id
+  has_many :notifications, dependent: :destroy
+  has_many :acted_notifications, class_name: "Notification", foreign_key: :actor_id, dependent: :nullify
+  has_many :wallet_transactions, dependent: :destroy
+  has_many :written_reviews, class_name: "Review", foreign_key: :reviewer_id, dependent: :destroy
+  has_many :received_reviews, class_name: "Review", foreign_key: :reviewee_id, dependent: :destroy
   has_many :favorites, dependent: :destroy
   has_many :favorite_items, through: :favorites, source: :item
   has_many :addresses, dependent: :destroy

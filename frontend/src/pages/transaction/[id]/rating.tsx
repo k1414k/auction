@@ -17,7 +17,7 @@ export default function RatingPage() {
     try {
       await nextApi(`/orders/${id}`, {
         method: "PATCH",
-        body: { status: "completed" },
+        body: { status: "completed", rating, comment },
       });
       alert("評価が送信され、取引が完了しました");
       router.replace(`/transaction/${id}`);
