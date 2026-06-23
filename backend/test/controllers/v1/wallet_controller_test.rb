@@ -1,6 +1,6 @@
 require "test_helper"
 
-class V1::WalletControllerTest < ActionDispatch::IntegrationTest
+class V1WalletControllerTest < ActionDispatch::IntegrationTest
   # test "the truth" do
   #   assert true
   # end
