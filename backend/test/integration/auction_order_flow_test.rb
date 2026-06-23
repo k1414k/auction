@@ -63,6 +63,10 @@ class AuctionOrderFlowTest < Minitest::Test
     assert_equal 1800, item.price
     assert_equal 98200, winner.reload.points
     assert_equal 1800, seller.reload.balance
+    assert_equal 1, winner.wallet_transactions.points.purchase.where(order: order).count
+    assert_equal 1, seller.wallet_transactions.balance.sale.where(order: order).count
+    assert winner.notifications.todo.where(action_url: "/items/#{item.id}/checkout").exists?
+    assert seller.notifications.where(action_url: "/transaction/#{order.id}").exists?
 
     duplicate_session, = post_order(winner, item, address)
     assert_equal 422, duplicate_session.response.status
@@ -137,6 +141,90 @@ class AuctionOrderFlowTest < Minitest::Test
     success_body = response_json(session)
     assert_equal 201, session.response.status, success_body.inspect
     assert_equal 1200, item.highest_bid.amount
+    assert_equal 1, seller.notifications.where(title: "新しい入札がありました").count
+    assert_equal 1, first_bidder.notifications.todo.where(title: "入札額が更新されました").count
+
+    session.get "/auction/v1/user/bids", headers: headers, as: :json
+    bids_body = response_json(session)
+    assert_equal 200, session.response.status
+    assert_equal item.id, bids_body.first.fetch("item_id")
+    assert_equal "winning", bids_body.first.fetch("status")
+  end
+
+  def test_seller_can_accept_offer_and_buyer_can_finish_payment
+    seller = create_user("seller")
+    buyer = create_user("buyer")
+    category = create_category
+    address = create_address(buyer)
+    item = create_negotiation_item(seller, category, price: 3000)
+
+    buyer_session, buyer_headers = signed_session_for(buyer)
+    buyer_session.post "/auction/v1/items/#{item.id}/offers",
+      params: { amount: 2400 },
+      headers: buyer_headers,
+      as: :json
+    offer_body = response_json(buyer_session)
+
+    assert_equal 201, buyer_session.response.status, offer_body.inspect
+    offer = Offer.find(offer_body.fetch("id"))
+
+    seller_session, seller_headers = signed_session_for(seller)
+    seller_session.get "/auction/v1/offers", headers: seller_headers, as: :json
+    offers_body = response_json(seller_session)
+
+    assert_equal 200, seller_session.response.status
+    assert_equal offer.id, offers_body.first.fetch("id")
+
+    seller_session.patch "/auction/v1/offers/#{offer.id}",
+      params: { status: "accepted" },
+      headers: seller_headers,
+      as: :json
+    accepted_body = response_json(seller_session)
+
+    assert_equal 200, seller_session.response.status, accepted_body.inspect
+    order = Order.find(accepted_body.fetch("order_id"))
+    @orders << order
+
+    assert order.waiting_payment?
+    assert item.reload.trading?
+    assert_equal 2400, item.price
+    assert buyer.notifications.todo.where(action_url: "/items/#{item.id}/checkout").exists?
+
+    checkout_session, checkout_body = post_order(buyer, item, address)
+    assert_equal 200, checkout_session.response.status, checkout_body.inspect
+    assert_equal order.id, checkout_body.fetch("order_id")
+    assert order.reload.waiting_shipping?
+    assert_equal 97600, buyer.reload.points
+    assert_equal 2400, seller.reload.balance
+  end
+
+  def test_review_rating_and_comment_are_persisted_when_order_completes
+    seller = create_user("seller")
+    buyer = create_user("buyer")
+    category = create_category
+    address = create_address(buyer)
+    item = create_fixed_item(seller, category, price: 2500)
+
+    session, body = post_order(buyer, item, address)
+    assert_equal 200, session.response.status, body.inspect
+
+    order = Order.find(body.fetch("order_id"))
+    @orders << order
+    order.update!(status: :waiting_review)
+
+    session, headers = signed_session_for(buyer)
+    session.patch "/auction/v1/orders/#{order.id}",
+      params: { status: "completed", rating: "good", comment: "ありがとうございました" },
+      headers: headers,
+      as: :json
+    completed_body = response_json(session)
+
+    assert_equal 200, session.response.status, completed_body.inspect
+    assert_equal "completed", completed_body.fetch("status")
+    assert_equal "good", completed_body.fetch("review").fetch("rating")
+    assert_equal "ありがとうございました", completed_body.fetch("review").fetch("comment")
+    assert_equal "good", order.reviews.find_by!(reviewer: buyer).rating
+    assert item.reload.sold?
   end
 
   private
@@ -188,6 +276,18 @@ class AuctionOrderFlowTest < Minitest::Test
       description: "fixed",
       price: price,
       sale_type: :fixed_price,
+      trading_status: :listed
+    ).tap { |item| @items << item }
+  end
+
+  def create_negotiation_item(seller, category, price:)
+    Item.create!(
+      user: seller,
+      category: category,
+      title: "negotiation #{@suffix}",
+      description: "negotiation",
+      price: price,
+      sale_type: :negotiation,
       trading_status: :listed
     ).tap { |item| @items << item }
   end
