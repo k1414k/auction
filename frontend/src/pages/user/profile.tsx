@@ -1,7 +1,9 @@
 import { apiAssetUrl } from "@/lib/apiAssetUrl";
 import { nextApi } from "@/lib/fetch";
 import { useUserStore } from "@/stores/userStore";
+import type { WalletTransaction } from "@/types/wallet";
 import { formatNumber } from "@/utils/format-number";
+import { WalletTransactionList } from "@/components/WalletTransactionList";
 import {
   Banknote,
   Coins,
@@ -58,18 +60,6 @@ type BidItem = {
   created_at: string;
 };
 
-type WalletTransaction = {
-  id: number;
-  account: "points" | "balance" | string;
-  kind: string;
-  amount: number;
-  balance_after: number;
-  points_after: number;
-  description: string;
-  order_id: number | null;
-  created_at: string;
-};
-
 function ProfileSkeleton() {
   return (
     <>
@@ -122,27 +112,26 @@ export default function MyPage() {
     const [bidsLoading, setBidsLoading] = useState(false)
     const [bidsError, setBidsError] = useState<string | null>(null)
     const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([])
+    const [walletLoading, setWalletLoading] = useState(false)
+    const [walletError, setWalletError] = useState<string | null>(null)
     const [introductionDraft, setIntroductionDraft] = useState("")
     const [savingIntroduction, setSavingIntroduction] = useState(false)
 
     const fetchHistory = useCallback(async () => {
       if (!user) return
       try {
-        const [buyRes, sellRes, itemsRes, walletRes] = await Promise.all([
+        const [buyRes, sellRes, itemsRes] = await Promise.all([
           nextApi<unknown, OrderItem[]>("/orders?role=buyer", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
           nextApi<unknown, OrderItem[]>("/orders?role=seller", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
           nextApi<unknown, MyItem[]>("/user/items", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
-          nextApi<unknown, WalletTransaction[]>("/user/wallet-transactions", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
         ])
         setBuyOrders(buyRes)
         setSellOrders(sellRes)
         setMyItems(itemsRes)
-        setWalletTransactions(walletRes)
       } catch {
         setBuyOrders([])
         setSellOrders([])
         setMyItems([])
-        setWalletTransactions([])
       }
     }, [user])
 
@@ -165,6 +154,25 @@ export default function MyPage() {
       }
     }, [user])
 
+    const fetchWalletTransactions = useCallback(async () => {
+      if (!user) {
+        setWalletTransactions([])
+        setWalletError(null)
+        return
+      }
+
+      setWalletLoading(true)
+      setWalletError(null)
+      try {
+        const response = await nextApi<unknown, WalletTransaction[]>("/user/wallet-transactions", { method: "GET" })
+        setWalletTransactions(Array.isArray(response) ? response : [])
+      } catch {
+        setWalletError("ポイント・売上履歴を取得できませんでした")
+      } finally {
+        setWalletLoading(false)
+      }
+    }, [user])
+
     useEffect(() => {
       fetchHistory()
     }, [fetchHistory])
@@ -172,6 +180,10 @@ export default function MyPage() {
     useEffect(() => {
       fetchBids()
     }, [fetchBids])
+
+    useEffect(() => {
+      fetchWalletTransactions()
+    }, [fetchWalletTransactions])
 
     useEffect(() => {
       if (user) setIntroductionDraft(user.introduction ?? "")
@@ -667,23 +679,22 @@ export default function MyPage() {
                   <p className="text-lg font-bold">{formatNumber(user?.points ?? 0)} P</p>
                 </div>
               </div>
-              <div className="mt-4 space-y-3">
-                {walletTransactions.length === 0 ? (
-                  <p className="text-sm text-gray-500">履歴はまだありません</p>
+              <div className="mt-4">
+                {walletLoading ? (
+                  <p className="py-6 text-center text-sm text-gray-500">履歴を読み込んでいます...</p>
+                ) : walletError ? (
+                  <div className="py-6 text-center">
+                    <p className="text-sm text-red-600">{walletError}</p>
+                    <button
+                      type="button"
+                      onClick={fetchWalletTransactions}
+                      className="mt-3 rounded-lg bg-blue-500 px-4 py-2 text-sm font-bold text-white hover:bg-blue-600"
+                    >
+                      再試行
+                    </button>
+                  </div>
                 ) : (
-                  walletTransactions.map((tx) => (
-                    <div key={tx.id} className="border-t border-gray-100 pt-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-medium text-gray-800">{tx.description}</p>
-                        <p className={`text-sm font-bold ${tx.amount >= 0 ? "text-green-600" : "text-red-600"}`}>
-                          {tx.amount >= 0 ? "+" : ""}{formatNumber(tx.amount)}
-                        </p>
-                      </div>
-                      <p className="text-xs text-gray-400">
-                        {tx.account === "points" ? "ポイント" : "売上高"} / {new Date(tx.created_at).toLocaleDateString("ja-JP")}
-                      </p>
-                    </div>
-                  ))
+                  <WalletTransactionList transactions={walletTransactions} />
                 )}
               </div>
             </div>

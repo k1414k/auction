@@ -1,4 +1,6 @@
 class Auction::V1::UsersController < ApplicationController
+  WALLET_HISTORY_LIMIT = 100
+
   before_action :authenticate_user!
 
   def my_items
@@ -32,7 +34,10 @@ class Auction::V1::UsersController < ApplicationController
   end
 
   def wallet_transactions
-    transactions = current_user.wallet_transactions.includes(:order).order(created_at: :desc).limit(100)
+    transactions = current_user.wallet_transactions
+      .order(created_at: :desc, id: :desc)
+      .limit(WALLET_HISTORY_LIMIT)
+
     render json: transactions.map { |tx|
       {
         id: tx.id,
