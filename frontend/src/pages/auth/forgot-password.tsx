@@ -1,35 +1,36 @@
-// app/forgot-password/page.tsx
-import AuthLayout from "@/components/AuthLayout";
-import Link from "next/link";
-import { FormEvent, useState } from "react";
+import AuthLayout from "@/components/AuthLayout"
+import Link from "next/link"
+import { FormEvent, useState } from "react"
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setMessage(null);
-    setError(null);
-    setLoading(true);
+    e.preventDefault()
+    setMessage(null)
+    setError(null)
+    setLoading(true)
     try {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ email }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error ?? "送信に失敗しました");
-      setMessage("再設定リンクを送信しました。メールをご確認ください。");
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error ?? "送信に失敗しました")
+      setMessage(
+        "登録済みのメールアドレスの場合、再設定リンクを送信しました。メールをご確認ください。"
+      )
     } catch (e) {
-      setError(e instanceof Error ? e.message : "送信に失敗しました");
+      setError(e instanceof Error ? e.message : "送信に失敗しました")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <AuthLayout>
@@ -43,11 +44,16 @@ export default function ForgotPasswordPage() {
             onChange={(e) => setEmail(e.target.value)}
             className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
             placeholder="you@example.com"
+            autoComplete="email"
             required
           />
         </div>
-        {message && <p className="text-sm text-green-600 bg-green-50 p-2 rounded-lg">{message}</p>}
-        {error && <p className="text-sm text-red-600 bg-red-50 p-2 rounded-lg">{error}</p>}
+        {message && (
+          <p className="text-sm text-green-600 bg-green-50 p-2 rounded-lg">{message}</p>
+        )}
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 p-2 rounded-lg">{error}</p>
+        )}
         <button
           type="submit"
           disabled={loading}
@@ -62,5 +68,5 @@ export default function ForgotPasswordPage() {
         </Link>
       </p>
     </AuthLayout>
-  );
+  )
 }

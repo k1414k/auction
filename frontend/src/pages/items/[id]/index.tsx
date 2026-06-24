@@ -285,11 +285,16 @@ export default function ProductDetailPage() {
                         
                         {
 	                            item.created_by_current_user ? (
-	                            <Link href="/user/items" className="block">
+	                            <div className="space-y-3">
+	                            <Link href={`/items/${item.id}/edit`} className="block">
 	                                <button className="w-full bg-blue-500 text-white font-bold py-4 rounded-full md:rounded-xl active:scale-95 transition shadow-lg shadow-blue-200">
-	                                    商品管理
+	                                    商品を編集
 	                                </button>
 	                            </Link>
+	                            <Link href="/user/items" className="block text-center text-sm text-blue-600 font-bold">
+	                                商品管理へ
+	                            </Link>
+	                            </div>
 	                            ) : currentOrderId ? (
 	                            <div className="mt-4 p-4 bg-white/80 backdrop-blur-md border-t">
 	                                <Link

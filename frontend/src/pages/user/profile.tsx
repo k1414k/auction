@@ -567,7 +567,12 @@ export default function MyPage() {
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-gray-800 truncate">{o.item_title}</p>
                         <p className="text-sm text-gray-600">¥{formatNumber(o.price)}</p>
-                        <p className="text-xs text-gray-400">{o.seller_nickname}</p>
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-xs text-gray-400">{o.seller_nickname}</p>
+                          <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${orderStatusColor(o.status)}`}>
+                            {orderStatusText(o.status)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </Link>
@@ -593,7 +598,12 @@ export default function MyPage() {
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-gray-800 truncate">{o.item_title}</p>
                         <p className="text-sm text-gray-600">¥{formatNumber(o.price)}</p>
-                        <p className="text-xs text-gray-400">{o.buyer_nickname}</p>
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-xs text-gray-400">{o.buyer_nickname}</p>
+                          <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${orderStatusColor(o.status)}`}>
+                            {orderStatusText(o.status)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </Link>
@@ -649,4 +659,22 @@ function bidStatusText(status: string) {
     won: "落札",
     lost: "終了",
   }[status] ?? status
+}
+
+function orderStatusText(status: string) {
+  return {
+    waiting_payment: "支払い待ち",
+    waiting_shipping: "発送待ち",
+    waiting_review: "評価待ち",
+    completed: "完了",
+  }[status] ?? status
+}
+
+function orderStatusColor(status: string) {
+  return {
+    waiting_payment: "bg-gray-100 text-gray-600",
+    waiting_shipping: "bg-blue-100 text-blue-700",
+    waiting_review: "bg-amber-100 text-amber-700",
+    completed: "bg-green-100 text-green-700",
+  }[status] ?? "bg-gray-100 text-gray-600"
 }

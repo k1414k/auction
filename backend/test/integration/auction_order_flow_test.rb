@@ -227,6 +227,37 @@ class AuctionOrderFlowTest < Minitest::Test
     assert item.reload.sold?
   end
 
+  def test_seller_can_update_listed_item_but_not_trading_item
+    seller = create_user("seller")
+    buyer = create_user("buyer")
+    category = create_category
+    address = create_address(buyer)
+    item = create_fixed_item(seller, category, price: 2500)
+
+    seller_session, seller_headers = signed_session_for(seller)
+    seller_session.patch "/auction/v1/items/#{item.id}",
+      params: { item: { title: "updated #{@suffix}" } },
+      headers: seller_headers,
+      as: :json
+
+    assert_equal 200, seller_session.response.status, response_json(seller_session).inspect
+    assert_equal "updated #{@suffix}", item.reload.title
+
+    order_session, order_body = post_order(buyer, item, address)
+    assert_equal 200, order_session.response.status, order_body.inspect
+    @orders << Order.find(order_body.fetch("order_id"))
+
+    seller_session.patch "/auction/v1/items/#{item.id}",
+      params: { item: { title: "blocked #{@suffix}" } },
+      headers: seller_headers,
+      as: :json
+    blocked_body = response_json(seller_session)
+
+    assert_equal 422, seller_session.response.status
+    assert_equal "取引中または販売終了の商品は編集できません", blocked_body.fetch("error")
+    assert_equal "updated #{@suffix}", item.reload.title
+  end
+
   private
 
   def create_user(role, points: 100000)

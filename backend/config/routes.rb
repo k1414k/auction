@@ -9,7 +9,9 @@ Rails.application.routes.draw do
   # /web/...     : メインサイト（jongin.blog）向けを想定
 
   # 認証エンドポイントはサービス共通で /auth にまとめる。
-  mount_devise_token_auth_for "User", at: "auth"
+  mount_devise_token_auth_for "User",
+    at: "auth",
+    controllers: { passwords: "auth/passwords" }
   
   namespace :admin do
     namespace :v1, module: :v1, path: "v1" do

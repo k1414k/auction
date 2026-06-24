@@ -5,16 +5,19 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method !== "POST") return res.status(405).end()
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST")
+    return res.status(405).end()
+  }
+
+  const email = typeof req.body?.email === "string" ? req.body.email.trim() : ""
+  if (!email) {
+    return res.status(422).json({ error: "メールアドレスを入力してください" })
+  }
 
   const api = createApi(req, res)
   try {
-    const redirectUrl =
-      `${req.headers.origin ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001"}/auth/sign-in`
-    const apiRes = await api.post("/auth/password", {
-      email: req.body?.email,
-      redirect_url: redirectUrl,
-    })
+    const apiRes = await api.post("/auth/password", { email })
     return res.status(200).json(apiRes.data)
   } catch (e: unknown) {
     const err = e as { response?: { status: number; data?: { errors?: string[]; error?: string } } }

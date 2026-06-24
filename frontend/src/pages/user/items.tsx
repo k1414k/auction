@@ -241,11 +241,11 @@ export default function MyItemsPage() {
                 </Link>
                 <div className="flex border-t border-gray-100">
                   <Link
-                    href={`/items/${item.id}`}
+                    href={`/items/${item.id}/edit`}
                     className="flex-1 flex items-center justify-center gap-1 py-3 text-blue-600 font-medium hover:bg-blue-50 transition"
                   >
                     <Edit2 size={16} />
-                    詳細
+                    編集
                   </Link>
                   <button
                     type="button"
