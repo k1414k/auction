@@ -186,9 +186,10 @@ watch(
     // ルート名に基づいてページタイトルを更新
     const titleMap: Record<string, string> = {
       'dashboard': 'ダッシュボード',
-        'users': 'ユーザー管理',
-        'items': '商品管理',
-        'orders': '注文管理',
+      'users': 'ユーザー管理',
+      'items': '商品管理',
+      'orders': '注文管理',
+      'orders-id': '注文詳細',
       'reports-sales': '売上分析',
       'reports-users': 'ユーザー分析',
       'settings': '設定'

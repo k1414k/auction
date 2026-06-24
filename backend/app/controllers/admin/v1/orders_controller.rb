@@ -35,9 +35,8 @@ class Admin::V1::OrdersController < Admin::V1::BaseController
       itemTitle: order.item.title,
       price: order.item.price,
       status: order.status,
-      buyer: order.buyer.nickname,
-      seller: order.seller.nickname,
-      shippingAddress: order.shipping_address,
+      buyerNickname: order.buyer.nickname,
+      sellerNickname: order.seller.nickname,
       createdAt: order.created_at,
       updatedAt: order.updated_at
     }
@@ -46,11 +45,38 @@ class Admin::V1::OrdersController < Admin::V1::BaseController
   def order_detail_json(order)
     {
       **order_json(order),
+      item: {
+        id: order.item.id,
+        title: order.item.title,
+        price: order.item.price,
+        saleType: order.item.sale_type,
+        tradingStatus: order.item.trading_status
+      },
+      buyer: participant_json(order.buyer),
+      seller: participant_json(order.seller),
+      shippingAddress: order.shipping_address,
       messagesCount: order.messages.size,
-      review: order.reviews.first && {
-        rating: order.reviews.first.rating,
-        comment: order.reviews.first.comment
-      }
+      reviews: order.reviews.sort_by(&:created_at).map { |review| review_json(review) },
+      canUpdate: current_user.can_admin?(:orders, :update)
+    }
+  end
+
+  def participant_json(user)
+    {
+      id: user.id,
+      nickname: user.nickname,
+      email: user.email
+    }
+  end
+
+  def review_json(review)
+    {
+      id: review.id,
+      reviewerId: review.reviewer_id,
+      revieweeId: review.reviewee_id,
+      rating: review.rating,
+      comment: review.comment,
+      createdAt: review.created_at
     }
   end
 end

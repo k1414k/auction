@@ -58,18 +58,53 @@ export interface Category {
   updatedAt: string;
 }
 
-// 注文
-export interface Order {
+export type OrderStatus =
+  | 'waiting_payment'
+  | 'waiting_shipping'
+  | 'waiting_review'
+  | 'completed';
+
+export interface OrderSummary {
   id: number;
   itemId: number;
   itemTitle: string;
   price: number;
-  status: 'waiting_payment' | 'waiting_shipping' | 'waiting_review' | 'completed';
-  buyer: string;
-  seller: string;
-  shippingAddress?: string | null;
+  status: OrderStatus;
+  buyerNickname: string;
+  sellerNickname: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface OrderParticipant {
+  id: number;
+  nickname: string;
+  email: string;
+}
+
+export interface OrderReview {
+  id: number;
+  reviewerId: number;
+  revieweeId: number;
+  rating: 'bad' | 'good';
+  comment?: string | null;
+  createdAt: string;
+}
+
+export interface OrderDetail extends OrderSummary {
+  item: {
+    id: number;
+    title: string;
+    price: number;
+    saleType: 'fixed_price' | 'auction' | 'negotiation';
+    tradingStatus: 'draft' | 'listed' | 'trading' | 'sold';
+  };
+  buyer: OrderParticipant;
+  seller: OrderParticipant;
+  shippingAddress?: string | null;
+  messagesCount: number;
+  reviews: OrderReview[];
+  canUpdate: boolean;
 }
 
 // API レスポンス
