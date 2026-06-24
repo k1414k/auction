@@ -110,14 +110,21 @@ export function SearchTop({ categories, items }: SearchTopProps) {
       </section>
 
       <section>
-        <h2 className="text-sm font-bold text-gray-500 mb-3">おすすめ順</h2>
-        <div className="grid grid-cols-5 md:grid-cols-3 gap-2">
-          {items.map((item) => (
-            <Link key={item.id} href={`/items/${item.id}`}>
-              <AuctionCard item={item} />
-            </Link>
-          ))}
-        </div>
+        <h2 className="text-sm font-bold text-gray-500 mb-1">おすすめ</h2>
+        <p className="text-xs text-gray-400 mb-3">いいね・入札数と新着度をもとに表示しています</p>
+        {items.length === 0 ? (
+          <div className="rounded-xl border border-gray-100 bg-white px-4 py-10 text-center text-sm text-gray-500">
+            現在おすすめできる商品がありません
+          </div>
+        ) : (
+          <div className="grid grid-cols-5 md:grid-cols-3 gap-2">
+            {items.map((item) => (
+              <Link key={item.id} href={`/items/${item.id}`}>
+                <AuctionCard item={item} />
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
     </>
   );

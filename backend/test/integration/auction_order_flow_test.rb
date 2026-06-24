@@ -167,6 +167,61 @@ class AuctionOrderFlowTest < Minitest::Test
     assert_equal "winning", bids_body.first.fetch("status")
   end
 
+  def test_my_bids_returns_latest_bid_per_item_with_current_status
+    seller = create_user("seller")
+    bidder = create_user("bidder")
+    other = create_user("other")
+    category = create_category
+
+    winning_item = create_auction_item(seller, category, end_at: 1.hour.from_now)
+    first_bid = Bid.create!(item: winning_item, user: bidder, amount: 1100)
+    Bid.create!(item: winning_item, user: other, amount: 1200)
+    latest_bid = Bid.create!(item: winning_item, user: bidder, amount: 1300)
+
+    outbid_item = create_auction_item(seller, category, end_at: 2.hours.from_now)
+    Bid.create!(item: outbid_item, user: bidder, amount: 1100)
+    Bid.create!(item: outbid_item, user: other, amount: 1200)
+
+    won_item = create_auction_item(seller, category, end_at: 2.hours.ago)
+    Bid.create!(item: won_item, user: other, amount: 1200)
+    Bid.create!(item: won_item, user: bidder, amount: 1300)
+
+    lost_item = create_auction_item(seller, category, end_at: 1.hour.ago)
+    Bid.create!(item: lost_item, user: bidder, amount: 1200)
+    Bid.create!(item: lost_item, user: other, amount: 1300)
+
+    session, headers = signed_session_for(bidder)
+    session.get "/auction/v1/user/bids", headers: headers, as: :json
+    body = response_json(session)
+
+    assert_equal 200, session.response.status, body.inspect
+    assert_equal 4, body.length
+
+    bids_by_item = body.index_by { |entry| entry.fetch("item_id") }
+
+    winning_entry = bids_by_item.fetch(winning_item.id)
+    assert_equal latest_bid.id, winning_entry.fetch("id")
+    refute_equal first_bid.id, winning_entry.fetch("id")
+    assert_equal 1300, winning_entry.fetch("my_bid_amount")
+    assert_equal 1300, winning_entry.fetch("highest_bid_amount")
+    assert_equal "winning", winning_entry.fetch("status")
+
+    outbid_entry = bids_by_item.fetch(outbid_item.id)
+    assert_equal 1100, outbid_entry.fetch("my_bid_amount")
+    assert_equal 1200, outbid_entry.fetch("highest_bid_amount")
+    assert_equal "outbid", outbid_entry.fetch("status")
+
+    won_entry = bids_by_item.fetch(won_item.id)
+    assert_equal "won", won_entry.fetch("status")
+    assert_equal "waiting_payment", won_entry.fetch("order_status")
+    assert won_entry.fetch("order_id").present?
+
+    lost_entry = bids_by_item.fetch(lost_item.id)
+    assert_equal "lost", lost_entry.fetch("status")
+    assert_nil lost_entry.fetch("order_id")
+    assert_nil lost_entry.fetch("order_status")
+  end
+
   def test_seller_can_accept_offer_and_buyer_can_finish_payment
     seller = create_user("seller")
     buyer = create_user("buyer")

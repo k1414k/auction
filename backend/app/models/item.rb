@@ -23,7 +23,60 @@ class Item < ApplicationRecord
     fair: 3,
   }
 
-  scope :searchable, -> { where.not(trading_status: trading_statuses[:sold]) }
+  scope :searchable, -> { where(trading_status: trading_statuses[:listed]) }
+
+  def self.normalized_search_query(value)
+    value.to_s.unicode_normalize(:nfkc).strip.gsub(/\s+/, " ").downcase
+  end
+
+  def self.matching_search_query(value)
+    query = normalized_search_query(value)
+    return all if query.blank?
+
+    query.split.reduce(all) do |relation, token|
+      pattern = "%#{sanitize_sql_like(token)}%"
+      relation.where(
+        <<~SQL.squish,
+          LOWER(normalize(items.title, NFKC)) LIKE :pattern
+          OR LOWER(normalize(items.description, NFKC)) LIKE :pattern
+        SQL
+        pattern: pattern
+      )
+    end
+  end
+
+  def self.by_search_relevance(value)
+    query = normalized_search_query(value)
+    return order(created_at: :desc) if query.blank?
+
+    exact = connection.quote(query)
+    prefix = connection.quote("#{sanitize_sql_like(query)}%")
+    contains = connection.quote("%#{sanitize_sql_like(query)}%")
+
+    order(
+      Arel.sql(
+        <<~SQL.squish
+          CASE
+            WHEN LOWER(normalize(items.title, NFKC)) = #{exact} THEN 0
+            WHEN LOWER(normalize(items.title, NFKC)) LIKE #{prefix} THEN 1
+            WHEN LOWER(normalize(items.title, NFKC)) LIKE #{contains} THEN 2
+            ELSE 3
+          END ASC
+        SQL
+      ),
+      created_at: :desc
+    )
+  end
+
+  def self.recommended
+    left_joins(:favorites, :bids)
+      .group("items.id")
+      .order(
+        Arel.sql(
+          "COUNT(DISTINCT favorites.id) DESC, COUNT(DISTINCT bids.id) DESC, items.created_at DESC"
+        )
+      )
+  end
 
   def auction_ended?
     auction? && end_at.present? && end_at <= Time.current

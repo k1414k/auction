@@ -5,8 +5,9 @@ class Auction::V1::ItemsController < ApplicationController
   before_action :ensure_editable!, only: [:update]
 
   def ending_soon
-    items = Item.includes(:user, images_attachments: :blob)
+    items = Item.includes(:user, :bids, images_attachments: :blob)
       .where(sale_type: Item.sale_types[:auction])
+      .where(trading_status: Item.trading_statuses[:listed])
       .where("end_at IS NOT NULL AND end_at > ?", Time.current)
       .order(end_at: :asc)
       .limit(10)
@@ -14,8 +15,9 @@ class Auction::V1::ItemsController < ApplicationController
   end
 
   def one_yen
-    items = Item.includes(:user, images_attachments: :blob)
+    items = Item.includes(:user, :bids, images_attachments: :blob)
       .where(sale_type: Item.sale_types[:auction], start_price: 1)
+      .where(trading_status: Item.trading_statuses[:listed])
       .where("end_at IS NOT NULL AND end_at > ?", Time.current)
       .order(created_at: :desc)
       .limit(10)
@@ -24,7 +26,7 @@ class Auction::V1::ItemsController < ApplicationController
 
   def recently_sold
     orders = Order.where(status: :completed)
-      .includes(item: [:user, images_attachments: :blob])
+      .includes(item: [:user, :bids, images_attachments: :blob])
       .order(updated_at: :desc)
       .limit(10)
     render json: orders.map { |order|
@@ -58,9 +60,25 @@ class Auction::V1::ItemsController < ApplicationController
 
   def index
     AuctionSettlementService.settle_ended_auctions!
-    items = Item.searchable.includes(:user, images_attachments: :blob)
+    items = Item.searchable
+    items = filter_by_category(items)
 
-    render json: items.map { |item| item_list_json(item) }
+    if search_query.present?
+      items = items.matching_search_query(search_query).by_search_relevance(search_query)
+    else
+      items = items.recommended
+    end
+
+    items = items.limit(result_limit) if result_limit
+    items = items.preload(:user, :bids, images_attachments: :blob)
+    favorited_item_ids =
+      if current_user
+        current_user.favorites.where(item_id: items.map(&:id)).pluck(:item_id).index_with(true)
+      else
+        {}
+      end
+
+    render json: items.map { |item| item_list_json(item, favorited: favorited_item_ids.key?(item.id)) }
   end
 
   def show
@@ -164,18 +182,41 @@ class Auction::V1::ItemsController < ApplicationController
     rails_blob_path(blob, only_path: true)
   end
 
-  def item_list_json(item)
+  def item_list_json(item, favorited: nil)
+    bids = item.association(:bids).loaded? ? item.bids : item.bids.to_a
+
     {
       **item.as_json,
-      is_favorited: current_user ? current_user.favorited?(item) : false,
+      is_favorited: favorited.nil? ? (current_user&.favorited?(item) || false) : favorited,
       image: item.images.attached? ? blob_path_for(item.images.first) : nil,
       user_nickname: item.user.nickname,
       sale_type: item.sale_type,
       start_price: item.start_price,
       end_at: item.end_at,
-      current_bid: item.bids.maximum(:amount),
-      bids_count: item.bids.count
+      current_bid: bids.map(&:amount).max,
+      bids_count: bids.size
     }
+  end
+
+  def search_query
+    @search_query ||= Item.normalized_search_query(params[:q])
+  end
+
+  def filter_by_category(items)
+    category = params[:category].to_s.strip
+    return items if category.blank?
+
+    if category.match?(/\A\d+\z/)
+      items.where(category_id: category.to_i)
+    else
+      items.joins(:category).where(categories: { name: category })
+    end
+  end
+
+  def result_limit
+    return nil if params[:limit].blank?
+
+    params[:limit].to_i.clamp(1, 100)
   end
 
   def can_checkout_auction?(item, order, user)
