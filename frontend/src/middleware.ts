@@ -16,6 +16,8 @@ export function middleware(req: NextRequest) {
         "/sell",
         "/favorites",
         "/checkout",
+        "/notifications",
+        "/transaction",
     ]
     const isProtected = protectedPaths.some(path => // protectedPathsが入った経路は遮断される
         pathname.startsWith(path) || pathname.endsWith(path)

@@ -119,30 +119,46 @@ class Auction::V1::OrderController < ApplicationController
             description: "「#{@order.item.title}」の売上"
           )
         end
+        Notification.create_for!(
+          user: @order.seller,
+          actor: current_user,
+          title: "購入手続きが完了しました",
+          body: "「#{@order.item.title}」の支払いと配送先登録が完了しました。発送を進めてください。",
+          action_url: "/transaction/#{@order.id}",
+          category: :todo
+        )
       end
     when "waiting_review"
       return head :forbidden unless @order.seller_id == current_user.id
-      @order.update!(status: :waiting_review)
-      Notification.create_for!(
-        user: @order.buyer,
-        actor: current_user,
-        title: "商品が発送されました",
-        body: "「#{@order.item.title}」が発送されました。受け取り後に評価してください。",
-        action_url: "/transaction/#{@order.id}",
-        category: :todo
-      )
+      return render json: { error: "発送待ちの注文のみ更新できます" }, status: :unprocessable_entity unless @order.waiting_shipping?
+
+      ActiveRecord::Base.transaction do
+        @order.update!(status: :waiting_review)
+        Notification.create_for!(
+          user: @order.buyer,
+          actor: current_user,
+          title: "商品が発送されました",
+          body: "「#{@order.item.title}」が発送されました。受け取り後に評価してください。",
+          action_url: "/transaction/#{@order.id}",
+          category: :todo
+        )
+      end
     when "completed"
       return head :forbidden unless @order.buyer_id == current_user.id
-      save_review!(@order) if params[:rating].present?
-      @order.update!(status: :completed)
-      @order.item.update!(trading_status: :sold) if @order.item.trading?
-      Notification.create_for!(
-        user: @order.seller,
-        actor: current_user,
-        title: "取引が完了しました",
-        body: "「#{@order.item.title}」の取引が完了しました。",
-        action_url: "/transaction/#{@order.id}"
-      )
+      return render json: { error: "受取待ちの注文のみ更新できます" }, status: :unprocessable_entity unless @order.waiting_review?
+
+      ActiveRecord::Base.transaction do
+        save_review!(@order) if params[:rating].present?
+        @order.update!(status: :completed)
+        @order.item.update!(trading_status: :sold) if @order.item.trading?
+        Notification.create_for!(
+          user: @order.seller,
+          actor: current_user,
+          title: "取引が完了しました",
+          body: "「#{@order.item.title}」の取引が完了しました。",
+          action_url: "/transaction/#{@order.id}"
+        )
+      end
     else
       return render json: { error: "無効なステータスです" }, status: :unprocessable_entity
     end

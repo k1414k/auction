@@ -12,7 +12,7 @@ class Auction::V1::NotificationsController < ApplicationController
 
   def update
     notification = current_user.notifications.find(params[:id])
-    notification.update!(read_at: Time.current)
+    notification.update!(read_at: Time.current) unless notification.read_at?
     render json: notification_json(notification)
   end
 

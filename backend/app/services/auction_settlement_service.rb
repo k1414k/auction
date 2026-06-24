@@ -21,7 +21,10 @@ class AuctionSettlementService
       return nil unless locked_item.auction? && locked_item.listed? && locked_item.auction_ended?
 
       winning_bid = locked_item.highest_bid
-      return nil unless winning_bid
+      unless winning_bid
+        create_ended_without_bids_notification!(locked_item)
+        return nil
+      end
 
       order = Order.create!(
         item: locked_item,
@@ -47,8 +50,37 @@ class AuctionSettlementService
         body: "「#{locked_item.title}」が¥#{winning_bid.amount}で落札されました。",
         action_url: "/transaction/#{order.id}"
       )
+      losing_bidders(locked_item, winning_bid).each do |loser|
+        Notification.create_for!(
+          user: loser,
+          actor: locked_item.user,
+          title: "落札できませんでした",
+          body: "「#{locked_item.title}」は¥#{winning_bid.amount}で落札されました。",
+          action_url: "/items/#{locked_item.id}"
+        )
+      end
 
       order
     end
+  end
+
+  private
+
+  def create_ended_without_bids_notification!(item)
+    title = "入札なしでオークションが終了しました"
+    action_url = "/items/#{item.id}/edit"
+    return if item.user.notifications.exists?(title: title, action_url: action_url)
+
+    Notification.create_for!(
+      user: item.user,
+      title: title,
+      body: "「#{item.title}」は入札がないまま終了しました。",
+      action_url: action_url,
+      category: :todo
+    )
+  end
+
+  def losing_bidders(item, winning_bid)
+    User.where(id: item.bids.where.not(user_id: winning_bid.user_id).select(:user_id).distinct)
   end
 end
