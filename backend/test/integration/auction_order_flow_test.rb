@@ -67,9 +67,25 @@ class AuctionOrderFlowTest < Minitest::Test
     assert_equal 1, seller.wallet_transactions.balance.sale.where(order: order).count
     assert winner.notifications.todo.where(action_url: "/items/#{item.id}/checkout").exists?
     assert seller.notifications.where(action_url: "/transaction/#{order.id}").exists?
+    assert other.notifications.where(title: "落札できませんでした", action_url: "/items/#{item.id}").exists?
 
     duplicate_session, = post_order(winner, item, address)
     assert_equal 422, duplicate_session.response.status
+  end
+
+  def test_ended_auction_without_bids_notifies_seller_only_once
+    seller = create_user("seller")
+    category = create_category
+    item = create_auction_item(seller, category, end_at: 1.hour.ago)
+
+    2.times { AuctionSettlementService.settle_item!(item) }
+
+    notifications = seller.notifications.where(
+      title: "入札なしでオークションが終了しました",
+      action_url: "/items/#{item.id}/edit"
+    )
+    assert_equal 1, notifications.count
+    assert notifications.first.todo?
   end
 
   def test_loser_and_active_auction_bidder_cannot_checkout
@@ -154,9 +170,19 @@ class AuctionOrderFlowTest < Minitest::Test
   def test_seller_can_accept_offer_and_buyer_can_finish_payment
     seller = create_user("seller")
     buyer = create_user("buyer")
+    other_buyer = create_user("other")
     category = create_category
     address = create_address(buyer)
     item = create_negotiation_item(seller, category, price: 3000)
+
+    other_session, other_headers = signed_session_for(other_buyer)
+    other_session.post "/auction/v1/items/#{item.id}/offers",
+      params: { amount: 2300 },
+      headers: other_headers,
+      as: :json
+    other_offer_body = response_json(other_session)
+    assert_equal 201, other_session.response.status, other_offer_body.inspect
+    other_offer = Offer.find(other_offer_body.fetch("id"))
 
     buyer_session, buyer_headers = signed_session_for(buyer)
     buyer_session.post "/auction/v1/items/#{item.id}/offers",
@@ -189,6 +215,8 @@ class AuctionOrderFlowTest < Minitest::Test
     assert item.reload.trading?
     assert_equal 2400, item.price
     assert buyer.notifications.todo.where(action_url: "/items/#{item.id}/checkout").exists?
+    assert other_offer.reload.rejected?
+    assert other_buyer.notifications.where(title: "オファーが見送られました", action_url: "/items/#{item.id}").exists?
 
     checkout_session, checkout_body = post_order(buyer, item, address)
     assert_equal 200, checkout_session.response.status, checkout_body.inspect
@@ -196,6 +224,65 @@ class AuctionOrderFlowTest < Minitest::Test
     assert order.reload.waiting_shipping?
     assert_equal 97600, buyer.reload.points
     assert_equal 2400, seller.reload.balance
+  end
+
+  def test_transaction_message_notifies_the_other_party
+    seller = create_user("seller")
+    buyer = create_user("buyer")
+    category = create_category
+    item = create_fixed_item(seller, category, price: 2500)
+    item.update!(trading_status: :trading)
+    order = Order.create!(item: item, buyer: buyer, seller: seller, status: :waiting_shipping)
+    @orders << order
+
+    session, headers = signed_session_for(buyer)
+    session.post "/auction/v1/orders/#{order.id}/messages",
+      params: { content: "発送予定を教えてください" },
+      headers: headers,
+      as: :json
+
+    body = response_json(session)
+    assert_equal 201, session.response.status, body.inspect
+    assert_equal "発送予定を教えてください", body.fetch("content")
+
+    notification = seller.notifications.find_by!(
+      title: "取引メッセージが届きました",
+      action_url: "/transaction/#{order.id}"
+    )
+    assert_equal buyer.id, notification.actor_id
+    assert_equal 0, buyer.notifications.where(title: "取引メッセージが届きました").count
+  end
+
+  def test_notifications_api_filters_and_marks_only_own_notification_as_read
+    user = create_user("user")
+    other = create_user("other")
+    notice = Notification.create_for!(user: user, title: "通常通知", action_url: "/")
+    todo = Notification.create_for!(user: user, title: "要対応通知", action_url: "/user/profile", category: :todo)
+    other_notification = Notification.create_for!(user: other, title: "他人の通知")
+
+    session, headers = signed_session_for(user)
+    session.get "/auction/v1/notifications", headers: headers, as: :json
+    all_body = response_json(session)
+
+    assert_equal 200, session.response.status
+    assert_equal [todo.id, notice.id], all_body.map { |entry| entry.fetch("id") }
+
+    session.get "/auction/v1/notifications?category=todo", headers: headers, as: :json
+    todo_body = response_json(session)
+
+    assert_equal 200, session.response.status
+    assert_equal [todo.id], todo_body.map { |entry| entry.fetch("id") }
+
+    session.patch "/auction/v1/notifications/#{todo.id}", headers: headers, as: :json
+    updated_body = response_json(session)
+
+    assert_equal 200, session.response.status
+    assert updated_body.fetch("read_at").present?
+    assert todo.reload.read_at.present?
+
+    session.patch "/auction/v1/notifications/#{other_notification.id}", headers: headers, as: :json
+    assert_equal 404, session.response.status
+    assert_nil other_notification.reload.read_at
   end
 
   def test_review_rating_and_comment_are_persisted_when_order_completes

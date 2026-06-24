@@ -12,7 +12,6 @@ class Auction::V1::BidsController < ApplicationController
   def create
     amount = params[:amount].to_i
     bid = nil
-    previous_highest = nil
 
     ActiveRecord::Base.transaction do
       @item = Item.lock.find(@item.id)
@@ -20,24 +19,24 @@ class Auction::V1::BidsController < ApplicationController
       validate_bid!(amount)
 
       bid = @item.bids.create!(user: current_user, amount: amount)
-    end
 
-    Notification.create_for!(
-      user: @item.user,
-      actor: current_user,
-      title: "新しい入札がありました",
-      body: "「#{@item.title}」に¥#{bid.amount}の入札がありました。",
-      action_url: "/items/#{@item.id}"
-    )
-    if previous_highest&.user_id.present? && previous_highest.user_id != current_user.id
       Notification.create_for!(
-        user: previous_highest.user,
+        user: @item.user,
         actor: current_user,
-        title: "入札額が更新されました",
-        body: "「#{@item.title}」でほかのユーザーが最高額を更新しました。",
-        action_url: "/items/#{@item.id}",
-        category: :todo
+        title: "新しい入札がありました",
+        body: "「#{@item.title}」に¥#{bid.amount}の入札がありました。",
+        action_url: "/items/#{@item.id}"
       )
+      if previous_highest&.user_id.present? && previous_highest.user_id != current_user.id
+        Notification.create_for!(
+          user: previous_highest.user,
+          actor: current_user,
+          title: "入札額が更新されました",
+          body: "「#{@item.title}」でほかのユーザーが最高額を更新しました。",
+          action_url: "/items/#{@item.id}",
+          category: :todo
+        )
+      end
     end
 
     render json: { id: bid.id, amount: bid.amount }, status: :created

@@ -20,8 +20,12 @@ class Auction::V1::OffersController < ApplicationController
     return render json: { error: "この商品は値段交渉に対応していません" }, status: :unprocessable_entity unless item.negotiation?
     return render json: { error: "この商品は購入できません" }, status: :unprocessable_entity unless item.listed?
 
-    offer = item.offers.build(user: current_user, amount: amount)
-    if offer.save
+    offer = nil
+    Offer.transaction do
+      item = Item.lock.find(item.id)
+      raise OfferError, "この商品は購入できません" unless item.listed?
+
+      offer = item.offers.create!(user: current_user, amount: amount)
       Notification.create_for!(
         user: item.user,
         actor: current_user,
@@ -30,10 +34,13 @@ class Auction::V1::OffersController < ApplicationController
         action_url: "/user/items",
         category: :todo
       )
-      render json: { id: offer.id, amount: offer.amount, status: offer.status }, status: :created
-    else
-      render json: { errors: offer.errors.full_messages }, status: :unprocessable_entity
     end
+
+    render json: { id: offer.id, amount: offer.amount, status: offer.status }, status: :created
+  rescue OfferError => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
   end
 
   def update
@@ -47,14 +54,19 @@ class Auction::V1::OffersController < ApplicationController
     when "rejected"
       return render json: { error: "処理済みのオファーです" }, status: :unprocessable_entity unless offer.pending?
 
-      offer.update!(status: :rejected)
-      Notification.create_for!(
-        user: offer.user,
-        actor: current_user,
-        title: "オファーが見送られました",
-        body: "「#{offer.item.title}」へのオファーは承認されませんでした。",
-        action_url: "/items/#{offer.item_id}"
-      )
+      Offer.transaction do
+        offer.lock!
+        raise OfferError, "処理済みのオファーです" unless offer.pending?
+
+        offer.update!(status: :rejected)
+        Notification.create_for!(
+          user: offer.user,
+          actor: current_user,
+          title: "オファーが見送られました",
+          body: "「#{offer.item.title}」へのオファーは承認されませんでした。",
+          action_url: "/items/#{offer.item_id}"
+        )
+      end
       render json: { id: offer.id, status: offer.status }
     else
       render json: { error: "無効なステータスです" }, status: :unprocessable_entity
@@ -71,18 +83,16 @@ class Auction::V1::OffersController < ApplicationController
 
   def accept_offer!(offer)
     Order.transaction do
-      offer.lock!
       item = Item.lock.find(offer.item_id)
+      offer = item.offers.lock.find(offer.id)
 
       raise OfferError, "処理済みのオファーです" unless offer.pending?
       raise OfferError, "この商品はすでに取引中です" if item.order.present?
       raise OfferError, "この商品は購入できません" unless item.listed?
 
+      rejected_offers = item.offers.pending.where.not(id: offer.id).includes(:user).to_a
       offer.update!(status: :accepted)
-      item.offers.pending.where.not(id: offer.id).update_all(
-        status: Offer.statuses[:rejected],
-        updated_at: Time.current
-      )
+      Offer.where(id: rejected_offers.map(&:id)).update_all(status: Offer.statuses[:rejected], updated_at: Time.current)
 
       order = Order.create!(
         item: item,
@@ -100,6 +110,15 @@ class Auction::V1::OffersController < ApplicationController
         action_url: "/items/#{item.id}/checkout",
         category: :todo
       )
+      rejected_offers.each do |rejected_offer|
+        Notification.create_for!(
+          user: rejected_offer.user,
+          actor: current_user,
+          title: "オファーが見送られました",
+          body: "「#{item.title}」では別のオファーが承認されました。",
+          action_url: "/items/#{item.id}"
+        )
+      end
       Notification.create_for!(
         user: current_user,
         actor: offer.user,

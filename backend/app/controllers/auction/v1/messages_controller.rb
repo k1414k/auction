@@ -8,12 +8,22 @@ class Auction::V1::MessagesController < ApplicationController
   end
 
   def create
-    message = @order.messages.build(user: current_user, content: params[:content].to_s.strip)
-    if message.save
-      render json: message_json(message), status: :created
-    else
-      render json: { errors: message.errors.full_messages }, status: :unprocessable_entity
+    message = nil
+    Message.transaction do
+      message = @order.messages.create!(user: current_user, content: params[:content].to_s.strip)
+      recipient = @order.buyer_id == current_user.id ? @order.seller : @order.buyer
+      Notification.create_for!(
+        user: recipient,
+        actor: current_user,
+        title: "取引メッセージが届きました",
+        body: "「#{@order.item.title}」の取引に新しいメッセージがあります。",
+        action_url: "/transaction/#{@order.id}"
+      )
     end
+
+    render json: message_json(message), status: :created
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
   end
 
   private

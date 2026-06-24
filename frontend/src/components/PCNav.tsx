@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { House, Heart, Search, CircleUser, CameraIcon } from "lucide-react";
+import { House, Heart, Search, CircleUser, CameraIcon, Bell } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export function PCNav() {
@@ -17,6 +17,7 @@ export function PCNav() {
     { href: "/search", label: "探す", icon: Search },
     { href: "/sell", label: "出品", icon: CameraIcon },
     { href: "/favorites", label: "いいね", icon: Heart },
+    { href: "/notifications", label: "お知らせ", icon: Bell },
     { href: "/user/profile", label: "マイページ", icon: CircleUser },
   ];
 
