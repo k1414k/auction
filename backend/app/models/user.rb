@@ -55,6 +55,12 @@ class User < ActiveRecord::Base
     end
   end
 
+  def serializable_hash(options = nil)
+    options = (options || {}).dup
+    options[:except] = Array(options[:except]) + [:allow_password_change]
+    super(options)
+  end
+
   private
 
   def create_nickname

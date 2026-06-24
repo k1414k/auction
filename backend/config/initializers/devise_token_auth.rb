@@ -1,6 +1,13 @@
 # frozen_string_literal: true
 
 DeviseTokenAuth.setup do |config|
+  frontend_app_url = ENV["FRONTEND_APP_URL"].presence
+  frontend_app_url ||= "http://localhost:3001" unless Rails.env.production?
+  raise "FRONTEND_APP_URL is required in production" unless frontend_app_url
+
+  frontend_app_url = frontend_app_url.sub(%r{/\z}, "")
+  password_reset_url = "#{frontend_app_url}/auth/reset-password"
+
   # By default the authorization headers will change after each request. The
   # client is responsible for keeping track of the changing tokens. Change
   # this to false to prevent the Authorization header from changing after
@@ -38,6 +45,12 @@ DeviseTokenAuth.setup do |config|
   # attribute updates. Set it to :password if you want it to be checked only if
   # password is updated.
   # config.check_current_password_before_update = :attributes
+
+  # Password reset links carry only the short-lived Devise reset token. This
+  # avoids exposing a normal authentication token in the browser URL.
+  config.require_client_password_reset_token = true
+  config.default_password_reset_url = password_reset_url
+  config.redirect_whitelist = [password_reset_url]
 
   # By default we will use callbacks for single omniauth.
   # It depends on fields like email, provider and uid.
