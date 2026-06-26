@@ -6,21 +6,23 @@ import { nextApi } from '@/lib/fetch';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { apiAssetUrl } from '@/lib/apiAssetUrl';
+import { readViewHistory, type ViewHistoryItem } from '@/utils/view-history';
 
-type HistoryItem = {
-    id: number;
-    title: string;
-    price: number;
-    image: string | null;
-    viewed_at: string;
-};
+const sortOptions: Array<{ value: SortMode; label: string }> = [
+    { value: "recent", label: "新しい順" },
+    { value: "price_low", label: "価格が安い順" },
+    { value: "price_high", label: "価格が高い順" },
+];
+
+type SortMode = 'recent' | 'price_low' | 'price_high';
 
 export default function FavoritesPage() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<'likes' | 'history'>('likes');
     const [items, setItems] = useState<Item[]|[]>([]);
-    const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
-    const [sortMode, setSortMode] = useState<'recent' | 'price_low' | 'price_high'>('recent');
+    const [historyItems, setHistoryItems] = useState<ViewHistoryItem[]>([]);
+    const [sortMode, setSortMode] = useState<SortMode>('recent');
+    const [filterMenuOpen, setFilterMenuOpen] = useState(false);
     const getItems = async()=> {
         try {
             type ResType = {
@@ -47,12 +49,15 @@ export default function FavoritesPage() {
     }, [])
     useEffect(()=>{
         if (typeof window === "undefined") return;
-        try {
-            const stored = window.localStorage.getItem("auction_view_history");
-            setHistoryItems(stored ? JSON.parse(stored) : []);
-        } catch {
-            setHistoryItems([]);
-        }
+        const syncHistory = () => setHistoryItems(readViewHistory());
+        syncHistory();
+        window.addEventListener("focus", syncHistory);
+        window.addEventListener("storage", syncHistory);
+
+        return () => {
+            window.removeEventListener("focus", syncHistory);
+            window.removeEventListener("storage", syncHistory);
+        };
     },[])
 
     const sortedLikes = sortCards(items);
@@ -68,10 +73,6 @@ export default function FavoritesPage() {
         });
     }
 
-    const cycleSort = () => {
-        setSortMode((mode) => mode === 'recent' ? 'price_low' : mode === 'price_low' ? 'price_high' : 'recent');
-    };
-
     return (
         <div className="bg-gray-50 min-h-screen pb-32">
             {/* ヘッダーエリア */}
@@ -79,14 +80,38 @@ export default function FavoritesPage() {
                 <div className="max-w-screen-xl mx-auto px-4 py-4">
                     <div className="flex items-center justify-between mb-4">
                         <h1 className="text-xl font-black text-gray-900">マイリスト</h1>
-                        <button
-                            type="button"
-                            onClick={cycleSort}
-                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                            title={sortLabel(sortMode)}
-                        >
-                            <SlidersHorizontal size={20} className="text-gray-600" />
-                        </button>
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setFilterMenuOpen((open) => !open)}
+                                className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+                                aria-expanded={filterMenuOpen}
+                                title="表示順"
+                            >
+                                <SlidersHorizontal size={18} className="text-gray-600" />
+                                {sortLabel(sortMode)}
+                            </button>
+                            {filterMenuOpen && (
+                                <div className="absolute right-0 top-11 z-30 w-44 overflow-hidden rounded-xl border border-gray-100 bg-white py-1 text-sm shadow-lg">
+                                    {sortOptions.map((option) => (
+                                        <button
+                                            key={option.value}
+                                            type="button"
+                                            onClick={() => {
+                                                setSortMode(option.value);
+                                                setFilterMenuOpen(false);
+                                            }}
+                                            className={`flex w-full items-center justify-between px-4 py-2 text-left font-bold transition-colors hover:bg-gray-50 ${
+                                                sortMode === option.value ? "text-blue-600" : "text-gray-600"
+                                            }`}
+                                        >
+                                            <span>{option.label}</span>
+                                            {sortMode === option.value && <span className="text-xs">選択中</span>}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* タブ切り替え（PCでは幅を制限） */}
@@ -202,7 +227,7 @@ export default function FavoritesPage() {
     );
 }
 
-function sortLabel(mode: 'recent' | 'price_low' | 'price_high') {
+function sortLabel(mode: SortMode) {
     return {
         recent: "新しい順",
         price_low: "価格が安い順",
