@@ -12,6 +12,7 @@ import { apiAssetUrl } from '@/lib/apiAssetUrl';
 import { SkeletonDetail } from '@/components/ui/SkeletonDetail';
 import { Modal } from '@/components/Modal';
 import Image from 'next/image';
+import { addViewHistory } from '@/utils/view-history';
 
 
 export default function ProductDetailPage() {
@@ -92,29 +93,12 @@ export default function ProductDetailPage() {
     useEffect(() => {
         if (!item || typeof window === "undefined") return
 
-        const key = "auction_view_history"
-        const stored = window.localStorage.getItem(key)
-        let previous: Array<{
-          id: number;
-          title: string;
-          price: number;
-          image: string | null;
-          viewed_at: string;
-        }> = []
-        try {
-          previous = stored ? JSON.parse(stored) : []
-        } catch {
-          previous = []
-        }
-        const entry = {
+        addViewHistory({
           id: item.id,
           title: item.title,
           price: displayPrice,
           image: item.image ?? item.images?.[0] ?? null,
-          viewed_at: new Date().toISOString(),
-        }
-        const next = [entry, ...previous.filter((historyItem) => historyItem.id !== item.id)].slice(0, 30)
-        window.localStorage.setItem(key, JSON.stringify(next))
+        })
     }, [displayPrice, item])
 
     const handleBid = async () => {
