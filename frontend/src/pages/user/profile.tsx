@@ -116,6 +116,7 @@ export default function MyPage() {
     const [walletError, setWalletError] = useState<string | null>(null)
     const [introductionDraft, setIntroductionDraft] = useState("")
     const [savingIntroduction, setSavingIntroduction] = useState(false)
+    const [introductionError, setIntroductionError] = useState<string | null>(null)
 
     const fetchHistory = useCallback(async () => {
       if (!user) return
@@ -186,21 +187,36 @@ export default function MyPage() {
     }, [fetchWalletTransactions])
 
     useEffect(() => {
-      if (user) setIntroductionDraft(user.introduction ?? "")
-    }, [user])
+      if (user && !instroEdit) setIntroductionDraft(user.introduction ?? "")
+    }, [instroEdit, user])
+
+    const startIntroductionEdit = () => {
+      if (!user) return
+      setIntroductionDraft(user.introduction ?? "")
+      setIntroductionError(null)
+      setInstroEdit(true)
+    }
+
+    const cancelIntroductionEdit = () => {
+      if (savingIntroduction) return
+      setIntroductionDraft(user?.introduction ?? "")
+      setIntroductionError(null)
+      setInstroEdit(false)
+    }
 
     const saveIntroduction = async () => {
       if (!user || savingIntroduction) return
       setSavingIntroduction(true)
+      setIntroductionError(null)
       try {
         const updated = await nextApi<{ introduction: string }, NonNullable<typeof user>>("/user/profile", {
           method: "PATCH",
           body: { introduction: introductionDraft },
         })
-        setUser({ ...user, introduction: updated.introduction })
+        setUser({ ...user, ...updated, introduction: updated.introduction ?? "" })
         setInstroEdit(false)
       } catch {
-        alert("自己紹介の保存に失敗しました")
+        setIntroductionError("自己紹介の保存に失敗しました")
       } finally {
         setSavingIntroduction(false)
       }
@@ -417,8 +433,12 @@ export default function MyPage() {
                       value={introductionDraft}
                       onChange={(e) => setIntroductionDraft(e.target.value)}
                     />
+                    {introductionError && (
+                      <p className="text-xs text-red-600">{introductionError}</p>
+                    )}
                     <div className="flex gap-2">
                       <button
+                        type="button"
                         className="px-4 py-2 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition disabled:opacity-50"
                         onClick={saveIntroduction}
                         disabled={savingIntroduction}
@@ -426,23 +446,23 @@ export default function MyPage() {
                         {savingIntroduction ? "保存中..." : "保存"}
                       </button>
                       <button
-                        className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition"
-                        onClick={() => {
-                          setIntroductionDraft(user?.introduction ?? "")
-                          setInstroEdit(false)
-                        }}
+                        type="button"
+                        className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition disabled:opacity-50"
+                        onClick={cancelIntroductionEdit}
+                        disabled={savingIntroduction}
                       >
                         キャンセル
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <p
-                    className="text-gray-600 text-sm leading-relaxed cursor-pointer hover:text-gray-800 transition py-1"
-                    onClick={() => setInstroEdit(true)}
+                  <button
+                    type="button"
+                    className="block w-full text-left text-gray-600 text-sm leading-relaxed cursor-pointer hover:text-gray-800 transition py-1"
+                    onClick={startIntroductionEdit}
                   >
                     {user?.introduction || "自己紹介を追加する"}
-                  </p>
+                  </button>
                 )}
               </div>
             </div>
