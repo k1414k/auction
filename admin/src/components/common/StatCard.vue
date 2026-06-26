@@ -5,8 +5,8 @@
         <div>
           <p class="text-subtitle2 text-gray-600 mb-2">{{ title }}</p>
           <p class="text-h4 font-bold">{{ formattedValue }}</p>
-          <p v-if="change" :class="changeClass" class="text-sm mt-2">
-            <v-icon :icon="changeIcon" size="small" /> {{ change }}%
+          <p v-if="change !== undefined && change !== null" :class="changeClass" class="text-sm mt-2">
+            <v-icon :icon="changeIcon" size="small" /> {{ formattedChange }}
           </p>
         </div>
         <v-avatar :color="color" size="64" class="opacity-20">
@@ -51,11 +51,18 @@ const formattedValue = computed(() => {
   }
 })
 
+const formattedChange = computed(() => {
+  if (props.change === undefined || props.change === null) return ''
+  return `${props.change.toFixed(1)}%`
+})
+
 const changeIcon = computed(() => {
+  if (props.change === 0) return 'mdi-minus'
   return props.change && props.change > 0 ? 'mdi-trending-up' : 'mdi-trending-down'
 })
 
 const changeClass = computed(() => {
+  if (props.change === 0) return 'text-gray-500'
   return props.change && props.change > 0 ? 'text-green-600' : 'text-red-600'
 })
 
