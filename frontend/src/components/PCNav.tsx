@@ -21,23 +21,29 @@ export function PCNav() {
     { href: "/user/profile", label: "マイページ", icon: CircleUser },
   ];
 
-  const stats = useMemo(() => [
-    { label: "本日の入札数", value: summary?.bids.today ?? 0 },
-    { label: "本日の落札数", value: summary?.auctions.today ?? 0 },
-    { label: "昨日の入札数", value: summary?.bids.yesterday ?? 0 },
-    { label: "昨日の落札数", value: summary?.auctions.yesterday ?? 0 },
-  ], [summary]);
+  const stats = useMemo(() => {
+    if (!summary) return [];
+
+    return [
+      { label: "本日の入札数", value: summary.bids.today },
+      { label: "本日の落札数", value: summary.auctions.today },
+      { label: "昨日の入札数", value: summary.bids.yesterday },
+      { label: "昨日の落札数", value: summary.auctions.yesterday },
+    ];
+  }, [summary]);
 
   // ループを自然に見せるために複製
   const loopStats = useMemo(() => [...stats, ...stats], [stats]);
 
   useEffect(() => {
+    if (stats.length === 0) return;
+
     const timer = setInterval(() => {
       setStatIndex((prev) => prev + 1);
     }, 2200);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [stats.length]);
 
   useEffect(() => {
     fetch("/api/stats/summary", { credentials: "include" })
@@ -49,6 +55,8 @@ export function PCNav() {
   }, []);
 
   useEffect(() => {
+    if (stats.length === 0) return;
+
     if (statIndex >= stats.length) {
       const resetTimer = setTimeout(() => {
         setAnimate(false);
@@ -94,33 +102,34 @@ export function PCNav() {
           })}
         </div>
 
-        {/* 右: 1行だけ見える縦ティッカー */}
-        <div className="shrink-0">
-          <div
-            className="w-[230px] overflow-hidden rounded-md border border-gray-200 bg-gray-50 px-3"
-            style={{ height: `${rowHeight}px` }}
-          >
+        {summary && (
+          <div className="shrink-0">
             <div
-              className={animate ? "transition-transform duration-500 ease-in-out" : ""}
-              style={{
-                transform: `translateY(-${statIndex * rowHeight}px)`,
-              }}
+              className="w-[230px] overflow-hidden rounded-md border border-gray-200 bg-gray-50 px-3"
+              style={{ height: `${rowHeight}px` }}
             >
-              {loopStats.map((stat, idx) => (
-                <div
-                  key={`${stat.label}-${idx}`}
-                  className="flex h-[28px] items-center justify-between gap-3 text-md whitespace-nowrap"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-gray-700" />
-                    <span className="truncate text-gray-800">{stat.label}</span>
+              <div
+                className={animate ? "transition-transform duration-500 ease-in-out" : ""}
+                style={{
+                  transform: `translateY(-${statIndex * rowHeight}px)`,
+                }}
+              >
+                {loopStats.map((stat, idx) => (
+                  <div
+                    key={`${stat.label}-${idx}`}
+                    className="flex h-[28px] items-center justify-between gap-3 text-md whitespace-nowrap"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-gray-700" />
+                      <span className="truncate text-gray-800">{stat.label}</span>
+                    </div>
+                    <span className="font-semibold text-gray-800">{stat.value}</span>
                   </div>
-                  <span className="font-semibold text-gray-800">{stat.value}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
