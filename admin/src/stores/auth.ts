@@ -23,6 +23,7 @@ type LoginResponseBody = {
 }
 
 type MyProfileResponse = {
+  id?: number
   name?: string
   nickname?: string
   email?: string
@@ -107,7 +108,7 @@ export const useAuthStore = defineStore('auth', {
 
         const role = (profile.role || res._data?.data?.role || 'user') as AdminUser['role']
         const name =
-          (profile.nickname || profile.name || res._data?.data?.nickname || res._data?.data?.name || email) as string
+          (profile.name || profile.nickname || res._data?.data?.name || res._data?.data?.nickname || email) as string
         const id = Number(res._data?.data?.id || 0)
 
         this.user = {
@@ -147,6 +148,29 @@ export const useAuthStore = defineStore('auth', {
         this.token = null
         this.isAuthenticated = false
         this.clearStorage()
+      }
+    },
+
+    updateTokenFromHeaders(headers: Headers) {
+      const accessToken = headers.get('access-token')
+      const client = headers.get('client')
+      const uid = headers.get('uid')
+
+      if (!accessToken || !client || !uid) return
+
+      this.token = {
+        'access-token': String(accessToken),
+        client: String(client),
+        uid: String(uid)
+      }
+      this.persistToStorage()
+    },
+
+    updateCurrentUser(user: Partial<AdminUser>) {
+      if (!this.user) return
+      this.user = {
+        ...this.user,
+        ...user
       }
     },
 
