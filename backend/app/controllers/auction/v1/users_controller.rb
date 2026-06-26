@@ -1,4 +1,6 @@
 class Auction::V1::UsersController < ApplicationController
+  WALLET_HISTORY_LIMIT = 100
+
   before_action :authenticate_user!
 
   def my_items
@@ -21,7 +23,7 @@ class Auction::V1::UsersController < ApplicationController
     AuctionSettlementService.settle_ended_auctions!
 
     bids = current_user.bids
-      .includes(item: [:order, { images_attachments: :blob }])
+      .includes(item: [:bids, :order, { images_attachments: :blob }])
       .order(created_at: :desc)
 
     latest_by_item = bids.each_with_object({}) do |bid, memo|
@@ -32,7 +34,10 @@ class Auction::V1::UsersController < ApplicationController
   end
 
   def wallet_transactions
-    transactions = current_user.wallet_transactions.includes(:order).order(created_at: :desc).limit(100)
+    transactions = current_user.wallet_transactions
+      .order(created_at: :desc, id: :desc)
+      .limit(WALLET_HISTORY_LIMIT)
+
     render json: transactions.map { |tx|
       {
         id: tx.id,
@@ -139,7 +144,7 @@ class Auction::V1::UsersController < ApplicationController
 
   def bid_json(bid)
     item = bid.item
-    highest_bid = item.highest_bid
+    highest_bid = highest_bid_for(item)
     order = item.order
     status =
       if order&.buyer_id == current_user.id
@@ -166,6 +171,10 @@ class Auction::V1::UsersController < ApplicationController
       order_status: order&.buyer_id == current_user.id ? order.status : nil,
       created_at: bid.created_at
     }
+  end
+
+  def highest_bid_for(item)
+    item.bids.min_by { |candidate| [-candidate.amount, candidate.created_at, candidate.id] }
   end
 
 end

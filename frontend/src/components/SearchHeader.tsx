@@ -5,84 +5,93 @@ import { Search } from "lucide-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
+function normalizeKeyword(value: string) {
+  return value.normalize("NFKC").trim().replace(/\s+/g, " ");
+}
+
 export function SearchHeader() {
   const router = useRouter();
   const [keyword, setKeyword] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [items, setItems] = useState<Item[] | null>(null);
+  const [suggestions, setSuggestions] = useState<Item[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setKeyword(value);
-    setIsTyping(value.length > 0);
+    setIsTyping(value.trim().length > 0);
   };
 
-  const saveSearchKeyword = () => {
-    const history = JSON.parse(localStorage.getItem("search_history") || "[]");
-    const newHistory = [keyword, ...history.filter((k: string) => k !== keyword)].slice(0, 5);
+  const saveSearchKeyword = (value: string) => {
+    const history: string[] = JSON.parse(localStorage.getItem("search_history") || "[]");
+    const normalized = normalizeKeyword(value);
+    const newHistory = [
+      normalized,
+      ...history.filter((entry) => normalizeKeyword(entry).toLowerCase() !== normalized.toLowerCase()),
+    ].slice(0, 5);
     localStorage.setItem("search_history", JSON.stringify(newHistory));
   };
 
-  const pushSearch = () => {
-    if (keyword.length < 2) {
+  const pushSearch = (value = keyword) => {
+    const normalized = normalizeKeyword(value);
+
+    if (normalized.length < 2) {
       alert("2文字以上で入力してください");
       return;
     }
 
-    if (keyword.length > 10) {
-      alert("10文字以下で入力してください");
+    if (normalized.length > 50) {
+      alert("50文字以下で入力してください");
       return;
     }
 
+    setKeyword(normalized);
     setIsTyping(false);
-    saveSearchKeyword();
-    router.push(`/search?q=${encodeURIComponent(keyword)}`);
-
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
+    saveSearchKeyword(normalized);
+    router.push({ pathname: "/search", query: { q: normalized } });
   };
 
   useEffect(() => {
-    const getItems = async () => {
+    const normalized = normalizeKeyword(keyword);
+    if (!isTyping || normalized.length < 2) {
+      setSuggestions([]);
+      setSuggestionsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      setSuggestionsLoading(true);
       try {
         type ResType = { data: Item[] };
-        const res: ResType = await nextApi("/items", { method: "GET" });
-        setItems(res.data);
-      } catch (e) {
-        if (e instanceof Error) {
-          const errorMessage = JSON.parse(e.message);
-          console.log(errorMessage);
-        } else {
-          alert("ERR_CODE_500");
-        }
+        const params = new URLSearchParams({ q: normalized, limit: "7" });
+        const res: ResType = await nextApi(`/items?${params.toString()}`, { method: "GET" });
+        if (!cancelled) setSuggestions(res.data);
+      } catch {
+        if (!cancelled) setSuggestions([]);
+      } finally {
+        if (!cancelled) setSuggestionsLoading(false);
       }
-    };
+    }, 250);
 
-    getItems();
-  }, []);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [isTyping, keyword]);
 
   useEffect(() => {
     setIsTyping(false);
-  }, [router.asPath]);
+    const query = typeof router.query.q === "string" ? router.query.q : "";
+    setKeyword(query);
+  }, [router.asPath, router.query.q]);
 
-  const SuggestList = ({
-    items,
-    keyword,
-  }: {
-    items: Item[];
-    keyword: string;
-  }) => {
-    const filtered = items
-      .filter((item: Item) => {
-        const title = item.title?.toLowerCase() || "";
-        const description = item.description?.toLowerCase() || "";
-        const query = keyword.toLowerCase();
+  const SuggestList = ({ items }: { items: Item[] }) => {
+    if (suggestionsLoading) {
+      return <div className="px-3 py-3 text-sm text-gray-500">候補を検索しています...</div>;
+    }
 
-        return title.includes(query) || description.includes(query);
-      })
-      .slice(0, 7);
-
-    if (filtered.length === 0) {
+    if (items.length === 0) {
       return (
         <div className="px-3 py-3 text-sm text-gray-500">
           該当する候補がありません
@@ -92,16 +101,12 @@ export function SearchHeader() {
 
     return (
       <ul>
-        {filtered.map((item: Item) => (
+        {items.map((item: Item) => (
           <li
             key={item.id}
             className="border-b border-gray-100 last:border-0 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer flex justify-between items-center"
             onMouseDown={() => {
-              setIsTyping(false);
-              setKeyword(item.title);
-              router.push(`/search?q=${encodeURIComponent(item.title)}`);
-              document.body.scrollTop = 0;
-              document.documentElement.scrollTop = 0;
+              pushSearch(item.title);
             }}
           >
             <span className="font-medium truncate pr-2">{item.title}</span>
@@ -132,16 +137,16 @@ export function SearchHeader() {
         <button
           type="button"
           aria-label="検索する"
-          onClick={pushSearch}
+          onClick={() => pushSearch()}
           className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md bg-transparent p-1 text-gray-400 hover:bg-white hover:text-sky-600 active:bg-sky-50 transition"
         >
           <Search className="w-5 h-5" />
         </button>
       </div>
 
-      {isTyping && items && (
+      {isTyping && normalizeKeyword(keyword).length >= 2 && (
         <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-          <SuggestList items={items} keyword={keyword} />
+          <SuggestList items={suggestions} />
         </div>
       )}
     </div>

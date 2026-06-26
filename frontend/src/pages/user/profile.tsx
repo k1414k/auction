@@ -1,7 +1,9 @@
 import { apiAssetUrl } from "@/lib/apiAssetUrl";
 import { nextApi } from "@/lib/fetch";
 import { useUserStore } from "@/stores/userStore";
+import type { WalletTransaction } from "@/types/wallet";
 import { formatNumber } from "@/utils/format-number";
+import { WalletTransactionList } from "@/components/WalletTransactionList";
 import {
   Banknote,
   Coins,
@@ -52,21 +54,9 @@ type BidItem = {
   highest_bid_amount: number | null;
   end_at: string | null;
   auction_ended: boolean;
-  status: "winning" | "outbid" | "won" | "lost" | string;
+  status: "winning" | "outbid" | "won" | "lost";
   order_id: number | null;
   order_status: string | null;
-  created_at: string;
-};
-
-type WalletTransaction = {
-  id: number;
-  account: "points" | "balance" | string;
-  kind: string;
-  amount: number;
-  balance_after: number;
-  points_after: number;
-  description: string;
-  order_id: number | null;
   created_at: string;
 };
 
@@ -119,31 +109,68 @@ export default function MyPage() {
     const [sellOrders, setSellOrders] = useState<OrderItem[]>([])
     const [myItems, setMyItems] = useState<MyItem[]>([])
     const [bids, setBids] = useState<BidItem[]>([])
+    const [bidsLoading, setBidsLoading] = useState(false)
+    const [bidsError, setBidsError] = useState<string | null>(null)
     const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([])
+    const [walletLoading, setWalletLoading] = useState(false)
+    const [walletError, setWalletError] = useState<string | null>(null)
     const [introductionDraft, setIntroductionDraft] = useState("")
     const [savingIntroduction, setSavingIntroduction] = useState(false)
+    const [introductionError, setIntroductionError] = useState<string | null>(null)
 
     const fetchHistory = useCallback(async () => {
       if (!user) return
       try {
-        const [buyRes, sellRes, itemsRes, bidsRes, walletRes] = await Promise.all([
+        const [buyRes, sellRes, itemsRes] = await Promise.all([
           nextApi<unknown, OrderItem[]>("/orders?role=buyer", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
           nextApi<unknown, OrderItem[]>("/orders?role=seller", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
           nextApi<unknown, MyItem[]>("/user/items", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
-          nextApi<unknown, BidItem[]>("/user/bids", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
-          nextApi<unknown, WalletTransaction[]>("/user/wallet-transactions", { method: "GET" }).then((d) => (Array.isArray(d) ? d : [])).catch(() => []),
         ])
         setBuyOrders(buyRes)
         setSellOrders(sellRes)
         setMyItems(itemsRes)
-        setBids(bidsRes)
-        setWalletTransactions(walletRes)
       } catch {
         setBuyOrders([])
         setSellOrders([])
         setMyItems([])
+      }
+    }, [user])
+
+    const fetchBids = useCallback(async () => {
+      if (!user) {
         setBids([])
+        setBidsError(null)
+        return
+      }
+
+      setBidsLoading(true)
+      setBidsError(null)
+      try {
+        const response = await nextApi<unknown, BidItem[]>("/user/bids", { method: "GET" })
+        setBids(Array.isArray(response) ? response : [])
+      } catch {
+        setBidsError("入札一覧を取得できませんでした")
+      } finally {
+        setBidsLoading(false)
+      }
+    }, [user])
+
+    const fetchWalletTransactions = useCallback(async () => {
+      if (!user) {
         setWalletTransactions([])
+        setWalletError(null)
+        return
+      }
+
+      setWalletLoading(true)
+      setWalletError(null)
+      try {
+        const response = await nextApi<unknown, WalletTransaction[]>("/user/wallet-transactions", { method: "GET" })
+        setWalletTransactions(Array.isArray(response) ? response : [])
+      } catch {
+        setWalletError("ポイント・売上履歴を取得できませんでした")
+      } finally {
+        setWalletLoading(false)
       }
     }, [user])
 
@@ -152,21 +179,44 @@ export default function MyPage() {
     }, [fetchHistory])
 
     useEffect(() => {
-      if (user) setIntroductionDraft(user.introduction ?? "")
-    }, [user])
+      fetchBids()
+    }, [fetchBids])
+
+    useEffect(() => {
+      fetchWalletTransactions()
+    }, [fetchWalletTransactions])
+
+    useEffect(() => {
+      if (user && !instroEdit) setIntroductionDraft(user.introduction ?? "")
+    }, [instroEdit, user])
+
+    const startIntroductionEdit = () => {
+      if (!user) return
+      setIntroductionDraft(user.introduction ?? "")
+      setIntroductionError(null)
+      setInstroEdit(true)
+    }
+
+    const cancelIntroductionEdit = () => {
+      if (savingIntroduction) return
+      setIntroductionDraft(user?.introduction ?? "")
+      setIntroductionError(null)
+      setInstroEdit(false)
+    }
 
     const saveIntroduction = async () => {
       if (!user || savingIntroduction) return
       setSavingIntroduction(true)
+      setIntroductionError(null)
       try {
         const updated = await nextApi<{ introduction: string }, NonNullable<typeof user>>("/user/profile", {
           method: "PATCH",
           body: { introduction: introductionDraft },
         })
-        setUser({ ...user, introduction: updated.introduction })
+        setUser({ ...user, ...updated, introduction: updated.introduction ?? "" })
         setInstroEdit(false)
       } catch {
-        alert("自己紹介の保存に失敗しました")
+        setIntroductionError("自己紹介の保存に失敗しました")
       } finally {
         setSavingIntroduction(false)
       }
@@ -383,8 +433,12 @@ export default function MyPage() {
                       value={introductionDraft}
                       onChange={(e) => setIntroductionDraft(e.target.value)}
                     />
+                    {introductionError && (
+                      <p className="text-xs text-red-600">{introductionError}</p>
+                    )}
                     <div className="flex gap-2">
                       <button
+                        type="button"
                         className="px-4 py-2 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition disabled:opacity-50"
                         onClick={saveIntroduction}
                         disabled={savingIntroduction}
@@ -392,23 +446,23 @@ export default function MyPage() {
                         {savingIntroduction ? "保存中..." : "保存"}
                       </button>
                       <button
-                        className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition"
-                        onClick={() => {
-                          setIntroductionDraft(user?.introduction ?? "")
-                          setInstroEdit(false)
-                        }}
+                        type="button"
+                        className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition disabled:opacity-50"
+                        onClick={cancelIntroductionEdit}
+                        disabled={savingIntroduction}
                       >
                         キャンセル
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <p
-                    className="text-gray-600 text-sm leading-relaxed cursor-pointer hover:text-gray-800 transition py-1"
-                    onClick={() => setInstroEdit(true)}
+                  <button
+                    type="button"
+                    className="block w-full text-left text-gray-600 text-sm leading-relaxed cursor-pointer hover:text-gray-800 transition py-1"
+                    onClick={startIntroductionEdit}
                   >
                     {user?.introduction || "自己紹介を追加する"}
-                  </p>
+                  </button>
                 )}
               </div>
             </div>
@@ -494,13 +548,28 @@ export default function MyPage() {
           </h4>
           {activeTab === "入札中" && (
             <div className="space-y-2">
-              {bids.length === 0 ? (
+              {bidsLoading ? (
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center text-gray-500">
-                  入札中の商品はありません
+                  入札一覧を読み込んでいます...
+                </div>
+              ) : bidsError ? (
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-red-100 text-center">
+                  <p className="text-sm text-red-600">{bidsError}</p>
+                  <button
+                    type="button"
+                    onClick={fetchBids}
+                    className="mt-3 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-bold hover:bg-blue-600 transition"
+                  >
+                    再試行
+                  </button>
+                </div>
+              ) : bids.length === 0 ? (
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center text-gray-500">
+                  入札した商品はありません
                 </div>
               ) : (
                 bids.map((bid) => (
-                  <Link key={bid.id} href={bid.order_id ? `/transaction/${bid.order_id}` : `/items/${bid.item_id}`}>
+                  <Link key={bid.id} href={bidDestination(bid)}>
                     <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-3 hover:bg-gray-50">
                       <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                         {bid.item_image && (
@@ -510,10 +579,17 @@ export default function MyPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
                           <p className="font-bold text-gray-800 truncate">{bid.item_title}</p>
-                          <span className="text-xs text-blue-600 font-bold shrink-0">{bidStatusText(bid.status)}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 ${bidStatusColor(bid.status)}`}>
+                            {bidStatusText(bid.status)}
+                          </span>
                         </div>
                         <p className="text-sm text-gray-600">あなたの入札 ¥{formatNumber(bid.my_bid_amount)}</p>
-                        <p className="text-xs text-gray-400">現在最高 ¥{formatNumber(bid.highest_bid_amount ?? bid.my_bid_amount)}</p>
+                        <div className="flex items-center justify-between gap-2 text-xs text-gray-400">
+                          <p>
+                            {bid.auction_ended ? "落札額" : "現在最高"} ¥{formatNumber(bid.highest_bid_amount ?? bid.my_bid_amount)}
+                          </p>
+                          <p>{bidEndText(bid)}</p>
+                        </div>
                       </div>
                     </div>
                   </Link>
@@ -623,23 +699,22 @@ export default function MyPage() {
                   <p className="text-lg font-bold">{formatNumber(user?.points ?? 0)} P</p>
                 </div>
               </div>
-              <div className="mt-4 space-y-3">
-                {walletTransactions.length === 0 ? (
-                  <p className="text-sm text-gray-500">履歴はまだありません</p>
+              <div className="mt-4">
+                {walletLoading ? (
+                  <p className="py-6 text-center text-sm text-gray-500">履歴を読み込んでいます...</p>
+                ) : walletError ? (
+                  <div className="py-6 text-center">
+                    <p className="text-sm text-red-600">{walletError}</p>
+                    <button
+                      type="button"
+                      onClick={fetchWalletTransactions}
+                      className="mt-3 rounded-lg bg-blue-500 px-4 py-2 text-sm font-bold text-white hover:bg-blue-600"
+                    >
+                      再試行
+                    </button>
+                  </div>
                 ) : (
-                  walletTransactions.map((tx) => (
-                    <div key={tx.id} className="border-t border-gray-100 pt-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-medium text-gray-800">{tx.description}</p>
-                        <p className={`text-sm font-bold ${tx.amount >= 0 ? "text-green-600" : "text-red-600"}`}>
-                          {tx.amount >= 0 ? "+" : ""}{formatNumber(tx.amount)}
-                        </p>
-                      </div>
-                      <p className="text-xs text-gray-400">
-                        {tx.account === "points" ? "ポイント" : "売上高"} / {new Date(tx.created_at).toLocaleDateString("ja-JP")}
-                      </p>
-                    </div>
-                  ))
+                  <WalletTransactionList transactions={walletTransactions} />
                 )}
               </div>
             </div>
@@ -655,10 +730,38 @@ export default function MyPage() {
 function bidStatusText(status: string) {
   return {
     winning: "最高額",
-    outbid: "更新あり",
+    outbid: "最高額更新あり",
     won: "落札",
     lost: "終了",
   }[status] ?? status
+}
+
+function bidStatusColor(status: BidItem["status"]) {
+  return {
+    winning: "bg-blue-100 text-blue-700",
+    outbid: "bg-amber-100 text-amber-700",
+    won: "bg-green-100 text-green-700",
+    lost: "bg-gray-100 text-gray-600",
+  }[status]
+}
+
+function bidDestination(bid: BidItem) {
+  if (bid.status === "won" && bid.order_status === "waiting_payment") {
+    return `/items/${bid.item_id}/checkout`
+  }
+  return bid.order_id ? `/transaction/${bid.order_id}` : `/items/${bid.item_id}`
+}
+
+function bidEndText(bid: BidItem) {
+  if (bid.auction_ended) return "終了済み"
+  if (!bid.end_at) return ""
+
+  return `${new Date(bid.end_at).toLocaleString("ja-JP", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })} 終了`
 }
 
 function orderStatusText(status: string) {

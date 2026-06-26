@@ -1,11 +1,15 @@
 import { nextApi } from "@/lib/fetch";
 import { useUserStore } from "@/stores/userStore";
+import type { WalletTransaction, WalletAccount } from "@/types/wallet";
 import { formatNumber } from "@/utils/format-number";
 import { Spinner } from "@/components/ui/Spinner";
-import { Banknote, Coins } from "lucide-react";
+import { WalletTransactionList } from "@/components/WalletTransactionList";
+import { Banknote, Coins, History } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+type HistoryFilter = "all" | WalletAccount;
 
 export default function Wallet() {
   const router = useRouter();
@@ -14,13 +18,17 @@ export default function Wallet() {
   const [chargeAmount, setChargeAmount] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyFilter, setHistoryFilter] = useState<HistoryFilter>("all");
 
   const balance = user?.balance ?? 0;
   const points = user?.points ?? 0;
   const amountNum = parseInt(chargeAmount, 10) || 0;
   const canCharge = amountNum > 0 && amountNum <= balance && !loading;
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
       type Res = { user: { balance: number; points: number; nickname: string; name: string; email: string; introduction: string; avatar_url: string | null; role: string } };
       const res = await nextApi<unknown, Res>("/auth/user", { method: "GET" });
@@ -28,11 +36,35 @@ export default function Wallet() {
     } catch {
       router.push("/auth/sign-in");
     }
-  };
+  }, [router, setUser]);
+
+  const fetchTransactions = useCallback(async () => {
+    setHistoryLoading(true);
+    setHistoryError(null);
+    try {
+      const data = await nextApi<unknown, WalletTransaction[]>("/user/wallet-transactions", {
+        method: "GET",
+      });
+      setTransactions(Array.isArray(data) ? data : []);
+    } catch {
+      setHistoryError("ポイント・売上履歴を取得できませんでした");
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchUser();
-  }, []);
+    fetchTransactions();
+  }, [fetchTransactions, fetchUser]);
+
+  const filteredTransactions = useMemo(
+    () =>
+      historyFilter === "all"
+        ? transactions
+        : transactions.filter((transaction) => transaction.account === historyFilter),
+    [historyFilter, transactions]
+  );
 
   const handleCharge = async () => {
     if (!canCharge || !user) return;
@@ -45,6 +77,7 @@ export default function Wallet() {
       });
       setUser({ ...user, balance: data.balance, points: data.points });
       setChargeAmount("");
+      await fetchTransactions();
     } catch (e) {
       const err = e as Error;
       let msg = "チャージに失敗しました";
@@ -142,6 +175,64 @@ export default function Wallet() {
             <li>売上高をポイントにチャージすると、他の商品の購入に使えます。</li>
             <li>チャージしたポイントは購入時に即時で使えます。</li>
           </ul>
+        </section>
+
+        <section className="rounded-2xl bg-white p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center gap-2">
+            <History size={20} className="text-gray-500" />
+            <h2 className="font-bold text-gray-800">ポイント・売上履歴</h2>
+          </div>
+
+          <div className="mt-4 flex gap-2">
+            {([
+              ["all", "すべて"],
+              ["points", "ポイント"],
+              ["balance", "売上"],
+            ] as const).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setHistoryFilter(value)}
+                className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+                  historyFilter === value
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-2">
+            {historyLoading ? (
+              <div className="flex justify-center py-8">
+                <Spinner size="md" />
+              </div>
+            ) : historyError ? (
+              <div className="py-6 text-center">
+                <p className="text-sm text-red-600">{historyError}</p>
+                <button
+                  type="button"
+                  onClick={fetchTransactions}
+                  className="mt-3 rounded-lg bg-blue-500 px-4 py-2 text-sm font-bold text-white hover:bg-blue-600"
+                >
+                  再試行
+                </button>
+              </div>
+            ) : (
+              <WalletTransactionList
+                transactions={filteredTransactions}
+                emptyMessage={
+                  historyFilter === "points"
+                    ? "ポイント履歴はまだありません"
+                    : historyFilter === "balance"
+                      ? "売上履歴はまだありません"
+                      : "ポイント・売上履歴はまだありません"
+                }
+              />
+            )}
+          </div>
         </section>
       </main>
     </div>

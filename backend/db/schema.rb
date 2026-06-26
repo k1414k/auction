@@ -10,8 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_06_24_090000) do
+ActiveRecord::Schema[7.1].define(version: 2026_06_24_214354) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_trgm"
   enable_extension "plpgsql"
 
   create_table "active_storage_attachments", force: :cascade do |t|
@@ -108,6 +109,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_24_090000) do
     t.integer "start_price"
     t.datetime "end_at"
     t.integer "min_increment", default: 100, null: false
+    t.index "lower(NORMALIZE(description, NFKC)) gin_trgm_ops", name: "index_items_on_normalized_description_trigram", using: :gin
+    t.index "lower(NORMALIZE(title, NFKC)) gin_trgm_ops", name: "index_items_on_normalized_title_trigram", using: :gin
     t.index ["category_id"], name: "index_items_on_category_id"
     t.index ["price"], name: "index_items_on_price"
     t.index ["trading_status"], name: "index_items_on_trading_status"

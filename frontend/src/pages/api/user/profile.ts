@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next"
 import { createApi } from "@/lib/axios"
+import type { User } from "@/types/user"
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,9 +8,14 @@ export default async function handler(
 ) {
   if (req.method !== "PATCH") return res.status(405).end()
 
+  const introduction = req.body?.introduction
+  if (typeof introduction !== "string") {
+    return res.status(400).json({ error: "自己紹介を入力してください" })
+  }
+
   const api = createApi(req, res)
   try {
-    const apiRes = await api.patch("/auction/v1/user/profile", req.body)
+    const apiRes = await api.patch<User>("/auction/v1/user/profile", { introduction })
     return res.status(200).json(apiRes.data)
   } catch (e: unknown) {
     const err = e as { response?: { status: number; data?: { error?: string; errors?: string[] } } }

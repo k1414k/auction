@@ -20,37 +20,34 @@ export function ItemFilter({
     filters: Filters;
 }) {
     const selectedCategory = categories.find(c => c.name === filters.category);
-    const categoryId = selectedCategory?.id;
-
-    const filteredItems = items.filter((item) => {
-        const q = (filters.q ?? "").toLowerCase();
-        // キーワード検索
-        
-        if (filters.q && !item.title.toLowerCase().includes(q) && !item.description.toLowerCase().includes(q)) return false;
-
-        // カテゴリ (見つかったIDとitemのIDを直接比較)
-        if (filters.category && item.category_id !== categoryId) return false;
-
-        return true;
-    });
+    const resultLabel = filters.q
+        ? `「${filters.q}」の検索結果`
+        : selectedCategory
+          ? `${selectedCategory.name}の商品`
+          : "商品一覧";
 
     return (
         <>
             <div className="flex items-center justify-between mb-3">
                 <div className="text-sm text-gray-600">
-                    {filters.q
-                        ? `「${filters.q}」の検索結果（${filteredItems?.length}件）`
-                        : "商品一覧"}
+                    {resultLabel}（{items.length}件）
                 </div>
             </div>
 
-            <div className="grid grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 gap-2">
-                {filteredItems?.map((item) => (
-                    <Link key={item.id} href={`/items/${item.id}`}>
-                        <AuctionCard item={item} />
-                    </Link>
-                ))}
-            </div>
+            {items.length === 0 ? (
+                <div className="rounded-xl border border-gray-100 bg-white px-4 py-12 text-center">
+                    <p className="font-bold text-gray-700">条件に合う商品がありません</p>
+                    <p className="mt-1 text-sm text-gray-500">キーワードを短くするか、カテゴリを変更してみてください。</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 gap-2">
+                    {items.map((item) => (
+                        <Link key={item.id} href={`/items/${item.id}`}>
+                            <AuctionCard item={item} />
+                        </Link>
+                    ))}
+                </div>
+            )}
         </>
     );
 }
